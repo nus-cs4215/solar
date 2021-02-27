@@ -2,7 +2,7 @@
   "name": "solar",
   "version": "1.0.0",
   "description": "The Solar programming language is a minimalist dialect of the Lua programming language.",
-  "main": "index.js",
+  "main": "solar.ts",
   "scripts": {
     "test": "jest"
   },
