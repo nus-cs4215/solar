@@ -31,7 +31,7 @@ Testing
 
 The Solar project utilises the Jest testing framework for its test suite. To run the test suite:
 ``` {.}
-$ npm jest
+$ npm test
 ```
 
 Jest is documented here: <https://jestjs.io/docs/en/getting-started.html>
