@@ -1,3 +1,5 @@
+import { SymbolTable } from './symbolTable';
+
 /*
     Mainly just a symbol table, and a link to its parent (outer scope)
 */

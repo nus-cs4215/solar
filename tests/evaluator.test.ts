@@ -3,7 +3,7 @@ import { Evaluator } from '../src/evaluator';
 // ast for 2 + 3
 const ast1 = {
 
-    type: 'addition',
+    type: 'plus',
     left: {
         type: 'literal',
         value: 2
@@ -17,7 +17,7 @@ const ast1 = {
 // ast for 1 + 2 + 3
 const ast2 = {
 
-    type: 'addition',
+    type: 'plus',
     left: {
         type: 'literal',
         value: 1

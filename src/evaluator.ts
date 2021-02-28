@@ -4,7 +4,7 @@
 
     Current progress:
     - evaluate literal
-    - evaluate addition
+    - evaluate arithmetic
 
 */
 export class Evaluator {
