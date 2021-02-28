@@ -1,11 +1,13 @@
-// Mainly just a symbol table, and a link to its parent (outer scope)
+/*
+    Mainly just a symbol table, and a link to its parent (outer scope)
+*/
 class Environment {
 
-    record: any;     // symbol table. we use object as a hash table
+    record: SymbolTable;
     parent: Environment;
 
-    constructor(record: any, parent: Environment) {
-        this.record = record;   // start with empty symbol table
+    constructor(record: SymbolTable, parent: Environment) {
+        this.record = record;
         this.parent = parent;
     }
 }
