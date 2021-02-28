@@ -14,7 +14,7 @@ export class Evaluator {
         for the param, we use tree, instead of AST!
         Because tree can be entire ast, a subtree, or a single node (leaf)
     */
-    evaluate(tree: any) {
+    evaluate(tree: any): any {
         
         if (tree.type === 'literal') {
             return tree.value;
