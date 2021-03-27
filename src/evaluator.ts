@@ -8,21 +8,22 @@ export class Evaluator {
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
         
-        const body = ast.body
-        
-        for (const c of body) {
+        for (const c of ast.body) {
             this.evalComponent(c, this.globalScope);
         }
     }
     
     evalComponent(component: any, scope: Scope): any {
+        
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
         } else if (this.isSymbol(component)) {
             const symbol = component.name;
             return scope.lookup(symbol);
         } else if (this.isPrint(component)) {
-            const printArgument = this.evalComponent(component.expression.arguments[0], scope);
+            
+            const printArgumentComponent = component.expression.arguments[0];
+            const printArgument = this.evalComponent(printArgumentComponent, scope);
             console.log(printArgument);
             return;
         } else if (this.isAssignment(component)) {
@@ -40,7 +41,7 @@ export class Evaluator {
         return component.type === 'ForNumericStatement';
     }
 
-    evalForLoop(component: any, scope: Scope) {
+    evalForLoop(component: any, scope: Scope): void {
 
         const forLoopScope: Scope = new Scope({}, scope)
         
@@ -70,13 +71,18 @@ export class Evaluator {
         return component.type === 'AssignmentStatement';
     }
 
-    evalAssignment(component: any, scope: Scope) {
+    evalAssignment(component: any, scope: Scope): void {
+        
         const symbols = component.variables;
         const values = component.init;
-        assert(symbols.length === values.length, "Length of symbols do not match values")
+
+        assert(symbols.length === values.length, "Length of symbols do not match values");
+        
         for (let i = 0; i < symbols.length; i++) {
-            const symbolName = symbols[i].name;
-            scope.symbolTable[symbolName] = this.evalComponent(values[i], scope);
+            const symbol = symbols[i].name;
+            const value = values[i];
+
+            scope.symbolTable[symbol] = this.evalComponent(value, scope);
         }
     }
 
