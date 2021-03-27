@@ -19,7 +19,9 @@ foo(3)
 
 `;
 
-const ast = parser.parse(prog);
+const config = { luaVersion: '5.3' };
+
+const ast = parser.parse(prog, config);
 
 console.log(JSON.stringify(ast));   // prints the full AST in string form
 console.log(ast);                   // prints the concise AST in object form
