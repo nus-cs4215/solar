@@ -4,7 +4,7 @@ export class Evaluator {
 
     globalScope: Scope = new Scope({}, null);
 
-    // entry point
+    // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
         
         const body = ast.body
@@ -16,8 +16,18 @@ export class Evaluator {
     
     evalComponent(component: any, scope: Scope): any {
         
+        if (this.isLiteral(component)) {
+            return this.evalLiteral(component);
+        }
+
+        if (this.isSymbol(component)) {
+            const symbol = component.name;
+            return scope.lookup(symbol);
+        }
+
         if (this.isPrint(component)) {
-            console.log(5);
+            const printArgument = this.evalComponent(component.expression.arguments[0], scope);
+            console.log(printArgument);
             return;
         }
 
@@ -27,11 +37,17 @@ export class Evaluator {
         }
     }
 
-    isPrint(component: any) {
+
+
+    isSymbol(component: any): boolean {
+        return component.type === 'Identifier';
+    }
+
+    isPrint(component: any): boolean {
         return component.type === 'CallStatement' && component.expression.base.name === 'print';
     }
 
-    isAssignment(component: any) {
+    isAssignment(component: any): boolean {
         return component.type === 'AssignmentStatement';
     }
 
@@ -41,9 +57,6 @@ export class Evaluator {
 
         scope.symbolTable[symbol] = value;
     }
-
-
-    /*
 
     isLiteral(component: any): boolean {
         return component.type === 'StringLiteral' 
@@ -55,8 +68,6 @@ export class Evaluator {
     evalLiteral(component: any): string | number | boolean | null {
         return component.value;
     }
-
-    */
 
 
 

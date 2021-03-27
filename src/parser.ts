@@ -9,7 +9,7 @@ const prog = `
 
 -- this is a comment
 
-print(5)
+print(1)
 
 x = 6
 
@@ -26,8 +26,8 @@ const ast = parser.parse(prog, config);
 console.log(JSON.stringify(ast));   // prints the full AST in string form
 console.log(ast);                   // prints the concise AST in object form
 
-console.log(ast.body[0])
 
+// evaluate the ast - console will display 1 and 3
 const e = new Evaluator();
 e.evaluate(ast);
 
