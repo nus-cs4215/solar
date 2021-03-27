@@ -23,6 +23,7 @@ export class Evaluator {
             return scope.lookup(symbol);
         } else if (this.isPrint(component)) {
             const printArgument = this.evalComponent(component.expression.arguments[0], scope);
+            console.log(printArgument);
             return;
         } else if (this.isAssignment(component)) {
             this.evalAssignment(component, scope);
