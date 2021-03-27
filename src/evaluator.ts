@@ -10,7 +10,7 @@ export class Evaluator {
         
         const body = ast.body
         
-        for (let c of body) {
+        for (const c of body) {
             this.evalComponent(c, this.globalScope);
         }
     }
@@ -31,6 +31,31 @@ export class Evaluator {
             return;
         } else if (this.isBinaryExpression(component)) {
             return this.evalBinaryExpression(component, scope);
+        } else if (this.isForLoop(component)) {
+            this.evalForLoop(component, scope);
+            return;
+        }
+    }
+
+    isForLoop(component: any): boolean {
+        return component.type === 'ForNumericStatement';
+    }
+
+    evalForLoop(component: any, scope: Scope) {
+
+        const forLoopScope: Scope = new Scope({}, scope)
+        
+        const start = this.evalComponent(component.start, scope);
+        const end = this.evalComponent(component.end, scope);
+        const step = this.evalComponent(component.step, scope);
+
+        for (let i = start; i <= end; i += step) {
+
+            forLoopScope.symbolTable['i'] = i; 
+
+            for (const c of component.body) {
+                this.evalComponent(c, forLoopScope);
+            }
         }
     }
 
@@ -86,8 +111,4 @@ export class Evaluator {
             ? this.evalComponent(leftOperand, scope) + this.evalComponent(rightOperand, scope)
             : /** operator === '-' */ this.evalComponent(leftOperand, scope) - this.evalComponent(rightOperand, scope)
     }
-
-
-
-
 }
