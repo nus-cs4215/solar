@@ -14,17 +14,39 @@ export class Evaluator {
     
     evalComponent(component: any, scope: Scope): any {
         
-        if (this.isPrint(component)) {
-            console.log(5);
+        switch (component) {
+
+            case this.isPrint(component):
+                console.log(5);
+                break;
+
+            case this.isAssignment(component):
+                this.evalAssignment(component, scope);
+                break;
+
+            default:
+                console.log('No such case');
+                break;
         }
+
+
     }
 
     isPrint(component: any) {
         return true;
     }
 
+    isAssignment(component: any) {
+        return component.type === 'AssignmentStatement';
+    }
 
-    
+    evalAssignment(component: any, scope: Scope) {
+        const symbol = component.variables[0].name;
+        const value = component.init[0].value;
+
+        scope.symbolTable[symbol] = value;
+    }
+
 
     /*
 

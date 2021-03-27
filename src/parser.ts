@@ -7,15 +7,11 @@ const prog = `
 
 -- this is a comment
 
-function foo(x)
-    print(x)
-    y = 5 + 5
-    return y
-end
-
-foo(3)
-
 print(5)
+
+x = 6
+
+x = 3
 
 --t = { 1,3, 7 }
 
@@ -27,5 +23,7 @@ const ast = parser.parse(prog, config);
 
 console.log(JSON.stringify(ast));   // prints the full AST in string form
 console.log(ast);                   // prints the concise AST in object form
+
+console.log(ast.body[2])
 
 // to run this file - npm run parse
