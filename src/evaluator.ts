@@ -1,3 +1,5 @@
+import { Scope } from '../src/scope';
+
 export class Evaluator {
 
     globalScope: Scope = new Scope({}, null);
