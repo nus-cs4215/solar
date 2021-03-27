@@ -17,3 +17,5 @@ const ast = parser.parse(prog);
 
 console.log(JSON.stringify(ast));
 console.log(ast);
+
+// to run this file - npm run parse
