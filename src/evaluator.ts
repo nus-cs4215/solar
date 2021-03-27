@@ -16,22 +16,15 @@ export class Evaluator {
     
     evalComponent(component: any, scope: Scope): any {
         
-        switch (component) {
-
-            case this.isPrint(component):
-                console.log(5);
-                break;
-
-            case this.isAssignment(component):
-                this.evalAssignment(component, scope);
-                break;
-
-            default:
-                console.log('No such case');
-                break;
+        if (this.isPrint(component)) {
+            console.log(5);
+            return;
         }
 
-
+        if (this.isAssignment(component)) {
+            this.evalAssignment(component, scope);
+            return;
+        }
     }
 
     isPrint(component: any) {
