@@ -1,4 +1,5 @@
 import { Scope } from '../src/scope';
+const assert = require('assert');
 
 export class Evaluator {
 
@@ -15,29 +16,23 @@ export class Evaluator {
     }
     
     evalComponent(component: any, scope: Scope): any {
-        
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
-        }
-
-        if (this.isSymbol(component)) {
+        } else if (this.isSymbol(component)) {
             const symbol = component.name;
             return scope.lookup(symbol);
-        }
-
-        if (this.isPrint(component)) {
+        } else if (this.isPrint(component)) {
+            console.log(component.expression.arguments[0]);
             const printArgument = this.evalComponent(component.expression.arguments[0], scope);
             console.log(printArgument);
             return;
-        }
-
-        if (this.isAssignment(component)) {
+        } else if (this.isAssignment(component)) {
             this.evalAssignment(component, scope);
             return;
+        } else if (this.isBinaryExpression(component)) {
+            return this.evalBinaryExpression(component, scope);
         }
     }
-
-
 
     isSymbol(component: any): boolean {
         return component.type === 'Identifier';
@@ -52,10 +47,13 @@ export class Evaluator {
     }
 
     evalAssignment(component: any, scope: Scope) {
-        const symbol = component.variables[0].name;
-        const value = component.init[0].value;
-
-        scope.symbolTable[symbol] = value;
+        const symbols = component.variables;
+        const values = component.init;
+        assert(symbols.length === values.length, "Length of symbols do not match values")
+        for (let i = 0; i < symbols.length; i++) {
+            const symbolName = symbols[i].name;
+            scope.symbolTable[symbolName] = this.evalComponent(values[i], scope);
+        }
     }
 
     isLiteral(component: any): boolean {
@@ -66,10 +64,28 @@ export class Evaluator {
     }
 
     evalLiteral(component: any): string | number | boolean | null {
-        return component.value;
+        return component.type === 'StringLiteral'
+            ? component.raw
+            : component.value;
     }
 
+    isBinaryExpression(component: any): boolean {
+        return component.type === "BinaryExpression";
+    }
 
+    evalBinaryExpression(component: any, scope: Scope): number | boolean {
+        const operator = component.operator;
+        const leftOperand = component.left;
+        const rightOperand = component.right;
+
+        return operator === '*'
+            ? this.evalComponent(leftOperand, scope) * this.evalComponent(rightOperand, scope)
+            : operator === '/'
+            ? this.evalComponent(leftOperand, scope) / this.evalComponent(rightOperand, scope)
+            : operator === '+'
+            ? this.evalComponent(leftOperand, scope) + this.evalComponent(rightOperand, scope)
+            : /** operator === '-' */ this.evalComponent(leftOperand, scope) - this.evalComponent(rightOperand, scope)
+    }
 
 
 
