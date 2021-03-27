@@ -28,7 +28,7 @@ export class Evaluator {
     }
 
     isPrint(component: any) {
-        return true;
+        return component.type === 'CallStatement' && component.expression.base.name === 'print';
     }
 
     isAssignment(component: any) {
