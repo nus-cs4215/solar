@@ -2,18 +2,31 @@ export class Evaluator {
 
     globalScope: Scope = new Scope({}, null);
 
-    isChunk(component: any): boolean {
-        return component.type === 'Chunk';
-    }
-
-    evalChunk(component: any, scope: Scope): void {
+    // entry point
+    evaluate(ast: any): void {
         
-        const body = component.body;
+        const body = ast.body
         
         for (let c of body) {
-            this.evaluate(c);
+            this.evalComponent(c, this.globalScope);
         }
     }
+    
+    evalComponent(component: any, scope: Scope): any {
+        
+        if (this.isPrint(component)) {
+            console.log(5);
+        }
+    }
+
+    isPrint(component: any) {
+        return true;
+    }
+
+
+    
+
+    /*
 
     isLiteral(component: any): boolean {
         return component.type === 'StringLiteral' 
@@ -25,13 +38,12 @@ export class Evaluator {
     evalLiteral(component: any): string | number | boolean | null {
         return component.value;
     }
-    
-    evaluate(component: any): any {
-        // number, boolean, string, nil
-        return this.isChunk(component)
-            ? this.evalChunk(component, this.globalScope)
-            : this.isLiteral(component)
-            ? this.evalLiteral(component)
-            : console.error("Unknown component type");
-    }
+
+    */
+
+
+
+
+
+
 }
