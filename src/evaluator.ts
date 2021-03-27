@@ -21,7 +21,6 @@ export class Evaluator {
             const symbol = component.name;
             return scope.lookup(symbol);
         } else if (this.isPrint(component)) {
-            
             const printArgumentComponent = component.expression.arguments[0];
             const printArgument = this.evalComponent(printArgumentComponent, scope);
             console.log(printArgument);
@@ -31,6 +30,8 @@ export class Evaluator {
             return;
         } else if (this.isBinaryExpression(component)) {
             return this.evalBinaryExpression(component, scope);
+        } else if (this.isUnaryExpression(component)) {
+            return this.evalUnaryExpression(component, scope);
         } else if (this.isForLoop(component)) {
             this.evalForLoop(component, scope);
             return;
@@ -99,8 +100,20 @@ export class Evaluator {
             : component.value;
     }
 
+    isUnaryExpression(component: any): boolean {
+        return component.type === 'UnaryExpression';
+    }
+
+    evalUnaryExpression(component: any, scope: Scope): number | boolean {
+        const operator = component.operator;
+        const argument = component.argument;
+        return operator === 'not'
+            ? !this.evalComponent(argument, scope)
+            : /** operator === '-' */ -this.evalComponent(argument, scope);
+    }
+
     isBinaryExpression(component: any): boolean {
-        return component.type === "BinaryExpression";
+        return component.type === 'BinaryExpression';
     }
 
     evalBinaryExpression(component: any, scope: Scope): number | boolean {
