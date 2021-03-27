@@ -9,10 +9,13 @@ const prog = `
 
 function foo(x)
     print(x)
-    return 5 + 5
+    y = 5 + 5
+    return y
 end
 
 foo(3)
+
+--t = { 1,3, 7 }
 
 `;
 
