@@ -1,5 +1,8 @@
 const parser = require('luaparse');
 
+
+// refer to lua cheatsheet https://devhints.io/lua to write sample program
+
 const prog = `
 
 -- this is a comment
