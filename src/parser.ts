@@ -7,6 +7,7 @@ const parser = require('luaparse');
 
 const prog = `
 x = 1 - 3
+print(true)
 print('Entering loop now')
 for i = 1, 10, 1 do
     print(x)
