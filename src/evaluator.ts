@@ -59,34 +59,6 @@ export class Evaluator {
             default:
                 console.log('This syntax tree component is unrecognised');
         }
-        
-        /*
-        if (this.isLiteral(component)) {
-            return this.evalLiteral(component);
-        } else if (this.isSymbol(component)) {
-            const symbol = component.name;
-            return scope.lookup(symbol);
-        } else if (this.isPrint(component)) {
-            const printArgumentComponent = component.expression.arguments[0];
-            const printArgument = this.evalComponent(printArgumentComponent, scope);
-            console.log(printArgument);
-            return;
-        } else if (this.isAssignment(component)) {
-            this.evalAssignment(component, scope);
-            return;
-        } else if (this.isBinaryExpression(component)) {
-            return this.evalBinaryExpression(component, scope);
-        } else if (this.isUnaryExpression(component)) {
-            return this.evalUnaryExpression(component, scope);
-        } else if (this.isForLoop(component)) {
-            this.evalForLoop(component, scope);
-            return;
-        }
-        */
-    }
-
-    isForLoop(component: any): boolean {
-        return component.type === 'ForNumericStatement';
     }
 
     evalForLoop(component: any, scope: Scope): void {
@@ -105,18 +77,6 @@ export class Evaluator {
                 this.evalComponent(c, forLoopScope);
             }
         }
-    }
-
-    isSymbol(component: any): boolean {
-        return component.type === 'Identifier';
-    }
-
-    isPrint(component: any): boolean {
-        return component.type === 'CallStatement' && component.expression.base.name === 'print';
-    }
-
-    isAssignment(component: any): boolean {
-        return component.type === 'AssignmentStatement';
     }
 
     evalAssignment(component: any, scope: Scope): void {
@@ -150,10 +110,6 @@ export class Evaluator {
         }
     }
 
-    isUnaryExpression(component: any): boolean {
-        return component.type === 'UnaryExpression';
-    }
-
     evalUnaryExpression(component: any, scope: Scope): number | boolean {
 
         const argument = this.evalComponent(component.argument, scope);
@@ -165,10 +121,6 @@ export class Evaluator {
         } else {
             throw 'no such unary operation';
         }
-    }
-
-    isBinaryExpression(component: any): boolean {
-        return component.type === 'BinaryExpression';
     }
 
     evalLogicalExpression(component: any, scope: Scope): boolean {
@@ -184,7 +136,6 @@ export class Evaluator {
             throw 'no such logical operation';
         }
     }
-
 
     evalBinaryExpression(component: any, scope: Scope): string | number {
         
@@ -204,13 +155,5 @@ export class Evaluator {
         } else {
             throw 'no such binary operation';
         }
-
-        // return operator === '*'
-        //     ? this.evalComponent(leftOperand, scope) * this.evalComponent(rightOperand, scope)
-        //     : operator === '/'
-        //     ? this.evalComponent(leftOperand, scope) / this.evalComponent(rightOperand, scope)
-        //     : operator === '+'
-        //     ? this.evalComponent(leftOperand, scope) + this.evalComponent(rightOperand, scope)
-        //     : /** operator === '-' */ this.evalComponent(leftOperand, scope) - this.evalComponent(rightOperand, scope)
     }
 }
