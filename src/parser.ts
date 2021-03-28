@@ -7,6 +7,11 @@ const parser = require('luaparse');
 const prog = `\
 x = 77
 print(max(1,x,23,11,56))
+
+for k = 1, 10, 2 do
+    print(k)
+end
+
 `;
 
 const config = { luaVersion: '5.3' };

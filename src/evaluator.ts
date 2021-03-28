@@ -137,13 +137,14 @@ export class Evaluator {
 
         const forLoopScope: Scope = new Scope({}, scope)
         
+        const loopControlVariable = component.variable.name;
         const start = this.evalComponent(component.start, scope);
         const end = this.evalComponent(component.end, scope);
         const step = this.evalComponent(component.step, scope);
 
         for (let i = start; i <= end; i += step) {
 
-            forLoopScope.symbolTable['i'] = i; 
+            forLoopScope.symbolTable[loopControlVariable] = i; 
 
             for (const c of component.body) {
                 this.evalComponent(c, forLoopScope);
