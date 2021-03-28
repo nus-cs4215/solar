@@ -1,4 +1,4 @@
-import { Scope } from '../src/scope';
+import { Scope } from './scope';
 const assert = require('assert');
 
 export class Evaluator {

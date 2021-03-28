@@ -1,5 +1,4 @@
-import { Evaluator } from "./evaluator";
-
+import { Evaluator } from './evaluator';
 const parser = require('luaparse');
 
 
