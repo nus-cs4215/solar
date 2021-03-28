@@ -211,8 +211,7 @@ export class Evaluator {
         }
     }
 
-    // to add: < > <= >= ~= ==
-    evalBinaryExpression(component: any, scope: Scope): string | number {
+    evalBinaryExpression(component: any, scope: Scope): string | number | boolean {
         
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
@@ -235,7 +234,31 @@ export class Evaluator {
         } else if (component.operator === '-' && bothSidesAreNumbers) {
             return left - right;
         } else if (component.operator === '+' && bothSidesAreStrings) {
-            return left + right;
+            return left + right;    // string concat
+        } else if (component.operator === '==' && bothSidesAreStrings) {
+            return left === right;
+        } else if (component.operator === '==' && bothSidesAreNumbers) {
+            return left === right;
+        } else if (component.operator === '~=' && bothSidesAreStrings) {
+            return left !== right;
+        } else if (component.operator === '~=' && bothSidesAreNumbers) {
+            return left !== right;
+        } else if (component.operator === '>' && bothSidesAreStrings) {
+            return left > right;
+        } else if (component.operator === '>' && bothSidesAreNumbers) {
+            return left > right;
+        } else if (component.operator === '>=' && bothSidesAreStrings) {
+            return left >= right;
+        } else if (component.operator === '>=' && bothSidesAreNumbers) {
+            return left >= right;
+        } else if (component.operator === '<' && bothSidesAreStrings) {
+            return left < right;
+        } else if (component.operator === '<' && bothSidesAreNumbers) {
+            return left < right;
+        } else if (component.operator === '<=' && bothSidesAreStrings) {
+            return left <= right;
+        } else if (component.operator === '<=' && bothSidesAreNumbers) {
+            return left <= right;
         } else {
             throw 'no such binary operation';
         }

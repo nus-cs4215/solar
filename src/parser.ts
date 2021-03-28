@@ -5,13 +5,8 @@ const parser = require('luaparse');
 // refer to lua cheatsheet https://devhints.io/lua to write sample program
 
 const prog = `\
-x = 77
-print(max(1,x,23,11,56))
-
-for k = 1, 10, 2 do
-    print(k)
-end
-
+x = 2
+print(1== x)
 `;
 
 const config = { luaVersion: '5.3' };
