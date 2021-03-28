@@ -40,11 +40,21 @@ export class Evaluator {
             case 'BinaryExpression':
                 return this.evalBinaryExpression(component, scope);
 
+            case 'LogicalExpression':
+                return this.evalLogicalExpression(component, scope);
+
             case 'ForNumericStatement':
                 return this.evalForLoop(component, scope);
 
             case 'CallStatement':
-                return 1;
+                if (component.expression.base.name === 'print') {
+
+                    const printArgumentComponent = component.expression.arguments[0];
+                    const printArgument = this.evalComponent(printArgumentComponent, scope);
+                    console.log(printArgument);
+                    return;
+                }
+                break;
             
             default:
                 console.log('This syntax tree component is unrecognised');
@@ -153,7 +163,7 @@ export class Evaluator {
         } else if (component.operator === '-' && typeof argument === 'number') {
             return -argument;
         } else {
-            throw 'no such unary operator';
+            throw 'no such unary operation';
         }
     }
 
@@ -161,7 +171,22 @@ export class Evaluator {
         return component.type === 'BinaryExpression';
     }
 
-    evalBinaryExpression(component: any, scope: Scope): string | number | boolean {
+    evalLogicalExpression(component: any, scope: Scope): boolean {
+        
+        const left = this.evalComponent(component.left, scope);
+        const right = this.evalComponent(component.right, scope);
+
+        if (component.operator === 'and' && typeof left === 'boolean' && typeof right === 'boolean') {
+            return left && right;
+        } else if (component.operator === 'or' && typeof left === 'boolean' && typeof right === 'boolean') {
+            return left || right;
+        } else {
+            throw 'no such logical operation';
+        }
+    }
+
+
+    evalBinaryExpression(component: any, scope: Scope): string | number {
         
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
@@ -174,14 +199,10 @@ export class Evaluator {
             return left + right;
         } else if (component.operator === '+' && typeof left === 'number' && typeof right === 'number') {
             return left - right;
-        } else if (component.operator === 'and' && typeof left === 'boolean' && typeof right === 'boolean') {
-            return left && right;
-        } else if (component.operator === 'or' && typeof left === 'boolean' && typeof right === 'boolean') {
-            return left || right;
         } else if (component.operator === '+' && typeof left === 'string' && typeof right === 'string') {
             return left + right;
         } else {
-            throw 'no such unary operator';
+            throw 'no such binary operation';
         }
 
         // return operator === '*'
