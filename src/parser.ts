@@ -6,7 +6,7 @@ const parser = require('luaparse');
 // refer to lua cheatsheet https://devhints.io/lua to write sample program
 
 const prog = `
-x = not true
+x = true + "string"
 y = nil
 b = true or x
 print(b)
@@ -19,7 +19,7 @@ const ast = parser.parse(prog, config);
 // console.log(JSON.stringify(ast));   // prints the full AST in string form
 // console.log(ast);                   // prints the concise AST in object form
 
-console.log(ast.body[1])
+console.log(ast.body[0])
 
 // evaluate the ast
 const e = new Evaluator();

@@ -28,10 +28,9 @@ export class Evaluator {
     
             case 'AssignmentStatement': {
                 const symbol = component.variables[0].name;
-                const value = component.init[0];
-                const evaluatedValue = this.evalComponent(value, scope);
-
-                scope.symbolTable[symbol] = evaluatedValue;
+                const valueComponent = component.init[0];
+                const value = this.evalComponent(valueComponent, scope);
+                scope.symbolTable[symbol] = value;
                 return;
             }               
             
@@ -147,10 +146,12 @@ export class Evaluator {
 
     evalUnaryExpression(component: any, scope: Scope): number | boolean {
 
-        if (component.operator === 'not') {
-            return !this.evalComponent(component.argument, scope);
-        } else if (component.operator === '-') {
-            return -this.evalComponent(component.argument, scope);
+        const argument = this.evalComponent(component.argument, scope);
+
+        if (component.operator === 'not' && typeof argument === 'boolean') {
+            return !argument;
+        } else if (component.operator === '-' && typeof argument === 'number') {
+            return -argument;
         } else {
             throw 'no such unary operator';
         }
