@@ -94,10 +94,13 @@ export class Evaluator {
             || component.type === 'NilLiteral';
     }
 
-    evalLiteral(component: any): string | number | boolean | null {
-        return component.type === 'StringLiteral'
-            ? component.raw
-            : component.value;
+    evalLiteral(component: any): string | number | boolean {
+
+        if (component.type === 'StringLiteral') {
+            return component.raw;
+        } else {
+            return component.value;
+        }
     }
 
     isUnaryExpression(component: any): boolean {
@@ -105,11 +108,12 @@ export class Evaluator {
     }
 
     evalUnaryExpression(component: any, scope: Scope): number | boolean {
-        const operator = component.operator;
-        const argument = component.argument;
-        return operator === 'not'
-            ? !this.evalComponent(argument, scope)
-            : /** operator === '-' */ -this.evalComponent(argument, scope);
+
+        if (component.operator === 'not') {
+            return !this.evalComponent(component.argument, scope);
+        } else {    // component.operator === '-'
+            return -this.evalComponent(component.argument, scope);
+        }
     }
 
     isBinaryExpression(component: any): boolean {
