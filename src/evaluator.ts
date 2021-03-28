@@ -161,17 +161,35 @@ export class Evaluator {
         return component.type === 'BinaryExpression';
     }
 
-    evalBinaryExpression(component: any, scope: Scope): number | boolean {
-        const operator = component.operator;
-        const leftOperand = component.left;
-        const rightOperand = component.right;
+    evalBinaryExpression(component: any, scope: Scope): string | number | boolean {
+        
+        const left = this.evalComponent(component.left, scope);
+        const right = this.evalComponent(component.right, scope);
 
-        return operator === '*'
-            ? this.evalComponent(leftOperand, scope) * this.evalComponent(rightOperand, scope)
-            : operator === '/'
-            ? this.evalComponent(leftOperand, scope) / this.evalComponent(rightOperand, scope)
-            : operator === '+'
-            ? this.evalComponent(leftOperand, scope) + this.evalComponent(rightOperand, scope)
-            : /** operator === '-' */ this.evalComponent(leftOperand, scope) - this.evalComponent(rightOperand, scope)
+        if (component.operator === '*' && typeof left === 'number' && typeof right === 'number') {
+            return left * right;
+        } else if (component.operator === '/' && typeof left === 'number' && typeof right === 'number') {
+            return left / right;
+        } else if (component.operator === '+' && typeof left === 'number' && typeof right === 'number') {
+            return left + right;
+        } else if (component.operator === '+' && typeof left === 'number' && typeof right === 'number') {
+            return left - right;
+        } else if (component.operator === 'and' && typeof left === 'boolean' && typeof right === 'boolean') {
+            return left && right;
+        } else if (component.operator === 'or' && typeof left === 'boolean' && typeof right === 'boolean') {
+            return left || right;
+        } else if (component.operator === '+' && typeof left === 'string' && typeof right === 'string') {
+            return left + right;
+        } else {
+            throw 'no such unary operator';
+        }
+
+        // return operator === '*'
+        //     ? this.evalComponent(leftOperand, scope) * this.evalComponent(rightOperand, scope)
+        //     : operator === '/'
+        //     ? this.evalComponent(leftOperand, scope) / this.evalComponent(rightOperand, scope)
+        //     : operator === '+'
+        //     ? this.evalComponent(leftOperand, scope) + this.evalComponent(rightOperand, scope)
+        //     : /** operator === '-' */ this.evalComponent(leftOperand, scope) - this.evalComponent(rightOperand, scope)
     }
 }
