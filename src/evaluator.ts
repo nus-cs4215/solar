@@ -79,6 +79,7 @@ export class Evaluator {
         }
     }
 
+    // currently unused. for minimalism, we only allow simple x = 1 assignments. don't allow x,y = 1,2
     evalAssignment(component: any, scope: Scope): void {
         
         const symbols = component.variables;
@@ -137,6 +138,7 @@ export class Evaluator {
         }
     }
 
+    // to add: < > <= >= ~= ==
     evalBinaryExpression(component: any, scope: Scope): string | number {
         
         const left = this.evalComponent(component.left, scope);
