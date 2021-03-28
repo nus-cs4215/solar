@@ -111,8 +111,10 @@ export class Evaluator {
 
         if (component.operator === 'not') {
             return !this.evalComponent(component.argument, scope);
-        } else {    // component.operator === '-'
+        } else if (component.operator === '-') {
             return -this.evalComponent(component.argument, scope);
+        } else {
+            throw 'no such unary operator';
         }
     }
 
