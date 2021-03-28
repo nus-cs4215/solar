@@ -142,15 +142,24 @@ export class Evaluator {
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
 
-        if (component.operator === '*' && typeof left === 'number' && typeof right === 'number') {
+        const bothSidesAreNumbers = typeof left === 'number' && typeof right === 'number';
+        const bothSidesAreStrings = typeof left === 'string' && typeof right === 'string';
+
+        if (component.operator === '^' && bothSidesAreNumbers) {
+            return left ** right;
+        } else if (component.operator === '%' && bothSidesAreNumbers) {
+            return left % right;
+        } else if (component.operator === '//' && bothSidesAreNumbers) {
+            return Math.floor(left / right);
+        } else if (component.operator === '*' && bothSidesAreNumbers) {
             return left * right;
-        } else if (component.operator === '/' && typeof left === 'number' && typeof right === 'number') {
+        } else if (component.operator === '/' && bothSidesAreNumbers) {
             return left / right;
-        } else if (component.operator === '+' && typeof left === 'number' && typeof right === 'number') {
+        } else if (component.operator === '+' && bothSidesAreNumbers) {
             return left + right;
-        } else if (component.operator === '+' && typeof left === 'number' && typeof right === 'number') {
+        } else if (component.operator === '-' && bothSidesAreNumbers) {
             return left - right;
-        } else if (component.operator === '+' && typeof left === 'string' && typeof right === 'string') {
+        } else if (component.operator === '+' && bothSidesAreStrings) {
             return left + right;
         } else {
             throw 'no such binary operation';
