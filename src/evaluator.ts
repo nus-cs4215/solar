@@ -17,6 +17,43 @@ export class Evaluator {
         
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
+        }
+
+        switch (component.type) {
+
+            case 'Identifier': {
+                const symbol = component.name;
+                return scope.lookup(symbol);
+            }
+    
+            case 'AssignmentStatement': {
+                const symbol = component.variables[0].name;
+                const value = component.init[0];
+                const evaluatedValue = this.evalComponent(value, scope);
+
+                scope.symbolTable[symbol] = evaluatedValue;
+                return;
+            }               
+            
+            case 'UnaryExpression':
+                return this.evalUnaryExpression(component, scope);
+
+            case 'BinaryExpression':
+                return this.evalBinaryExpression(component, scope);
+
+            case 'ForNumericStatement':
+                return this.evalForLoop(component, scope);
+
+            case 'CallStatement':
+                return 1;
+            
+            default:
+                console.log('This syntax tree component is unrecognised');
+        }
+        
+        /*
+        if (this.isLiteral(component)) {
+            return this.evalLiteral(component);
         } else if (this.isSymbol(component)) {
             const symbol = component.name;
             return scope.lookup(symbol);
@@ -36,6 +73,7 @@ export class Evaluator {
             this.evalForLoop(component, scope);
             return;
         }
+        */
     }
 
     isForLoop(component: any): boolean {
@@ -94,7 +132,7 @@ export class Evaluator {
             || component.type === 'NilLiteral';
     }
 
-    evalLiteral(component: any): string | number | boolean {
+    evalLiteral(component: any): string | number | boolean | null {
 
         if (component.type === 'StringLiteral') {
             return component.raw;

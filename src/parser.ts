@@ -7,7 +7,7 @@ const parser = require('luaparse');
 
 const prog = `
 x = not true
-
+y = nil
 b = true or x
 print(b)
 `;
@@ -19,7 +19,7 @@ const ast = parser.parse(prog, config);
 // console.log(JSON.stringify(ast));   // prints the full AST in string form
 // console.log(ast);                   // prints the concise AST in object form
 
-console.log(ast.body[0])
+console.log(ast.body[1])
 
 // evaluate the ast
 const e = new Evaluator();
