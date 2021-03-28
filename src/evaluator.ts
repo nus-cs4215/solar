@@ -17,6 +17,43 @@ export class Evaluator {
         
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
+        }
+
+        switch (component.type) {
+
+            case 'Identifier': {
+                const symbol = component.name;
+                return scope.lookup(symbol);
+            }
+    
+            case 'AssignmentStatement': {
+                const symbol = component.variables[0].name;
+                const value = component.init[0];
+                const evaluatedValue = this.evalComponent(value, scope);
+
+                scope.symbolTable[symbol] = evaluatedValue;
+                return;
+            }               
+            
+            case 'UnaryExpression':
+                return this.evalUnaryExpression(component, scope);
+
+            case 'BinaryExpression':
+                return this.evalBinaryExpression(component, scope);
+
+            case 'ForNumericStatement':
+                return this.evalForLoop(component, scope);
+
+            case 'CallStatement':
+                return 1;
+            
+            default:
+                console.log('This syntax tree component is unrecognised');
+        }
+        
+        /*
+        if (this.isLiteral(component)) {
+            return this.evalLiteral(component);
         } else if (this.isSymbol(component)) {
             const symbol = component.name;
             return scope.lookup(symbol);
@@ -36,6 +73,7 @@ export class Evaluator {
             this.evalForLoop(component, scope);
             return;
         }
+        */
     }
 
     isForLoop(component: any): boolean {
@@ -95,9 +133,12 @@ export class Evaluator {
     }
 
     evalLiteral(component: any): string | number | boolean | null {
-        return component.type === 'StringLiteral'
-            ? component.raw
-            : component.value;
+
+        if (component.type === 'StringLiteral') {
+            return component.raw;
+        } else {
+            return component.value;
+        }
     }
 
     isUnaryExpression(component: any): boolean {
@@ -105,11 +146,14 @@ export class Evaluator {
     }
 
     evalUnaryExpression(component: any, scope: Scope): number | boolean {
-        const operator = component.operator;
-        const argument = component.argument;
-        return operator === 'not'
-            ? !this.evalComponent(argument, scope)
-            : /** operator === '-' */ -this.evalComponent(argument, scope);
+
+        if (component.operator === 'not') {
+            return !this.evalComponent(component.argument, scope);
+        } else if (component.operator === '-') {
+            return -this.evalComponent(component.argument, scope);
+        } else {
+            throw 'no such unary operator';
+        }
     }
 
     isBinaryExpression(component: any): boolean {
