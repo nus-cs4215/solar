@@ -4,9 +4,9 @@ const parser = require('luaparse');
 
 // refer to lua cheatsheet https://devhints.io/lua to write sample program
 
-const prog = `
-x=2^5-1
-print(x)
+const prog = `\
+x = 77
+print(max(1,x,23,11,56))
 `;
 
 const config = { luaVersion: '5.3' };
@@ -16,7 +16,7 @@ const ast = parser.parse(prog, config);
 // console.log(JSON.stringify(ast));   // prints the full AST in string form
 // console.log(ast);                   // prints the concise AST in object form
 
-console.log(ast.body[0])
+console.log(ast.body);
 
 // evaluate the ast
 const e = new Evaluator();

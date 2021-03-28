@@ -47,17 +47,89 @@ export class Evaluator {
                 return this.evalForLoop(component, scope);
 
             case 'CallStatement':
-                if (component.expression.base.name === 'print') {
-
-                    const printArgumentComponent = component.expression.arguments[0];
-                    const printArgument = this.evalComponent(printArgumentComponent, scope);
-                    console.log(printArgument);
-                    return;
-                }
-                break;
+                return this.evalCallExpression(component.expression, scope);
             
+            case 'CallExpression':
+                return this.evalCallExpression(component, scope);
+
             default:
                 console.log('This syntax tree component is unrecognised');
+        }
+    }
+
+    evalCallExpression(component: any, scope: Scope): any {
+
+        const functionName = component.base.name;
+
+        if (this.isBuiltInFunction(functionName)) {
+            const argsComponent = component.arguments;
+            const args = argsComponent.map(c => this.evalComponent(c, scope));
+            return this.invokeBuiltInFunction(functionName, args);
+        } else {
+            throw "self-defined function not implemented yet";
+        }
+    }
+
+    isBuiltInFunction(funcName: string): boolean {
+        return funcName === 'print' 
+            || funcName === 'abs' 
+            || funcName === 'ceil'
+            || funcName === 'floor'
+            || funcName === 'sqrt'
+            || funcName === 'max'
+            || funcName === 'min'
+    }
+
+    invokeBuiltInFunction(funcName: string, args: any[]): number | void {
+        
+        if (funcName === 'max') {
+            
+            let max = args[0];
+
+            for (const arg of args) {
+                if (arg > max) {
+                    max = arg;
+                }
+            }
+
+            return max;
+        }
+
+        if (funcName === 'min') {
+            
+            let min = args[0];
+
+            for (const arg of args) {
+                if (arg > min) {
+                    min = arg;
+                }
+            }
+
+            return min;
+        }
+        
+        const arg = args[0];
+
+        switch (funcName) {
+
+            case 'print':
+                console.log(arg);
+                return;
+            
+            case 'abs':
+                return Math.abs(arg);
+
+            case 'ceil':
+                return Math.ceil(arg);
+
+            case 'floor':
+                return Math.floor(arg);
+
+            case 'sqrt':
+                return Math.sqrt(arg);
+
+            default:
+                console.log('No such built-in function');
         }
     }
 
