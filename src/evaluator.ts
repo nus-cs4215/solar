@@ -57,10 +57,28 @@ export class Evaluator {
             case 'TableConstructorExpression':
                 return this.evalTable(component, scope);
 
+            case 'IndexExpression': {
+                const tableName = component.base.name;
+                const table = scope.lookup(tableName);
+                const index = this.evalComponent(component.index, scope);
+                return table[index];
+            }
+
+            case 'MemberExpression': {
+                const tableName = component.base.name;
+                const table = scope.lookup(tableName);
+                const key = component.identifier.name;
+                return table[key];
+            }
+
             default:
                 console.log('This syntax tree component is unrecognised');
         }
     }
+
+    // evalIndexExpression(component: any, scope: Scope): string | number | boolean {
+        
+    // } 
 
     isArray(tableComponent: any): boolean {
         return tableComponent[0].type === 'TableValue';
