@@ -3,9 +3,7 @@ const parser = require('luaparse');
 
 
 const prog = `\
-y = {a=7,b=1,x=3}
-x = y.x
-print(x)
+print(max(2^5, 2^6, 100))
 `;
 
 const config = { luaVersion: '5.3' };
@@ -15,7 +13,7 @@ const ast = parser.parse(prog, config);
 // console.log(JSON.stringify(ast));   // prints the full AST in string form
 // console.log(ast);                   // prints the concise AST in object form
 
-console.log(ast.body[1].init);
+console.log(ast.body);
 
 // evaluate the ast
 const e = new Evaluator();
