@@ -3,7 +3,7 @@ const parser = require('luaparse');
 
 
 const prog = `\
-print(max(2^5, 2^6, 100))
+print(min(2^5, 2^6, 100))
 `;
 
 const config = { luaVersion: '5.3' };

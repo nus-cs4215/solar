@@ -202,7 +202,7 @@ export class Evaluator {
             let min = args[0];
 
             for (const arg of args) {
-                if (arg > min) {
+                if (arg < min) {
                     min = arg;
                 }
             }
