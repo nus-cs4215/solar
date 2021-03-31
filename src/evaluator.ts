@@ -151,6 +151,7 @@ export class Evaluator {
         }
     }
 
+    /*
     // currently unused. for minimalism, we only allow simple x = 1 assignments. don't allow x,y = 1,2
     evalAssignment(component: any, scope: Scope): void {
         
@@ -166,6 +167,7 @@ export class Evaluator {
             scope.symbolTable[symbol] = this.evalComponent(value, scope);
         }
     }
+    */
 
     isLiteral(component: any): boolean {
         return component.type === 'StringLiteral' 
