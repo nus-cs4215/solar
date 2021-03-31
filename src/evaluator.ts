@@ -42,17 +42,20 @@ export class Evaluator {
             case 'LogicalExpression':
                 return this.evalLogicalExpression(component, scope);
 
+            case 'IfStatement':
+                return this.evalIfStatement(component, scope);
+
             case 'ForNumericStatement':
                 return this.evalForLoop(component, scope);
+            
+            case 'BreakStatement':
+                throw 'Break out of the loop!';
 
             case 'CallStatement':
                 return this.evalCallExpression(component.expression, scope);
             
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
-
-            case 'IfStatement':
-                return this.evalIfStatement(component, scope);
 
             case 'TableConstructorExpression':
                 return this.evalTable(component, scope);
@@ -246,10 +249,10 @@ export class Evaluator {
 
             for (const c of component.body) {
 
-                if (c.type === 'BreakStatement') {
-                    return;
-                } else {
+                try {
                     this.evalComponent(c, forLoopScope);
+                } catch (breakException) {
+                    return;
                 }
             }
         }

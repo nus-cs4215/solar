@@ -3,7 +3,14 @@ const parser = require('luaparse');
 
 
 const prog = `\
-print(min(2^5, 2^6, 100))
+
+for j = 1,10,1 do
+    print(j)
+    if (j == 3) then
+        break
+    end
+end
+
 `;
 
 const config = { luaVersion: '5.3' };
