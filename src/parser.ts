@@ -4,11 +4,10 @@ const parser = require('luaparse');
 
 const prog = `\
 
-for j = 1,10,1 do
-    print(j)
-    if (j == 3) then
-        break
-    end
+arr = {1,2,3,4,5,6,7,9,8,0}
+
+for i = 0,10,1 do
+    print(arr[i])
 end
 
 `;

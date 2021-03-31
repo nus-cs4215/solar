@@ -243,7 +243,7 @@ export class Evaluator {
         const end = this.evalComponent(component.end, scope);
         const step = this.evalComponent(component.step, scope);
 
-        for (let i = start; i <= end; i += step) {
+        for (let i = start; i < end; i += step) {
 
             forLoopScope.symbolTable[loopControlVariable] = i; 
 
