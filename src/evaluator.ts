@@ -132,17 +132,18 @@ export class Evaluator {
 
         const functionName = component.base.name;
 
+        const argsComponent = component.arguments;
+        const args = argsComponent.map(c => this.evalComponent(c, scope));
+
         if (functionName === 'print') {
-            const arg = this.evalComponent(component.arguments[0], scope);
-            console.log(arg);
+            console.log(args[0]);
             return;
         } else if (this.inMathLibrary(functionName)) {
-            const argsComponent = component.arguments;
-            const args = argsComponent.map(c => this.evalComponent(c, scope));
+
             return this.callMathLibrary(functionName, args);
         } else if (this.inStringLibrary(functionName)) {
-
-            throw "string library not implemented yet";
+            
+            return this.callStringLibrary(functionName, args);
         } else if (this.inArrayLibrary(functionName)) {
 
             throw "array library not implemented yet";
@@ -167,7 +168,7 @@ export class Evaluator {
     inStringLibrary(funcName: string): boolean {
         return funcName === 'str_len'
             || funcName === 'str_reverse'
-            || funcName === 'str_set'
+            || funcName === 'str_split'
     }
 
     inArrayLibrary(funcName: string): boolean {
@@ -185,8 +186,14 @@ export class Evaluator {
             || funcName === 'tbl_contains'
     }
 
-    callMathLibrary(funcName: string, args: any[]): number | void {
+    callMathLibrary(funcName: string, args: any[]): number {
         
+        for (const arg of args) {
+            if (typeof arg !== 'number') {
+                throw 'Math lib function - all args must be of type number';
+            }
+        }
+
         if (funcName === 'max') {
             
             let max = args[0];
@@ -231,6 +238,36 @@ export class Evaluator {
 
             default:
                 console.log('No such math library function');
+        }
+    }
+
+    reverseString(str: string): string {
+        return str.split("").reverse().join("");
+    }
+
+    callStringLibrary(funcName: string, args: any[]): number  | string | string[] {
+
+        if (typeof args[0] !== 'string') {
+            throw 'String lib function - first arg must be of type string';
+        }
+
+        switch (funcName) {
+
+            case 'str_len':
+                return args[0].length;
+
+            case 'str_reverse':
+                return this.reverseString(args[0]);
+
+            case 'str_split':
+                if (typeof args[1] === 'string'){
+                    return args[0].split(args[1]);
+                } else {
+                    throw 'Split function - second arg must be of type string';
+                }
+
+            default:
+                console.log('No such string library function');
         }
     }
 

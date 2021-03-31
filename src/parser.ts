@@ -2,13 +2,9 @@ import { Evaluator } from './evaluator';
 const parser = require('luaparse');
 
 
-const prog = `\
+const prog = `
 
-arr = {1,2,3,4,5,6,7,9,8,0}
-
-for i = 0,10,1 do
-    print(arr[i])
-end
+print(str_reverse('hi!'))
 
 `;
 
