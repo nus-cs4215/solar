@@ -1,17 +1,12 @@
 import { Evaluator } from './evaluator';
-const parser = require('luaparse');
-
-
-// refer to lua cheatsheet https://devhints.io/lua to write sample program
+import parser = require('luaparse');
 
 const prog = `\
 x = 2
 print(1== x)
 `;
 
-const config = { luaVersion: '5.3' };
-
-const ast = parser.parse(prog, config);
+const ast = parser.parse(prog, { luaVersion: '5.3' });
 
 // console.log(JSON.stringify(ast));   // prints the full AST in string form
 // console.log(ast);                   // prints the concise AST in object form
