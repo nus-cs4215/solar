@@ -129,26 +129,60 @@ export class Evaluator {
 
         const functionName = component.base.name;
 
-        if (this.isBuiltInFunction(functionName)) {
+        if (functionName === 'print') {
+            const arg = this.evalComponent(component.arguments[0], scope);
+            console.log(arg);
+            return;
+        } else if (this.inMathLibrary(functionName)) {
             const argsComponent = component.arguments;
             const args = argsComponent.map(c => this.evalComponent(c, scope));
-            return this.invokeBuiltInFunction(functionName, args);
+            return this.callMathLibrary(functionName, args);
+        } else if (this.inStringLibrary(functionName)) {
+
+            throw "string library not implemented yet";
+        } else if (this.inArrayLibrary(functionName)) {
+
+            throw "array library not implemented yet";
+        } else if (this.inTableLibrary(functionName)) {
+
+            throw "table library not implemented yet";
         } else {
+
             throw "self-defined function not implemented yet";
         }
     }
 
-    isBuiltInFunction(funcName: string): boolean {
-        return funcName === 'print' 
-            || funcName === 'abs' 
+    inMathLibrary(funcName: string): boolean {
+        return funcName === 'max'
+            || funcName === 'min'
+            || funcName === 'abs'
             || funcName === 'ceil'
             || funcName === 'floor'
             || funcName === 'sqrt'
-            || funcName === 'max'
-            || funcName === 'min'
     }
 
-    invokeBuiltInFunction(funcName: string, args: any[]): number | void {
+    inStringLibrary(funcName: string): boolean {
+        return funcName === 'str_len'
+            || funcName === 'str_reverse'
+            || funcName === 'str_set'
+    }
+
+    inArrayLibrary(funcName: string): boolean {
+        return funcName === 'arr_len'
+            || funcName === 'arr_push'
+            || funcName === 'arr_pop'
+            || funcName === 'arr_set'
+            || funcName === 'arr_sort'
+    }
+
+    inTableLibrary(funcName: string): boolean {
+        return funcName === 'tbl_len'
+            || funcName === 'tbl_put'
+            || funcName === 'tbl_remove'
+            || funcName === 'tbl_contains'
+    }
+
+    callMathLibrary(funcName: string, args: any[]): number | void {
         
         if (funcName === 'max') {
             
@@ -180,10 +214,6 @@ export class Evaluator {
 
         switch (funcName) {
 
-            case 'print':
-                console.log(arg);
-                return;
-            
             case 'abs':
                 return Math.abs(arg);
 
@@ -197,7 +227,7 @@ export class Evaluator {
                 return Math.sqrt(arg);
 
             default:
-                console.log('No such built-in function');
+                console.log('No such math library function');
         }
     }
 
