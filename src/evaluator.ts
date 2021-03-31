@@ -54,8 +54,36 @@ export class Evaluator {
             case 'IfStatement':
                 return this.evalIfStatement(component, scope);
 
+            case 'TableConstructorExpression':
+                return this.evalTable(component, scope);
+
             default:
                 console.log('This syntax tree component is unrecognised');
+        }
+    }
+
+    isArray(tableComponent: any): boolean {
+        return tableComponent[0].type === 'TableValue';
+    }
+
+    evalTable(component: any, scope: Scope): any {
+        
+        const tableComponent = component.fields;
+        
+        // if the "table" is really just an array, we return an array
+        if (this.isArray(tableComponent)) {
+            const arr = tableComponent.map(c => this.evalComponent(c.value, scope));
+            return arr;
+        } else {
+            let tbl = {}
+
+            for (const c of tableComponent) {
+                const k = c.key.name;
+                const v = this.evalComponent(c.value, scope);
+                tbl[k] = v;
+            }
+
+            return tbl;
         }
     }
 
@@ -207,7 +235,7 @@ export class Evaluator {
     evalLiteral(component: any): string | number | boolean | null {
 
         if (component.type === 'StringLiteral') {
-            const strLiteral = component.raw.slice(1, -1);  // remove the outermost single quote
+            const strLiteral = component.raw.slice(1, -1);  // remove the outermost quotes
             return strLiteral;
         } else {
             return component.value;
