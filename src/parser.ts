@@ -8,6 +8,9 @@ arr = {4,2,1}
 
 for x in arr do
     print(x)
+    if (x == 2) then
+        break
+    end
 end
 
 `;
@@ -19,7 +22,7 @@ const ast = parser.parse(prog, config);
 // console.log(JSON.stringify(ast));   // prints the full AST in string form
 // console.log(ast);                   // prints the concise AST in object form
 
-console.log(ast.body);
+console.log(ast.body[1]);
 
 // evaluate the ast
 const e = new Evaluator();

@@ -48,6 +48,9 @@ export class Evaluator {
             case 'ForNumericStatement':
                 return this.evalNumericForLoop(component, scope);
             
+            case 'ForGenericStatement':
+                return this.evalGenericForLoop(component, scope);
+                
             case 'BreakStatement':
                 throw 'Break out of the loop!';
 
@@ -271,9 +274,32 @@ export class Evaluator {
         }
     }
 
+    evalGenericForLoop(component: any, scope: Scope): void {
+ 
+        const forLoopScope: Scope = new Scope({}, scope);
+
+        const itemSymbol = component.variables[0].name;
+        const container = this.evalComponent(component.iterators[0], scope);
+
+        for (const item of container) {
+            
+            forLoopScope.symbolTable[itemSymbol] = item;
+
+            for (const c of component.body) {
+
+                try {
+                    this.evalComponent(c, forLoopScope);
+                } catch (breakException) {
+                    return;
+                }
+            }
+        }
+
+    }
+
     evalNumericForLoop(component: any, scope: Scope): void {
 
-        const forLoopScope: Scope = new Scope({}, scope)
+        const forLoopScope: Scope = new Scope({}, scope);
         
         const loopControlVariable = component.variable.name;
         const start = this.evalComponent(component.start, scope);
