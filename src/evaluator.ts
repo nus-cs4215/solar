@@ -46,7 +46,7 @@ export class Evaluator {
                 return this.evalIfStatement(component, scope);
 
             case 'ForNumericStatement':
-                return this.evalForLoop(component, scope);
+                return this.evalNumericForLoop(component, scope);
             
             case 'BreakStatement':
                 throw 'Break out of the loop!';
@@ -271,7 +271,7 @@ export class Evaluator {
         }
     }
 
-    evalForLoop(component: any, scope: Scope): void {
+    evalNumericForLoop(component: any, scope: Scope): void {
 
         const forLoopScope: Scope = new Scope({}, scope)
         

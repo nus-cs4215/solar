@@ -4,7 +4,11 @@ const parser = require('luaparse');
 
 const prog = `
 
-print(str_reverse('hi!'))
+arr = {4,2,1}
+
+for x in arr do
+    print(x)
+end
 
 `;
 
