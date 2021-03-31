@@ -1,5 +1,4 @@
 import { Scope } from './scope';
-const assert = require('assert');
 
 export class Evaluator {
 
@@ -158,7 +157,7 @@ export class Evaluator {
         const symbols = component.variables;
         const values = component.init;
 
-        assert(symbols.length === values.length, "Length of symbols do not match values");
+        // assert(symbols.length === values.length, "Length of symbols do not match values");
         
         for (let i = 0; i < symbols.length; i++) {
             const symbol = symbols[i].name;
