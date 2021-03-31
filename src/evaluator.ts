@@ -146,7 +146,12 @@ export class Evaluator {
             forLoopScope.symbolTable[loopControlVariable] = i; 
 
             for (const c of component.body) {
-                this.evalComponent(c, forLoopScope);
+
+                if (c.type === 'BreakStatement') {
+                    return;
+                } else {
+                    this.evalComponent(c, forLoopScope);
+                }
             }
         }
     }
