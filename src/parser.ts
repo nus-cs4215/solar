@@ -4,11 +4,8 @@ const parser = require('luaparse');
 
 const prog = `\
 x = 2
-print(1== x)
-
-for j = 1,10,1 do
-print(j)
-break
+if (1 == x) then
+print('hi')
 end
 
 `;
@@ -20,8 +17,7 @@ const ast = parser.parse(prog, config);
 // console.log(JSON.stringify(ast));   // prints the full AST in string form
 // console.log(ast);                   // prints the concise AST in object form
 
-const a = ast.body[2];
-console.log(a.body);
+console.log(ast.body);
 
 // evaluate the ast
 const e = new Evaluator();
