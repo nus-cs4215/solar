@@ -68,8 +68,10 @@ export class Evaluator {
 
             if (condition === true) {
 
+                const clauseScope: Scope = new Scope({}, scope)
+                
                 for (const c of clause.body) {
-                    this.evalComponent(c, scope);
+                    this.evalComponent(c, clauseScope);
                 }
 
                 return;
