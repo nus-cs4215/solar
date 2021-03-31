@@ -51,8 +51,29 @@ export class Evaluator {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
 
+            case 'IfStatement':
+                return this.evalIfStatement(component, scope);
+
             default:
                 console.log('This syntax tree component is unrecognised');
+        }
+    }
+
+    evalIfStatement(component: any, scope: Scope): any {
+        
+        for (const clause of component.clauses) {
+
+            const conditionComponent = clause.condition;
+            const condition = this.evalComponent(conditionComponent, scope);
+
+            if (condition === true) {
+
+                for (const c of clause.body) {
+                    this.evalComponent(c, scope);
+                }
+
+                return;
+            }
         }
     }
 
@@ -184,7 +205,8 @@ export class Evaluator {
     evalLiteral(component: any): string | number | boolean | null {
 
         if (component.type === 'StringLiteral') {
-            return component.raw;
+            const strLiteral = component.raw.slice(1, -1);  // remove the outermost single quote
+            return strLiteral;
         } else {
             return component.value;
         }
