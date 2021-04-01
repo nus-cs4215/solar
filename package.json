@@ -5,7 +5,10 @@
   "main": "sample.ts",
   "scripts": {
     "start": "ts-node src/interpreter/main.ts",
-    "test": "jest"
+    "test": "jest",
+    "transpile": "tsc src/interpreter/main.ts",
+    "bundle": "npm browserify build/main.js > build/bundle.js",
+    "build": "npm run transpile && npm run bundle"
   },
   "repository": {
     "type": "git",
