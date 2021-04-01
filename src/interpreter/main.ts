@@ -3,7 +3,7 @@ const parser = require('luaparse');
 
 // To run this file - npm start
 
-export function interpret(program: string): any {
+function interpret(program: string): any {
 
     // parse program into AST
     const ast = parser.parse(program, { luaVersion: '5.3' });
@@ -13,6 +13,7 @@ export function interpret(program: string): any {
     e.evaluate(ast);
 }
 
+/*
 
 // user program
 const prog = `
@@ -22,3 +23,4 @@ print('hi')
 `;
 
 interpret(prog);
+*/

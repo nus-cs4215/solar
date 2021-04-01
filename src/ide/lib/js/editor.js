@@ -59,8 +59,8 @@ executeCodeBtn.addEventListener('click', () => {
 
     // Run the user code
     try {
-        console.log(userCode);
-        //console.log(interpret(userCode));
+        interpret(userCode);
+        //console.log(userCode);
     } catch (err) {
         console.error(err);
     }
