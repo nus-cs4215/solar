@@ -4,8 +4,7 @@
   "description": "The Solar programming language is a minimalist dialect of the Lua programming language.",
   "main": "sample.ts",
   "scripts": {
-    "parse": "ts-node src/interpreter/parser.ts",
-    "start": "echo 'no such script' yet",
+    "start": "ts-node src/interpreter/main.ts",
     "test": "jest"
   },
   "repository": {
