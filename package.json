@@ -7,7 +7,7 @@
     "start": "ts-node src/interpreter/main.ts",
     "test": "jest",
     "transpile": "tsc src/interpreter/main.ts --outDir build",
-    "bundle": "browserify build/main.js --standalone interpreter > build/bundle.js",
+    "bundle": "browserify build/main.js > build/bundle.js",
     "build": "npm run transpile && npm run bundle"
   },
   "repository": {
