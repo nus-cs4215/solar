@@ -400,6 +400,7 @@ function interpret(program) {
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
+window.interpret = function(prog) { return interpret(prog) };
 /*
 
 // user program
@@ -3120,8 +3121,3 @@ exports.Scope = Scope;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[2]);
-
-function logThrice(str) {
-  const t = str + str + str;
-  console.log(t);
-}
