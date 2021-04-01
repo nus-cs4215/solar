@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node src/interpreter/main.ts",
     "test": "jest",
-    "transpile": "tsc src/interpreter/main.ts",
+    "transpile": "tsc src/interpreter/main.ts --outDir build",
     "bundle": "npm browserify build/main.js > build/bundle.js",
     "build": "npm run transpile && npm run bundle"
   },
