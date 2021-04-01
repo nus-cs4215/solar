@@ -4,10 +4,7 @@ const parser = require('luaparse');
 
 const prog = `
 
-function foo()
-    print('hi')
-    return 1
-end
+print('hi')
 
 `;
 
