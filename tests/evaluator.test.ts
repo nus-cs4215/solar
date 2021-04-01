@@ -1,4 +1,4 @@
-import { Evaluator } from '../src/evaluator';
+import { Evaluator } from '../src/interpreter/evaluator';
 
 // ast for 2 + 3
 const ast1 = {
