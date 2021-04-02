@@ -13,7 +13,7 @@ function interpret(program: string): any {
     e.evaluate(ast);
 }
 
-/*
+// placeholder comment
 
 // user program
 const prog = `
@@ -23,4 +23,3 @@ print('hi')
 `;
 
 interpret(prog);
-*/
