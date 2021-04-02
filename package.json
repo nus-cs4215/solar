@@ -8,7 +8,8 @@
     "test": "jest",
     "transpile": "tsc src/interpreter/main.ts --outDir build",
     "bundle": "browserify build/main.js -o src/ide/lib/js/bundle.js",
-    "build": "npm run transpile && npm run bundle"
+    "globalise": "rexreplace '// user program' 'window.interpret = interpret;' src/ide/lib/js/bundle.js",
+    "build": "npm run transpile && npm run bundle && npm run globalise"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   "dependencies": {
     "browserify": "^17.0.0",
     "luaparse": "^0.3.0",
+    "rexreplace": "^6.1.1",
     "ts-node": "^9.1.1"
   }
 }

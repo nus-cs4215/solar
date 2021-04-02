@@ -400,7 +400,7 @@ function interpret(program) {
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
-// user program
+window.interpret = interpret;
 var prog = "\n\nprint('hi')\n\n";
 interpret(prog);
 
