@@ -400,18 +400,9 @@ function interpret(program) {
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
-window.interpret = function(prog) { return interpret(prog) };
-/*
-
 // user program
-const prog = `
-
-print('hi')
-
-`;
-
+var prog = "\n\nprint('hi')\n\n";
 interpret(prog);
-*/ 
 
 },{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){
 "use strict";

@@ -10,14 +10,6 @@ function interpret(program) {
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
-/*
-
 // user program
-const prog = `
-
-print('hi')
-
-`;
-
+var prog = "\n\nprint('hi')\n\n";
 interpret(prog);
-*/ 
