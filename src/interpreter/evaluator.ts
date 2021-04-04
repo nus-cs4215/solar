@@ -386,7 +386,6 @@ export class Evaluator {
         return component.type === 'StringLiteral' 
             || component.type === 'NumericLiteral'
             || component.type === 'BooleanLiteral'
-            || component.type === 'NilLiteral';
     }
 
     evalLiteral(component: any): string | number | boolean | null {
