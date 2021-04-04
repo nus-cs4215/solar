@@ -16,7 +16,11 @@ function interpret(program: string): any {
 // user program
 const prog = `
 
-print('hi')
+x = 1
+
+while 1 == x do
+    print('hello')
+end
 
 `;
 
