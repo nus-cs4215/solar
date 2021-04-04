@@ -24,14 +24,13 @@ export class Evaluator {
                 const symbol = component.name;
                 return scope.lookup(symbol);
             }
+
+            // 'LetStatement'
+            case 'LocalStatement':
+                return this.evalDeclaration(component, scope);
     
-            case 'AssignmentStatement': {
-                const symbol = component.variables[0].name;
-                const valueComponent = component.init[0];
-                const value = this.evalComponent(valueComponent, scope);
-                scope.symbolTable[symbol] = value;
-                return;
-            }               
+            case 'AssignmentStatement': 
+                return this.evalAssignment(component, scope); 
             
             case 'UnaryExpression':
                 return this.evalUnaryExpression(component, scope);
@@ -82,6 +81,30 @@ export class Evaluator {
 
             default:
                 console.log('This syntax tree component is unrecognised');
+        }
+    }
+
+    evalDeclaration(component: any, scope: Scope): any {
+
+        const symbol = component.variables[0].name;
+        const value = this.evalComponent(component.init[0], scope);
+
+        if (symbol in scope.symbolTable) {
+            throw `${symbol} was already declared!`;
+        } else {
+            scope.symbolTable[symbol] = value;
+        }
+    }
+
+    evalAssignment(component: any, scope: Scope): any {
+
+        const symbol = component.variables[0].name;
+        const value = this.evalComponent(component.init[0], scope);
+
+        if (symbol in scope.symbolTable) {
+            scope.symbolTable[symbol] = value;
+        } else {
+            throw `${symbol} not declared yet!`;
         }
     }
 

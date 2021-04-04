@@ -20,6 +20,9 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 let x = 1
+print(x)
+x = 2
+print(x)
 `;
 
 interpret(userProgram);
