@@ -23,6 +23,19 @@ var Scope = /** @class */ (function () {
             }
         }
     };
+    Scope.prototype.assign = function (symbol, value) {
+        if (symbol in this.symbolTable) {
+            this.symbolTable[symbol] = value;
+        }
+        else {
+            if (this.isGlobalScope()) {
+                throw 'symbol not defined';
+            }
+            else {
+                this.parent.assign(symbol, value);
+            }
+        }
+    };
     Scope.prototype.isGlobalScope = function () {
         return this.parent === null;
     };

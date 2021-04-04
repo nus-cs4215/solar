@@ -22,13 +22,11 @@ var Evaluator = /** @class */ (function () {
                 var symbol = component.name;
                 return scope.lookup(symbol);
             }
-            case 'AssignmentStatement': {
-                var symbol = component.variables[0].name;
-                var valueComponent = component.init[0];
-                var value = this.evalComponent(valueComponent, scope);
-                scope.symbolTable[symbol] = value;
-                return;
-            }
+            // 'LetStatement'
+            case 'LocalStatement':
+                return this.evalDeclaration(component, scope);
+            case 'AssignmentStatement':
+                return this.evalAssignment(component, scope);
             case 'UnaryExpression':
                 return this.evalUnaryExpression(component, scope);
             case 'BinaryExpression':
@@ -37,6 +35,8 @@ var Evaluator = /** @class */ (function () {
                 return this.evalLogicalExpression(component, scope);
             case 'IfStatement':
                 return this.evalIfStatement(component, scope);
+            case 'WhileStatement':
+                return this.evalWhileLoop(component, scope);
             case 'ForNumericStatement':
                 return this.evalNumericForLoop(component, scope);
             case 'ForGenericStatement':
@@ -62,11 +62,24 @@ var Evaluator = /** @class */ (function () {
                 return table[key];
             }
             default:
-                console.log('This syntax tree component is unrecognised');
+                throw 'This syntax tree component is unrecognised';
         }
     };
-    // evalIndexExpression(component: any, scope: Scope): string | number | boolean {
-    // } 
+    Evaluator.prototype.evalDeclaration = function (component, scope) {
+        var symbol = component.variables[0].name;
+        var value = this.evalComponent(component.init[0], scope);
+        if (symbol in scope.symbolTable) {
+            throw symbol + " was already declared!";
+        }
+        else {
+            scope.symbolTable[symbol] = value;
+        }
+    };
+    Evaluator.prototype.evalAssignment = function (component, scope) {
+        var symbol = component.variables[0].name;
+        var value = this.evalComponent(component.init[0], scope);
+        scope.assign(symbol, value);
+    };
     Evaluator.prototype.isArray = function (tableComponent) {
         return tableComponent[0].type === 'TableValue';
     };
@@ -130,13 +143,14 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.inMathLibrary = function (funcName) {
-        return funcName === 'max'
-            || funcName === 'min'
-            || funcName === 'abs'
-            || funcName === 'ceil'
-            || funcName === 'floor'
-            || funcName === 'sqrt';
+        return funcName === 'math_max'
+            || funcName === 'math_min'
+            || funcName === 'math_abs'
+            || funcName === 'math_ceil'
+            || funcName === 'math_floor'
+            || funcName === 'math_sqrt';
     };
+    // to add: str_substring
     Evaluator.prototype.inStringLibrary = function (funcName) {
         return funcName === 'str_len'
             || funcName === 'str_reverse'
@@ -162,7 +176,7 @@ var Evaluator = /** @class */ (function () {
                 throw 'Math lib function - all args must be of type number';
             }
         }
-        if (funcName === 'max') {
+        if (funcName === 'math_max') {
             var max = args[0];
             for (var _a = 0, args_2 = args; _a < args_2.length; _a++) {
                 var arg_2 = args_2[_a];
@@ -172,7 +186,7 @@ var Evaluator = /** @class */ (function () {
             }
             return max;
         }
-        if (funcName === 'min') {
+        if (funcName === 'math_min') {
             var min = args[0];
             for (var _b = 0, args_3 = args; _b < args_3.length; _b++) {
                 var arg_3 = args_3[_b];
@@ -184,16 +198,16 @@ var Evaluator = /** @class */ (function () {
         }
         var arg = args[0];
         switch (funcName) {
-            case 'abs':
+            case 'math_abs':
                 return Math.abs(arg);
-            case 'ceil':
+            case 'math_ceil':
                 return Math.ceil(arg);
-            case 'floor':
+            case 'math_floor':
                 return Math.floor(arg);
-            case 'sqrt':
+            case 'math_sqrt':
                 return Math.sqrt(arg);
             default:
-                console.log('No such math library function');
+                throw 'No such math library function';
         }
     };
     Evaluator.prototype.reverseString = function (str) {
@@ -216,7 +230,27 @@ var Evaluator = /** @class */ (function () {
                     throw 'Split function - second arg must be of type string';
                 }
             default:
-                console.log('No such string library function');
+                throw 'No such string library function';
+        }
+    };
+    Evaluator.prototype.evalWhileLoop = function (component, scope) {
+        var whileLoopScope = new scope_1.Scope({}, scope);
+        var condition = this.evalComponent(component.condition, scope);
+        while (condition === true) {
+            for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+                var c = _a[_i];
+                try {
+                    this.evalComponent(c, whileLoopScope);
+                    /*
+                        'refresh' / update the while loop condition.
+                        This is necessary when the while loop body modifies the while loop condition
+                    */
+                    condition = this.evalComponent(component.condition, scope);
+                }
+                catch (breakException) {
+                    return;
+                }
+            }
         }
     };
     Evaluator.prototype.evalGenericForLoop = function (component, scope) {
@@ -276,8 +310,7 @@ var Evaluator = /** @class */ (function () {
     Evaluator.prototype.isLiteral = function (component) {
         return component.type === 'StringLiteral'
             || component.type === 'NumericLiteral'
-            || component.type === 'BooleanLiteral'
-            || component.type === 'NilLiteral';
+            || component.type === 'BooleanLiteral';
     };
     Evaluator.prototype.evalLiteral = function (component) {
         if (component.type === 'StringLiteral') {
