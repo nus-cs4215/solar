@@ -82,10 +82,6 @@ export class Evaluator {
         }
     }
 
-    // evalIndexExpression(component: any, scope: Scope): string | number | boolean {
-        
-    // } 
-
     isArray(tableComponent: any): boolean {
         return tableComponent[0].type === 'TableValue';
     }
