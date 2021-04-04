@@ -45,6 +45,9 @@ export class Evaluator {
             case 'IfStatement':
                 return this.evalIfStatement(component, scope);
 
+            case 'WhileStatement':
+                return this.evalWhileLoop(component, scope);
+
             case 'ForNumericStatement':
                 return this.evalNumericForLoop(component, scope);
             
@@ -268,6 +271,26 @@ export class Evaluator {
             default:
                 console.log('No such string library function');
         }
+    }
+
+    evalWhileLoop(component: any, scope: Scope): void {
+
+        const whileLoopScope: Scope = new Scope({}, scope);
+
+        const condition = this.evalComponent(component.condition, scope);
+
+        while (condition === true) {
+
+            for (const c of component.body) {
+                
+                try {
+                    this.evalComponent(c, whileLoopScope);
+                } catch (breakException) {
+                    return;
+                }
+            }
+        }
+
     }
 
     evalGenericForLoop(component: any, scope: Scope): void {
