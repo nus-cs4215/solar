@@ -448,7 +448,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nfunction add(x,y) \n    let a = 1 \n    return x+y+a\nend\n\n";
+var userProgram = "\n\nprint('hi')\n\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){
