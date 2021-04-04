@@ -182,14 +182,15 @@ export class Evaluator {
     }
 
     inMathLibrary(funcName: string): boolean {
-        return funcName === 'max'
-            || funcName === 'min'
-            || funcName === 'abs'
-            || funcName === 'ceil'
-            || funcName === 'floor'
-            || funcName === 'sqrt'
+        return funcName === 'math_max'
+            || funcName === 'math_min'
+            || funcName === 'math_abs'
+            || funcName === 'math_ceil'
+            || funcName === 'math_floor'
+            || funcName === 'math_sqrt'
     }
 
+    // to add: str_substring
     inStringLibrary(funcName: string): boolean {
         return funcName === 'str_len'
             || funcName === 'str_reverse'
@@ -219,7 +220,7 @@ export class Evaluator {
             }
         }
 
-        if (funcName === 'max') {
+        if (funcName === 'math_max') {
             
             let max = args[0];
 
@@ -232,7 +233,7 @@ export class Evaluator {
             return max;
         }
 
-        if (funcName === 'min') {
+        if (funcName === 'math_min') {
             
             let min = args[0];
 
@@ -249,16 +250,16 @@ export class Evaluator {
 
         switch (funcName) {
 
-            case 'abs':
+            case 'math_abs':
                 return Math.abs(arg);
 
-            case 'ceil':
+            case 'math_ceil':
                 return Math.ceil(arg);
 
-            case 'floor':
+            case 'math_floor':
                 return Math.floor(arg);
 
-            case 'sqrt':
+            case 'math_sqrt':
                 return Math.sqrt(arg);
 
             default:
