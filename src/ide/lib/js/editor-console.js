@@ -8,7 +8,7 @@ let console = (function (oldConsole) {
                     outputArgMessage = `${arg}`;
                     break;
                 case "object":
-                    outputArgMessage = `Table ${JSON.stringify(arg)}`;
+                    outputArgMessage = `Table ${JSON.stringify(arg).replaceAll("\"", "")}`;
                     break;
                 case "array":
                     outputArgMessage = `Array ${JSON.stringify(arg)}`;
