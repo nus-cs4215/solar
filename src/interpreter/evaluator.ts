@@ -80,7 +80,7 @@ export class Evaluator {
             }
 
             default:
-                console.log('This syntax tree component is unrecognised');
+                throw 'This syntax tree component is unrecognised';
         }
     }
 
@@ -263,7 +263,7 @@ export class Evaluator {
                 return Math.sqrt(arg);
 
             default:
-                console.log('No such math library function');
+                throw 'No such math library function';
         }
     }
 
@@ -293,7 +293,7 @@ export class Evaluator {
                 }
 
             default:
-                console.log('No such string library function');
+                throw 'No such string library function';
         }
     }
 
