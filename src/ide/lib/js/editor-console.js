@@ -8,7 +8,7 @@ let console = (function (oldConsole) {
                     outputArgMessage = `"${arg}"`;
                     break;
                 case "object":
-                    outputArgMessage = `Object ${JSON.stringify(arg)}`;
+                    outputArgMessage = `Table ${JSON.stringify(arg)}`;
                     break;
                 case "array":
                     outputArgMessage = `Array ${JSON.stringify(arg)}`;
@@ -26,6 +26,8 @@ let console = (function (oldConsole) {
             if (typeof arg === "function") return "function";
             if (typeof arg === "number") return "number";
             if (typeof arg === "undefined") return "undefined";
+            if (typeof arg === "object" && !Array.isArray(arg)) return "object";
+            if (typeof arg === "object" && Array.isArray(arg)) return "array";
         },
         logMultipleArguments: function (arguments) {
             let currentLog = "";
