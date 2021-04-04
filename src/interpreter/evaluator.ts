@@ -56,6 +56,9 @@ export class Evaluator {
             case 'BreakStatement':
                 throw 'Break out of the loop!';
 
+            case 'FunctionDeclaration':
+                return this.evalFunctionDeclaration(component, scope);
+
             case 'CallStatement':
                 return this.evalCallExpression(component.expression, scope);
             
@@ -82,6 +85,22 @@ export class Evaluator {
             default:
                 throw 'This syntax tree component is unrecognised';
         }
+    }
+
+    evalFunctionDeclaration(component: any, scope: Scope): any {
+        
+        if (scope !== this.globalScope) {
+            throw 'Functions can only be declared in the global scope';
+        }
+
+        throw 'not implemented yet';
+        // const symbol = component.identifier.name;
+
+        // let value = { params: [], body: };
+
+        // for ()
+
+        //scope.symbolTable[]
     }
 
     evalDeclaration(component: any, scope: Scope): any {
