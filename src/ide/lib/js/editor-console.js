@@ -5,7 +5,7 @@ let console = (function (oldConsole) {
 
             switch (this.getType(arg)) {
                 case "string":
-                    outputArgMessage = `"${arg}"`;
+                    outputArgMessage = `${arg}`;
                     break;
                 case "object":
                     outputArgMessage = `Table ${JSON.stringify(arg)}`;
