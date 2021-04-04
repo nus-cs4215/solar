@@ -43,6 +43,8 @@ var Evaluator = /** @class */ (function () {
                 return this.evalGenericForLoop(component, scope);
             case 'BreakStatement':
                 throw 'Break out of the loop!';
+            case 'FunctionDeclaration':
+                return this.evalFunctionDeclaration(component, scope);
             case 'CallStatement':
                 return this.evalCallExpression(component.expression, scope);
             case 'CallExpression':
@@ -64,6 +66,16 @@ var Evaluator = /** @class */ (function () {
             default:
                 throw 'This syntax tree component is unrecognised';
         }
+    };
+    Evaluator.prototype.evalFunctionDeclaration = function (component, scope) {
+        if (scope !== this.globalScope) {
+            throw 'Functions can only be declared in the global scope';
+        }
+        throw 'not implemented yet';
+        // const symbol = component.identifier.name;
+        // let value = { params: [], body: };
+        // for ()
+        //scope.symbolTable[]
     };
     Evaluator.prototype.evalDeclaration = function (component, scope) {
         var symbol = component.variables[0].name;

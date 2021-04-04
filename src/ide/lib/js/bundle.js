@@ -44,6 +44,8 @@ var Evaluator = /** @class */ (function () {
                 return this.evalGenericForLoop(component, scope);
             case 'BreakStatement':
                 throw 'Break out of the loop!';
+            case 'FunctionDeclaration':
+                return this.evalFunctionDeclaration(component, scope);
             case 'CallStatement':
                 return this.evalCallExpression(component.expression, scope);
             case 'CallExpression':
@@ -65,6 +67,16 @@ var Evaluator = /** @class */ (function () {
             default:
                 throw 'This syntax tree component is unrecognised';
         }
+    };
+    Evaluator.prototype.evalFunctionDeclaration = function (component, scope) {
+        if (scope !== this.globalScope) {
+            throw 'Functions can only be declared in the global scope';
+        }
+        throw 'not implemented yet';
+        // const symbol = component.identifier.name;
+        // let value = { params: [], body: };
+        // for ()
+        //scope.symbolTable[]
     };
     Evaluator.prototype.evalDeclaration = function (component, scope) {
         var symbol = component.variables[0].name;
@@ -431,13 +443,12 @@ function interpret(program) {
     var prog = program.replace('let', 'local');
     // parse program into AST
     var ast = parser.parse(prog, { luaVersion: '5.3' });
-    console.log(ast.body[1]);
     // evaluate AST
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nlet x = 1\n\nprint(x)\nif x == 2 then\n    x = 3\nelseif x == 1 then\n    x = 5\nend\n\nprint(x)\n\n";
+var userProgram = "\n\nfunction add(x,y) \n    let a = 1 \n    return x+y+a\nend\n\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){

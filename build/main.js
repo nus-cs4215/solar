@@ -8,11 +8,10 @@ function interpret(program) {
     var prog = program.replace('let', 'local');
     // parse program into AST
     var ast = parser.parse(prog, { luaVersion: '5.3' });
-    console.log(ast.body[1]);
     // evaluate AST
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nlet x = 1\n\nprint(x)\nif x == 2 then\n    x = 3\nelseif x == 1 then\n    x = 5\nend\n\nprint(x)\n\n";
+var userProgram = "\n\nfunction add(x,y) \n    let a = 1 \n    return x+y+a\nend\n\n";
 interpret(userProgram);
