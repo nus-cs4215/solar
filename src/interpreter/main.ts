@@ -19,10 +19,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-function add(x,y) 
-    let a = 1 
-    return x+y+a
-end
+print('hi')
 
 `;
 
