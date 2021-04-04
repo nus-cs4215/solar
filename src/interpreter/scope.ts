@@ -27,6 +27,20 @@ export class Scope {
         }
     }
 
+    assign(symbol: string, value: any): void {
+
+        if (symbol in this.symbolTable) {
+            this.symbolTable[symbol] = value;
+        } else {
+
+            if (this.isGlobalScope()) {
+                throw 'symbol not defined'
+            } else {
+                this.parent.assign(symbol, value);
+            }
+        }
+    }
+
     isGlobalScope(): boolean {
         return this.parent === null;
     }

@@ -100,12 +100,7 @@ export class Evaluator {
 
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
-
-        if (symbol in scope.symbolTable) {
-            scope.symbolTable[symbol] = value;
-        } else {
-            throw `${symbol} not declared yet!`;
-        }
+        scope.assign(symbol, value);
     }
 
     isArray(tableComponent: any): boolean {
@@ -301,7 +296,7 @@ export class Evaluator {
 
         const whileLoopScope: Scope = new Scope({}, scope);
 
-        const condition = this.evalComponent(component.condition, scope);
+        let condition = this.evalComponent(component.condition, scope);
 
         while (condition === true) {
 
@@ -309,6 +304,12 @@ export class Evaluator {
                 
                 try {
                     this.evalComponent(c, whileLoopScope);
+
+                    /*
+                        'refresh' / update the while loop condition.
+                        This is necessary when the while loop body modifies the while loop condition
+                    */
+                    condition = this.evalComponent(component.condition, scope);
                 } catch (breakException) {
                     return;
                 }

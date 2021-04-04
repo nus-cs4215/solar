@@ -22,10 +22,14 @@ const userProgram = `
 
 let x = 1
 
-while 10 > x do
-    print(x)
-    x = x + 1
+print(x)
+if x == 2 then
+    x = 3
+elseif x == 1 then
+    x = 5
 end
+
+print(x)
 
 `;
 
