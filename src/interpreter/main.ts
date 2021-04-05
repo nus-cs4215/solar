@@ -6,7 +6,7 @@ const parser = require('luaparse');
 function interpret(program: string): any {
 
     // replace 'let' with 'local' - a workaround to allow the use of 'let' keyword
-    const prog = program.replace('let', 'local');
+    const prog = program.replace(/let/g, 'local');
 
     // parse program into AST
     const ast = parser.parse(prog, { luaVersion: '5.3' });
