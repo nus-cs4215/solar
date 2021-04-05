@@ -440,7 +440,7 @@ var parser = require('luaparse');
 // To run this file - npm start
 function interpret(program) {
     // replace 'let' with 'local' - a workaround to allow the use of 'let' keyword
-    var prog = program.replace('let', 'local');
+    var prog = program.replace(/let/g, 'local');
     // parse program into AST
     var ast = parser.parse(prog, { luaVersion: '5.3' });
     // evaluate AST
@@ -448,7 +448,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nprint('hi')\n\n";
+var userProgram = "\n\nprint((true or false) and true)\n\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){
