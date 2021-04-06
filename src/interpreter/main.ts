@@ -23,7 +23,7 @@ function add(x,y)
     let a = 1
     if 5 > 3 then
         print('bye')
-        return 6
+        return x + y
     end
     print('can')
     return 7

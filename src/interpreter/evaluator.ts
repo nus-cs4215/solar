@@ -212,20 +212,7 @@ export class Evaluator {
         const functionScope = new Scope(null);
         
         const params = this.globalScope.symbolTable[funcName].params;
-        
-        // todo: abstract the following loop into a method
-
-        if (params.length !== args.length) {
-            throw 'Number of params should be equal to number of args';
-        }
-
-        const n = params.length;
-        
-        for (let i = 0; i < n; ++i) {
-            const symbol = params[i];
-            const value = args[i];
-            functionScope.symbolTable[symbol] = value;
-        }
+        functionScope.storeArguments(params, args);
         
         const funcBody = this.globalScope.symbolTable[funcName].body;
 
@@ -541,4 +528,5 @@ export class Evaluator {
             throw 'no such binary operation';
         }
     }
+    
 }
