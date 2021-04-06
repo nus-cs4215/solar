@@ -13,5 +13,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nprint((true or false) and true)\n\n";
+var userProgram = "\n\nif false then\n    print(1)\nelse\n    print(2)\nend\n\n";
 interpret(userProgram);
