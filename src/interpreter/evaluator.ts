@@ -1,5 +1,4 @@
 import { Scope } from './scope';
-import { ActivationRecord } from './activation-record';
 
 export class Evaluator {
 
@@ -13,8 +12,7 @@ export class Evaluator {
         }
     }
     
-    // env is either Scope or ActivationRecord
-    evalComponent(component: any, env: any): any {
+    evalComponent(component: any, scope: any): any {
         
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
@@ -24,66 +22,66 @@ export class Evaluator {
 
             case 'Identifier': {
                 const symbol = component.name;
-                return env.lookup(symbol);
+                return scope.lookup(symbol);
             }
 
             // 'LetStatement'
             case 'LocalStatement':
-                return this.evalDeclaration(component, env);
+                return this.evalDeclaration(component, scope);
     
             case 'AssignmentStatement': 
-                return this.evalAssignment(component, env); 
+                return this.evalAssignment(component, scope); 
             
             case 'UnaryExpression':
-                return this.evalUnaryExpression(component, env);
+                return this.evalUnaryExpression(component, scope);
 
             case 'BinaryExpression':
-                return this.evalBinaryExpression(component, env);
+                return this.evalBinaryExpression(component, scope);
 
             case 'LogicalExpression':
-                return this.evalLogicalExpression(component, env);
+                return this.evalLogicalExpression(component, scope);
 
             case 'IfStatement':
-                return this.evalIfStatement(component, env);
+                return this.evalIfStatement(component, scope);
 
             case 'WhileStatement':
-                return this.evalWhileLoop(component, env);
+                return this.evalWhileLoop(component, scope);
 
             case 'ForNumericStatement':
-                return this.evalNumericForLoop(component, env);
+                return this.evalNumericForLoop(component, scope);
             
             case 'ForGenericStatement':
-                return this.evalGenericForLoop(component, env);
+                return this.evalGenericForLoop(component, scope);
                 
             case 'BreakStatement':
                 throw 'Break out of the loop!';
 
             case 'FunctionDeclaration':
-                return this.evalFunctionDeclaration(component, env);
+                return this.evalFunctionDeclaration(component, scope);
 
             case 'CallStatement':
-                return this.evalCallExpression(component.expression, env);
+                return this.evalCallExpression(component.expression, scope);
             
             case 'CallExpression':
-                return this.evalCallExpression(component, env);
+                return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                const returnValue = this.evalComponent(component.arguments[0], env);
+                const returnValue = this.evalComponent(component.arguments[0], scope);
                 throw returnValue;
 
             case 'TableConstructorExpression':
-                return this.evalTable(component, env);
+                return this.evalTable(component, scope);
 
             case 'IndexExpression': {
                 const tableName = component.base.name;
-                const table = env.lookup(tableName);
-                const index = this.evalComponent(component.index, env);
+                const table = scope.lookup(tableName);
+                const index = this.evalComponent(component.index, scope);
                 return table[index];
             }
 
             case 'MemberExpression': {
                 const tableName = component.base.name;
-                const table = env.lookup(tableName);
+                const table = scope.lookup(tableName);
                 const key = component.identifier.name;
                 return table[key];
             }

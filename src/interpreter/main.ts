@@ -21,7 +21,8 @@ const userProgram = `
 
 function add(x,y) 
     let a = 1
-    if 5 < 3 then
+    if 5 > 3 then
+        print('bye')
         return 6
     end
     print('can')
