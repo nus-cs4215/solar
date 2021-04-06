@@ -9,7 +9,7 @@ import { ActivationRecord } from "./activation-record";
 export class Scope {
 
     symbolTable: any;   // hashtable / obj
-    parent: Scope | ActivationRecord;      // link to parent
+    parent: Scope;      // link to parent
 
     constructor(parent: Scope) {
         this.symbolTable = {};

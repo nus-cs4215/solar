@@ -210,18 +210,31 @@ export class Evaluator {
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
-
-        const activationRecord = new ActivationRecord();
+        
+        const functionScope = new Scope(null);
         
         const params = this.globalScope.symbolTable[funcName].params;
-        activationRecord.storeArguments(params, args);
-
-        const funcBody = this.globalScope.symbolTable[funcName].body;
         
+        // todo: abstract the following loop into a method
+
+        if (params.length !== args.length) {
+            throw 'Number of params should be equal to number of args';
+        }
+
+        const n = params.length;
+        
+        for (let i = 0; i < n; ++i) {
+            const symbol = params[i];
+            const value = args[i];
+            functionScope.symbolTable[symbol] = value;
+        }
+        
+        const funcBody = this.globalScope.symbolTable[funcName].body;
+
         for (const c of funcBody) {
 
             try {
-                this.evalComponent(c, activationRecord);
+                this.evalComponent(c, functionScope);
             } catch (returnValue) {
                 return returnValue;
             }
