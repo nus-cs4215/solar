@@ -93,14 +93,12 @@ export class Evaluator {
             throw 'Functions can only be declared in the global scope';
         }
 
-        throw 'not implemented yet';
-        // const symbol = component.identifier.name;
+        const funcSymbol = component.identifier.name;
+        const funcParams = component.parameters.map(p => p.name);
+        const funcBody = component.body;
+        const value = { params: funcParams, body: funcBody };
 
-        // let value = { params: [], body: };
-
-        // for ()
-
-        //scope.symbolTable[]
+        scope.symbolTable[funcSymbol] = value;
     }
 
     evalDeclaration(component: any, scope: Scope): any {
