@@ -147,24 +147,43 @@ export class Evaluator {
         }
     }
 
+    hasElseClause(clauses: any[]): boolean {
+        const lastClause = clauses[clauses.length - 1];
+        return lastClause.type === 'ElseClause';
+    }
+
     evalIfStatement(component: any, scope: Scope): any {
         
         for (const clause of component.clauses) {
 
-            const conditionComponent = clause.condition;
-            const condition = this.evalComponent(conditionComponent, scope);
-
-            if (condition === true) {
-
-                const clauseScope: Scope = new Scope({}, scope)
+            if (clause.type !== 'ElseClause') {
                 
-                for (const c of clause.body) {
-                    this.evalComponent(c, clauseScope);
-                }
+                const condition = this.evalComponent(clause.condition, scope);
 
-                return;
+                if (condition === true) {
+
+                    const clauseScope: Scope = new Scope({}, scope)
+                    
+                    for (const c of clause.body) {
+                        this.evalComponent(c, clauseScope);
+                    }
+
+                    return;
+                }
+            }
+            
+        }
+
+        if (this.hasElseClause(component.clauses)) {
+
+            const elseClauseScope: Scope = new Scope({}, scope);
+            const elseClause = component.clauses[component.clauses.length - 1];
+
+            for (const c of elseClause.body) {
+                this.evalComponent(c, elseClauseScope);
             }
         }
+
     }
 
     evalCallExpression(component: any, scope: Scope): any {

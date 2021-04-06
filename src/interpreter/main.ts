@@ -19,7 +19,11 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-print((true or false) and true)
+if false then
+    print(1)
+else
+    print(2)
+end
 
 `;
 

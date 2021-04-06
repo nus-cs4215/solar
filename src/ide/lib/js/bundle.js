@@ -115,18 +115,31 @@ var Evaluator = /** @class */ (function () {
             return tbl;
         }
     };
+    Evaluator.prototype.hasElseClause = function (clauses) {
+        var lastClause = clauses[clauses.length - 1];
+        return lastClause.type === 'ElseClause';
+    };
     Evaluator.prototype.evalIfStatement = function (component, scope) {
         for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
             var clause = _a[_i];
-            var conditionComponent = clause.condition;
-            var condition = this.evalComponent(conditionComponent, scope);
-            if (condition === true) {
-                var clauseScope = new scope_1.Scope({}, scope);
-                for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
-                    var c = _c[_b];
-                    this.evalComponent(c, clauseScope);
+            if (clause.type !== 'ElseClause') {
+                var condition = this.evalComponent(clause.condition, scope);
+                if (condition === true) {
+                    var clauseScope = new scope_1.Scope({}, scope);
+                    for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
+                        var c = _c[_b];
+                        this.evalComponent(c, clauseScope);
+                    }
+                    return;
                 }
-                return;
+            }
+        }
+        if (this.hasElseClause(component.clauses)) {
+            var elseClauseScope = new scope_1.Scope({}, scope);
+            var elseClause = component.clauses[component.clauses.length - 1];
+            for (var _d = 0, _e = elseClause.body; _d < _e.length; _d++) {
+                var c = _e[_d];
+                this.evalComponent(c, elseClauseScope);
             }
         }
     };
@@ -448,7 +461,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nprint((true or false) and true)\n\n";
+var userProgram = "\n\nif false then\n    print(1)\nelse\n    print(2)\nend\n\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){
