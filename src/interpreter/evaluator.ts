@@ -68,7 +68,8 @@ export class Evaluator {
                 return this.evalCallExpression(component, env);
 
             case 'ReturnStatement':
-                throw 'Return out of the function!';
+                const returnValue = this.evalComponent(component.arguments[0], env);
+                throw returnValue;
 
             case 'TableConstructorExpression':
                 return this.evalTable(component, env);
@@ -218,11 +219,11 @@ export class Evaluator {
         const funcBody = this.globalScope.symbolTable[funcName].body;
         
         for (const c of funcBody) {
+
             try {
                 this.evalComponent(c, activationRecord);
-            } catch (returnException) {
-                console.log('hi');
-                return;
+            } catch (returnValue) {
+                return returnValue;
             }
         }
     }

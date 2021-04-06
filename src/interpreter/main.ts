@@ -21,10 +21,11 @@ const userProgram = `
 
 function add(x,y) 
     let a = 1
-    if 5 < 3 then
-        return 5
+    if 5 > 3 then
+        return 6
     end
     print('can')
+    return 7
 end
 let sum = add(1,2)
 print(sum)

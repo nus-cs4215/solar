@@ -24,10 +24,19 @@ export class ActivationRecord {
     }
 
     lookup(symbol: string): any {
-        return this.symbolTable[symbol];
+        
+        if (symbol in this.symbolTable) {
+            return this.symbolTable[symbol];
+        } else {
+            throw 'symbol not defined';
+        }
     }
-
     assign(symbol:string, value: any): void {
-        this.symbolTable[symbol] = value;
+        
+        if (symbol in this.symbolTable) {
+            this.symbolTable[symbol] = value;
+        } else {
+            throw 'symbol not defined';
+        }
     }
 }
