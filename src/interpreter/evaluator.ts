@@ -1,4 +1,5 @@
 import { Scope } from './scope';
+import { ActivationRecord } from './activation-record';
 
 export class Evaluator {
 
