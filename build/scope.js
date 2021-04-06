@@ -6,8 +6,8 @@ exports.Scope = void 0;
     It also has a link to its parent scope.
 */
 var Scope = /** @class */ (function () {
-    function Scope(symbolTable, parent) {
-        this.symbolTable = symbolTable;
+    function Scope(parent) {
+        this.symbolTable = {};
         this.parent = parent;
     }
     Scope.prototype.lookup = function (symbol) {
@@ -15,7 +15,7 @@ var Scope = /** @class */ (function () {
             return this.symbolTable[symbol];
         }
         else {
-            if (this.isGlobalScope()) {
+            if (this.parent === null) {
                 throw 'symbol not defined';
             }
             else {
@@ -28,7 +28,7 @@ var Scope = /** @class */ (function () {
             this.symbolTable[symbol] = value;
         }
         else {
-            if (this.isGlobalScope()) {
+            if (this.parent === null) {
                 throw 'symbol not defined';
             }
             else {
@@ -36,8 +36,17 @@ var Scope = /** @class */ (function () {
             }
         }
     };
-    Scope.prototype.isGlobalScope = function () {
-        return this.parent === null;
+    // this method is only called by function scopes
+    Scope.prototype.storeArguments = function (params, args) {
+        if (params.length != args.length) {
+            throw 'Number of params should be equals to number of args';
+        }
+        var n = params.length;
+        for (var i = 0; i < n; ++i) {
+            var symbol = params[i];
+            var value = args[i];
+            this.symbolTable[symbol] = value;
+        }
     };
     return Scope;
 }());

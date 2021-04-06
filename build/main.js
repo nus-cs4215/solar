@@ -13,5 +13,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nif false then\n    print(1)\nelse\n    print(2)\nend\n\n";
+var userProgram = "\n\nfunction add(x,y) \n    let a = 1\n    if 5 > 3 then\n        a = a +5\n        print('bye')\n        print(a)\n        return x + y\n    end\n    print('can')\n    return 7\nend\nlet sum = add(1,2)\nprint(sum)\n";
 interpret(userProgram);
