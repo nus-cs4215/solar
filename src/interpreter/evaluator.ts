@@ -65,6 +65,9 @@ export class Evaluator {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
 
+            case 'ReturnStatement':
+                throw 'Return out of the function!';
+
             case 'TableConstructorExpression':
                 return this.evalTable(component, scope);
 
@@ -195,22 +198,12 @@ export class Evaluator {
         const argsComponent = component.arguments;
         const args = argsComponent.map(c => this.evalComponent(c, scope));
 
-        if (functionName === 'print') {
-            console.log(args[0]);
-            return;
-        } else if (this.inMathLibrary(functionName)) {
-
-            return this.callMathLibrary(functionName, args);
-        } else if (this.inStringLibrary(functionName)) {
-            
-            return this.callStringLibrary(functionName, args);
-        } else if (this.inArrayLibrary(functionName)) {
-
-            throw "array library not implemented yet";
-        } else if (this.inTableLibrary(functionName)) {
-
-            throw "table library not implemented yet";
-        } else {
+        if (functionName === 'print')                   console.log(args[0]);
+        else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
+        else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
+        else if (this.inArrayLibrary(functionName))     throw "array library not implemented yet";
+        else if (this.inTableLibrary(functionName))     throw "table library not implemented yet";
+        else {
 
             throw "self-defined function not implemented yet";
         }
