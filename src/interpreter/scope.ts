@@ -5,21 +5,20 @@
 export class Scope {
 
     symbolTable: any;   // hashtable / obj
-    parent: Scope;      // parent scope
+    parent: Scope;      // link to parent
 
-    constructor(symbolTable: any, parent: Scope) {
-        this.symbolTable = symbolTable;
+    constructor(parent: Scope) {
+        this.symbolTable = {};
         this.parent = parent;
     }
 
     lookup(symbol: string): any {
 
-
         if (symbol in this.symbolTable) {
             return this.symbolTable[symbol];
         } else {
             
-            if (this.isGlobalScope()) {
+            if (this.parent === null) {
                 throw 'symbol not defined';
             } else {
                 return this.parent.lookup(symbol);
@@ -33,7 +32,7 @@ export class Scope {
             this.symbolTable[symbol] = value;
         } else {
 
-            if (this.isGlobalScope()) {
+            if (this.parent === null) {
                 throw 'symbol not defined'
             } else {
                 this.parent.assign(symbol, value);
@@ -41,7 +40,22 @@ export class Scope {
         }
     }
 
-    isGlobalScope(): boolean {
-        return this.parent === null;
+    // this method is only called by function scopes
+    storeArguments(params: string[], args: any[]): void {
+
+        if (params.length != args.length) {
+            throw 'Number of params should be equals to number of args';
+        }
+
+        const n = params.length;
+
+        for (let i = 0; i < n; ++i) {
+            
+            const symbol = params[i];
+            const value = args[i];
+            
+            this.symbolTable[symbol] = value;
+        }
     }
+
 }

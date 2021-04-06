@@ -2,7 +2,7 @@ import { Scope } from './scope';
 
 export class Evaluator {
 
-    globalScope: Scope = new Scope({}, null);
+    globalScope = new Scope(null);
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
@@ -12,7 +12,7 @@ export class Evaluator {
         }
     }
     
-    evalComponent(component: any, scope: Scope): any {
+    evalComponent(component: any, scope: any): any {
         
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
@@ -65,6 +65,10 @@ export class Evaluator {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
 
+            case 'ReturnStatement':
+                const returnValue = this.evalComponent(component.arguments[0], scope);
+                throw returnValue;
+
             case 'TableConstructorExpression':
                 return this.evalTable(component, scope);
 
@@ -93,17 +97,15 @@ export class Evaluator {
             throw 'Functions can only be declared in the global scope';
         }
 
-        throw 'not implemented yet';
-        // const symbol = component.identifier.name;
+        const funcSymbol = component.identifier.name;
+        const funcParams = component.parameters.map(p => p.name);
+        const funcBody = component.body;
+        const value = { params: funcParams, body: funcBody };
 
-        // let value = { params: [], body: };
-
-        // for ()
-
-        //scope.symbolTable[]
+        scope.symbolTable[funcSymbol] = value;
     }
 
-    evalDeclaration(component: any, scope: Scope): any {
+    evalDeclaration(component: any, scope: any): any {
 
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
@@ -115,7 +117,7 @@ export class Evaluator {
         }
     }
 
-    evalAssignment(component: any, scope: Scope): any {
+    evalAssignment(component: any, scope: any): any {
 
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
@@ -126,7 +128,7 @@ export class Evaluator {
         return tableComponent[0].type === 'TableValue';
     }
 
-    evalTable(component: any, scope: Scope): any {
+    evalTable(component: any, scope: any): any {
         
         const tableComponent = component.fields;
         
@@ -152,7 +154,7 @@ export class Evaluator {
         return lastClause.type === 'ElseClause';
     }
 
-    evalIfStatement(component: any, scope: Scope): any {
+    evalIfStatement(component: any, scope: any): any {
         
         for (const clause of component.clauses) {
 
@@ -162,7 +164,7 @@ export class Evaluator {
 
                 if (condition === true) {
 
-                    const clauseScope: Scope = new Scope({}, scope)
+                    const clauseScope = new Scope(scope)
                     
                     for (const c of clause.body) {
                         this.evalComponent(c, clauseScope);
@@ -181,7 +183,7 @@ export class Evaluator {
         if (this.hasElseClause(component.clauses)) {
 
             const elseClause = component.clauses[component.clauses.length - 1];     // last clause
-            const elseClauseScope: Scope = new Scope({}, scope);
+            const elseClauseScope = new Scope(scope);
 
             for (const c of elseClause.body) {
                 this.evalComponent(c, elseClauseScope);
@@ -190,31 +192,37 @@ export class Evaluator {
 
     }
 
-    evalCallExpression(component: any, scope: Scope): any {
+    evalCallExpression(component: any, scope: any): any {
 
         const functionName = component.base.name;
 
         const argsComponent = component.arguments;
         const args = argsComponent.map(c => this.evalComponent(c, scope));
 
-        if (functionName === 'print') {
-            console.log(args[0]);
-            return;
-        } else if (this.inMathLibrary(functionName)) {
+        if (functionName === 'print')                   console.log(args[0]);
+        else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
+        else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
+        else if (this.inArrayLibrary(functionName))     throw "array library not implemented yet";
+        else if (this.inTableLibrary(functionName))     throw "table library not implemented yet";
+        else                                            return this.callSelfDefinedFunction(functionName, args);
+    }
 
-            return this.callMathLibrary(functionName, args);
-        } else if (this.inStringLibrary(functionName)) {
-            
-            return this.callStringLibrary(functionName, args);
-        } else if (this.inArrayLibrary(functionName)) {
+    callSelfDefinedFunction(funcName: string, args: any[]): any {
+        
+        const functionScope = new Scope(null);
+        
+        const params = this.globalScope.symbolTable[funcName].params;
+        functionScope.storeArguments(params, args);
+        
+        const funcBody = this.globalScope.symbolTable[funcName].body;
 
-            throw "array library not implemented yet";
-        } else if (this.inTableLibrary(functionName)) {
+        for (const c of funcBody) {
 
-            throw "table library not implemented yet";
-        } else {
-
-            throw "self-defined function not implemented yet";
+            try {
+                this.evalComponent(c, functionScope);
+            } catch (returnValue) {
+                return returnValue;
+            }
         }
     }
 
@@ -334,9 +342,9 @@ export class Evaluator {
         }
     }
 
-    evalWhileLoop(component: any, scope: Scope): void {
+    evalWhileLoop(component: any, scope: any): void {
 
-        const whileLoopScope: Scope = new Scope({}, scope);
+        const whileLoopScope = new Scope(scope);
 
         let condition = this.evalComponent(component.condition, scope);
 
@@ -362,7 +370,7 @@ export class Evaluator {
 
     evalGenericForLoop(component: any, scope: Scope): void {
  
-        const forLoopScope: Scope = new Scope({}, scope);
+        const forLoopScope = new Scope(scope);
 
         const itemSymbol = component.variables[0].name;
         const container = this.evalComponent(component.iterators[0], scope);
@@ -385,7 +393,7 @@ export class Evaluator {
 
     evalNumericForLoop(component: any, scope: Scope): void {
 
-        const forLoopScope: Scope = new Scope({}, scope);
+        const forLoopScope = new Scope(scope);
         
         const loopControlVariable = component.variable.name;
         const start = this.evalComponent(component.start, scope);
@@ -441,7 +449,7 @@ export class Evaluator {
         }
     }
 
-    evalUnaryExpression(component: any, scope: Scope): number | boolean {
+    evalUnaryExpression(component: any, scope: any): number | boolean {
 
         const argument = this.evalComponent(component.argument, scope);
 
@@ -454,7 +462,7 @@ export class Evaluator {
         }
     }
 
-    evalLogicalExpression(component: any, scope: Scope): boolean {
+    evalLogicalExpression(component: any, scope: any): boolean {
         
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
@@ -520,4 +528,5 @@ export class Evaluator {
             throw 'no such binary operation';
         }
     }
+    
 }

@@ -19,12 +19,19 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-if false then
-    print(1)
-else
-    print(2)
+function add(x,y) 
+    let a = 1
+    if 5 > 3 then
+        a = a +5
+        print('bye')
+        print(a)
+        return x + y
+    end
+    print('can')
+    return 7
 end
-
+let sum = add(1,2)
+print(sum)
 `;
 
 interpret(userProgram);
