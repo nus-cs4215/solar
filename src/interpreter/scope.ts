@@ -1,11 +1,15 @@
+import { ActivationRecord } from "./activation-record";
+
 /*
     Every scope has its own symbol table.
     It also has a link to its parent scope.
+
+    During function invocation, a scope inside the function body can have Activation Record as the parent.
 */
 export class Scope {
 
     symbolTable: any;   // hashtable / obj
-    parent: Scope;      // parent scope
+    parent: Scope | ActivationRecord;      // link to parent
 
     constructor(parent: Scope) {
         this.symbolTable = {};
