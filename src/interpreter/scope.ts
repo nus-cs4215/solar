@@ -7,8 +7,8 @@ export class Scope {
     symbolTable: any;   // hashtable / obj
     parent: Scope;      // parent scope
 
-    constructor(symbolTable: any, parent: Scope) {
-        this.symbolTable = symbolTable;
+    constructor(parent: Scope) {
+        this.symbolTable = {};
         this.parent = parent;
     }
 

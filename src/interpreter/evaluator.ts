@@ -3,7 +3,7 @@ import { ActivationRecord } from './activation-record';
 
 export class Evaluator {
 
-    globalScope = new Scope({}, null);
+    globalScope = new Scope(null);
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
@@ -165,7 +165,7 @@ export class Evaluator {
 
                 if (condition === true) {
 
-                    const clauseScope = new Scope({}, scope)
+                    const clauseScope = new Scope(scope)
                     
                     for (const c of clause.body) {
                         this.evalComponent(c, clauseScope);
@@ -184,7 +184,7 @@ export class Evaluator {
         if (this.hasElseClause(component.clauses)) {
 
             const elseClause = component.clauses[component.clauses.length - 1];     // last clause
-            const elseClauseScope = new Scope({}, scope);
+            const elseClauseScope = new Scope(scope);
 
             for (const c of elseClause.body) {
                 this.evalComponent(c, elseClauseScope);
@@ -345,7 +345,7 @@ export class Evaluator {
 
     evalWhileLoop(component: any, scope: any): void {
 
-        const whileLoopScope = new Scope({}, scope);
+        const whileLoopScope = new Scope(scope);
 
         let condition = this.evalComponent(component.condition, scope);
 
@@ -371,7 +371,7 @@ export class Evaluator {
 
     evalGenericForLoop(component: any, scope: Scope): void {
  
-        const forLoopScope = new Scope({}, scope);
+        const forLoopScope = new Scope(scope);
 
         const itemSymbol = component.variables[0].name;
         const container = this.evalComponent(component.iterators[0], scope);
@@ -394,7 +394,7 @@ export class Evaluator {
 
     evalNumericForLoop(component: any, scope: Scope): void {
 
-        const forLoopScope = new Scope({}, scope);
+        const forLoopScope = new Scope(scope);
         
         const loopControlVariable = component.variable.name;
         const start = this.evalComponent(component.start, scope);
