@@ -5,7 +5,7 @@ exports.Evaluator = void 0;
 var scope_1 = require("./scope");
 var Evaluator = /** @class */ (function () {
     function Evaluator() {
-        this.globalScope = new scope_1.Scope({}, null);
+        this.globalScope = new scope_1.Scope(null);
     }
     // entry point. ast is the syntax tree of the entire program.
     Evaluator.prototype.evaluate = function (ast) {
@@ -50,6 +50,9 @@ var Evaluator = /** @class */ (function () {
                 return this.evalCallExpression(component.expression, scope);
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
+            case 'ReturnStatement':
+                var returnValue = this.evalComponent(component.arguments[0], scope);
+                throw returnValue;
             case 'TableConstructorExpression':
                 return this.evalTable(component, scope);
             case 'IndexExpression': {
@@ -72,11 +75,11 @@ var Evaluator = /** @class */ (function () {
         if (scope !== this.globalScope) {
             throw 'Functions can only be declared in the global scope';
         }
-        throw 'not implemented yet';
-        // const symbol = component.identifier.name;
-        // let value = { params: [], body: };
-        // for ()
-        //scope.symbolTable[]
+        var funcSymbol = component.identifier.name;
+        var funcParams = component.parameters.map(function (p) { return p.name; });
+        var funcBody = component.body;
+        var value = { params: funcParams, body: funcBody };
+        scope.symbolTable[funcSymbol] = value;
     };
     Evaluator.prototype.evalDeclaration = function (component, scope) {
         var symbol = component.variables[0].name;
@@ -125,7 +128,7 @@ var Evaluator = /** @class */ (function () {
             if (clause.type !== 'ElseClause') {
                 var condition = this.evalComponent(clause.condition, scope);
                 if (condition === true) {
-                    var clauseScope = new scope_1.Scope({}, scope);
+                    var clauseScope = new scope_1.Scope(scope);
                     for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
                         var c = _c[_b];
                         this.evalComponent(c, clauseScope);
@@ -140,7 +143,7 @@ var Evaluator = /** @class */ (function () {
         */
         if (this.hasElseClause(component.clauses)) {
             var elseClause = component.clauses[component.clauses.length - 1]; // last clause
-            var elseClauseScope = new scope_1.Scope({}, scope);
+            var elseClauseScope = new scope_1.Scope(scope);
             for (var _d = 0, _e = elseClause.body; _d < _e.length; _d++) {
                 var c = _e[_d];
                 this.evalComponent(c, elseClauseScope);
@@ -152,24 +155,32 @@ var Evaluator = /** @class */ (function () {
         var functionName = component.base.name;
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
-        if (functionName === 'print') {
+        if (functionName === 'print')
             console.log(args[0]);
-            return;
-        }
-        else if (this.inMathLibrary(functionName)) {
+        else if (this.inMathLibrary(functionName))
             return this.callMathLibrary(functionName, args);
-        }
-        else if (this.inStringLibrary(functionName)) {
+        else if (this.inStringLibrary(functionName))
             return this.callStringLibrary(functionName, args);
-        }
-        else if (this.inArrayLibrary(functionName)) {
+        else if (this.inArrayLibrary(functionName))
             throw "array library not implemented yet";
-        }
-        else if (this.inTableLibrary(functionName)) {
+        else if (this.inTableLibrary(functionName))
             throw "table library not implemented yet";
-        }
-        else {
-            throw "self-defined function not implemented yet";
+        else
+            return this.callSelfDefinedFunction(functionName, args);
+    };
+    Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
+        var functionScope = new scope_1.Scope(null);
+        var params = this.globalScope.symbolTable[funcName].params;
+        functionScope.storeArguments(params, args);
+        var funcBody = this.globalScope.symbolTable[funcName].body;
+        for (var _i = 0, funcBody_1 = funcBody; _i < funcBody_1.length; _i++) {
+            var c = funcBody_1[_i];
+            try {
+                this.evalComponent(c, functionScope);
+            }
+            catch (returnValue) {
+                return returnValue;
+            }
         }
     };
     Evaluator.prototype.inMathLibrary = function (funcName) {
@@ -264,7 +275,7 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalWhileLoop = function (component, scope) {
-        var whileLoopScope = new scope_1.Scope({}, scope);
+        var whileLoopScope = new scope_1.Scope(scope);
         var condition = this.evalComponent(component.condition, scope);
         while (condition === true) {
             for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
@@ -284,7 +295,7 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalGenericForLoop = function (component, scope) {
-        var forLoopScope = new scope_1.Scope({}, scope);
+        var forLoopScope = new scope_1.Scope(scope);
         var itemSymbol = component.variables[0].name;
         var container = this.evalComponent(component.iterators[0], scope);
         for (var _i = 0, container_1 = container; _i < container_1.length; _i++) {
@@ -302,7 +313,7 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalNumericForLoop = function (component, scope) {
-        var forLoopScope = new scope_1.Scope({}, scope);
+        var forLoopScope = new scope_1.Scope(scope);
         var loopControlVariable = component.variable.name;
         var start = this.evalComponent(component.start, scope);
         var end = this.evalComponent(component.end, scope);
@@ -465,7 +476,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nif false then\n    print(1)\nelse\n    print(2)\nend\n\n";
+var userProgram = "\n\nfunction add(x,y) \n    let a = 1\n    if 5 > 3 then\n        a = a +5\n        print('bye')\n        print(a)\n        return x + y\n    end\n    print('can')\n    return 7\nend\nlet sum = add(1,2)\nprint(sum)\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){
@@ -477,8 +488,8 @@ exports.Scope = void 0;
     It also has a link to its parent scope.
 */
 var Scope = /** @class */ (function () {
-    function Scope(symbolTable, parent) {
-        this.symbolTable = symbolTable;
+    function Scope(parent) {
+        this.symbolTable = {};
         this.parent = parent;
     }
     Scope.prototype.lookup = function (symbol) {
@@ -486,7 +497,7 @@ var Scope = /** @class */ (function () {
             return this.symbolTable[symbol];
         }
         else {
-            if (this.isGlobalScope()) {
+            if (this.parent === null) {
                 throw 'symbol not defined';
             }
             else {
@@ -499,7 +510,7 @@ var Scope = /** @class */ (function () {
             this.symbolTable[symbol] = value;
         }
         else {
-            if (this.isGlobalScope()) {
+            if (this.parent === null) {
                 throw 'symbol not defined';
             }
             else {
@@ -507,8 +518,17 @@ var Scope = /** @class */ (function () {
             }
         }
     };
-    Scope.prototype.isGlobalScope = function () {
-        return this.parent === null;
+    // this method is only called by function scopes
+    Scope.prototype.storeArguments = function (params, args) {
+        if (params.length != args.length) {
+            throw 'Number of params should be equals to number of args';
+        }
+        var n = params.length;
+        for (var i = 0; i < n; ++i) {
+            var symbol = params[i];
+            var value = args[i];
+            this.symbolTable[symbol] = value;
+        }
     };
     return Scope;
 }());
