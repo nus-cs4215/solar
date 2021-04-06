@@ -133,9 +133,13 @@ var Evaluator = /** @class */ (function () {
                 }
             }
         }
+        /*
+            if we reach here, means none of the if and elseif branches were evaluated.
+            hence we will have to evaluate the else branch.
+        */
         if (this.hasElseClause(component.clauses)) {
+            var elseClause = component.clauses[component.clauses.length - 1]; // last clause
             var elseClauseScope = new scope_1.Scope({}, scope);
-            var elseClause = component.clauses[component.clauses.length - 1];
             for (var _d = 0, _e = elseClause.body; _d < _e.length; _d++) {
                 var c = _e[_d];
                 this.evalComponent(c, elseClauseScope);
