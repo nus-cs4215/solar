@@ -210,7 +210,11 @@ export class Evaluator {
     callSelfDefinedFunction(funcName: string, args: any[]): any {
 
         const activationRecord = new ActivationRecord();
+        
+        const params = this.globalScope[funcName].params;
+        activationRecord.storeArguments(params, args);
 
+        console.log(activationRecord);
     }
 
     inMathLibrary(funcName: string): boolean {

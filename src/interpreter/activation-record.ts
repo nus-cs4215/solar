@@ -2,6 +2,10 @@ export class ActivationRecord {
 
     symbolTable: any;     // hashtable / obj
 
+    constructor() {
+        this.symbolTable = {};  // start with empty symbol table
+    }
+
     storeArguments(params: string[], args: any[]): void {
 
         if (params.length != args.length) {
