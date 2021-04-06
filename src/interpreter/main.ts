@@ -22,7 +22,9 @@ const userProgram = `
 function add(x,y) 
     let a = 1
     if 5 > 3 then
+        a = a +5
         print('bye')
+        print(a)
         return x + y
     end
     print('can')
