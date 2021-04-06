@@ -24,7 +24,7 @@ function add(x,y)
     let a = 1
     return x+y 
 end
-print(add)
+add(1,2)
 
 `;
 

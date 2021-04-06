@@ -211,10 +211,10 @@ export class Evaluator {
 
         const activationRecord = new ActivationRecord();
         
-        const params = this.globalScope[funcName].params;
+        const params = this.globalScope.symbolTable[funcName].params;
         activationRecord.storeArguments(params, args);
 
-        console.log(activationRecord);
+        console.log(activationRecord.symbolTable);
     }
 
     inMathLibrary(funcName: string): boolean {
