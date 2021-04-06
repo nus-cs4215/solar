@@ -10,7 +10,6 @@ function interpret(program: string): any {
 
     // parse program into AST
     const ast = parser.parse(prog, { luaVersion: '5.3' });
-    // console.log(ast.body)
     
     // evaluate AST
     const e = new Evaluator();
@@ -22,10 +21,13 @@ const userProgram = `
 
 function add(x,y) 
     let a = 1
-    return x+y 
+    if 5 < 3 then
+        return 5
+    end
+    print('can')
 end
-add(1,2)
-
+let sum = add(1,2)
+print(sum)
 `;
 
 interpret(userProgram);

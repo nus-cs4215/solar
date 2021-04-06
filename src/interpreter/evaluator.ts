@@ -13,7 +13,7 @@ export class Evaluator {
         }
     }
     
-    evalComponent(component: any, scope: Scope): any {
+    evalComponent(component: any, scope: any): any {
         
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
@@ -105,7 +105,7 @@ export class Evaluator {
         scope.symbolTable[funcSymbol] = value;
     }
 
-    evalDeclaration(component: any, scope: Scope): any {
+    evalDeclaration(component: any, scope: any): any {
 
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
@@ -117,7 +117,7 @@ export class Evaluator {
         }
     }
 
-    evalAssignment(component: any, scope: Scope): any {
+    evalAssignment(component: any, scope: any): any {
 
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
@@ -128,7 +128,7 @@ export class Evaluator {
         return tableComponent[0].type === 'TableValue';
     }
 
-    evalTable(component: any, scope: Scope): any {
+    evalTable(component: any, scope: any): any {
         
         const tableComponent = component.fields;
         
@@ -154,7 +154,7 @@ export class Evaluator {
         return lastClause.type === 'ElseClause';
     }
 
-    evalIfStatement(component: any, scope: Scope): any {
+    evalIfStatement(component: any, scope: any): any {
         
         for (const clause of component.clauses) {
 
@@ -192,7 +192,7 @@ export class Evaluator {
 
     }
 
-    evalCallExpression(component: any, scope: Scope): any {
+    evalCallExpression(component: any, scope: any): any {
 
         const functionName = component.base.name;
 
@@ -214,7 +214,16 @@ export class Evaluator {
         const params = this.globalScope.symbolTable[funcName].params;
         activationRecord.storeArguments(params, args);
 
-        console.log(activationRecord.symbolTable);
+        const funcBody = this.globalScope.symbolTable[funcName].body;
+        
+        for (const c of funcBody) {
+            try {
+                this.evalComponent(c, activationRecord);
+            } catch (returnException) {
+                console.log('hi');
+                return;
+            }
+        }
     }
 
     inMathLibrary(funcName: string): boolean {
@@ -333,7 +342,7 @@ export class Evaluator {
         }
     }
 
-    evalWhileLoop(component: any, scope: Scope): void {
+    evalWhileLoop(component: any, scope: any): void {
 
         const whileLoopScope = new Scope({}, scope);
 
@@ -440,7 +449,7 @@ export class Evaluator {
         }
     }
 
-    evalUnaryExpression(component: any, scope: Scope): number | boolean {
+    evalUnaryExpression(component: any, scope: any): number | boolean {
 
         const argument = this.evalComponent(component.argument, scope);
 
@@ -453,7 +462,7 @@ export class Evaluator {
         }
     }
 
-    evalLogicalExpression(component: any, scope: Scope): boolean {
+    evalLogicalExpression(component: any, scope: any): boolean {
         
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);

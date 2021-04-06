@@ -22,4 +22,12 @@ export class ActivationRecord {
             this.symbolTable[symbol] = value;
         }
     }
+
+    lookup(symbol: string): any {
+        return this.symbolTable[symbol];
+    }
+
+    assign(symbol:string, value: any): void {
+        this.symbolTable[symbol] = value;
+    }
 }

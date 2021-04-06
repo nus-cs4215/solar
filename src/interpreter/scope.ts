@@ -14,7 +14,6 @@ export class Scope {
 
     lookup(symbol: string): any {
 
-
         if (symbol in this.symbolTable) {
             return this.symbolTable[symbol];
         } else {
