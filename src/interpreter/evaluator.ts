@@ -174,10 +174,14 @@ export class Evaluator {
             
         }
 
+        /* 
+            if we reach here, means none of the if and elseif branches were evaluated.
+            hence we will have to evaluate the else branch.
+        */
         if (this.hasElseClause(component.clauses)) {
 
+            const elseClause = component.clauses[component.clauses.length - 1];     // last clause
             const elseClauseScope: Scope = new Scope({}, scope);
-            const elseClause = component.clauses[component.clauses.length - 1];
 
             for (const c of elseClause.body) {
                 this.evalComponent(c, elseClauseScope);
