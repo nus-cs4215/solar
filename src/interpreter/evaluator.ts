@@ -203,10 +203,13 @@ export class Evaluator {
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
         else if (this.inArrayLibrary(functionName))     throw "array library not implemented yet";
         else if (this.inTableLibrary(functionName))     throw "table library not implemented yet";
-        else {
+        else                                            return this.callSelfDefinedFunction(functionName, args);
+    }
 
-            throw "self-defined function not implemented yet";
-        }
+    callSelfDefinedFunction(funcName: string, args: any[]): any {
+
+        // create an activation record class
+
     }
 
     inMathLibrary(funcName: string): boolean {
