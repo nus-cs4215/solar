@@ -3,15 +3,14 @@ const parser = require('luaparse');
 
 // To run this file - npm start
 
-function interpret(program: string): any {
-
-    // replace 'let' with 'local' - a workaround to allow the use of 'let' keyword
+function parseIntoAST(program: string): any {
     const prog = program.replace(/let/g, 'local');
-
-    // parse program into AST
     const ast = parser.parse(prog, { luaVersion: '5.3' });
-    
-    // evaluate AST
+    return ast;
+}
+
+function interpret(program: string): any {
+    const ast = parseIntoAST(program);
     const e = new Evaluator();
     e.evaluate(ast);
 }
@@ -19,19 +18,13 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-function add(x,y) 
-    let a = 1
-    if 5 > 3 then
-        a = a +5
-        print('bye')
-        print(a)
-        return x + y
+for i = 1, 10, 1 do
+    print(i)
+    if i == 5 then
+        break
     end
-    print('can')
-    return 7
 end
-let sum = add(1,2)
-print(sum)
+
 `;
 
 interpret(userProgram);
