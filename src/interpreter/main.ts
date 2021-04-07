@@ -18,13 +18,12 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-for i = 1, 10, 1 do
-    print(i)
-    if i == 5 then
-        break
-    end
-end
+let t = { a=1,vc=45,fc=6,b=1}
+print(t)
 
+for x,y in t do
+    print(y)
+end
 `;
 
 interpret(userProgram);
