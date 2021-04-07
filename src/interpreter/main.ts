@@ -18,12 +18,8 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let t = { a=1,vc=45,fc=6,b=1}
-print(t)
-
-for x,y in t do
-    print(y)
-end
+let ss = str_substring('hello', 0, 4);
+print(ss)
 `;
 
 interpret(userProgram);
