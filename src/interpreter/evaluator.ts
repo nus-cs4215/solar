@@ -72,6 +72,7 @@ export class Evaluator {
             case 'TableConstructorExpression':
                 return this.evalTable(component, scope);
 
+            /*
             case 'IndexExpression': {
                 const tableName = component.base.name;
                 const table = scope.lookup(tableName);
@@ -85,7 +86,7 @@ export class Evaluator {
                 const key = component.identifier.name;
                 return table[key];
             }
-
+            */
             default:
                 throw 'This syntax tree component is unrecognised';
         }
@@ -414,24 +415,6 @@ export class Evaluator {
             }
         }
     }
-
-    /*
-    // currently unused. for minimalism, we only allow simple x = 1 assignments. don't allow x,y = 1,2
-    evalAssignment(component: any, scope: Scope): void {
-        
-        const symbols = component.variables;
-        const values = component.init;
-
-        // assert(symbols.length === values.length, "Length of symbols do not match values");
-        
-        for (let i = 0; i < symbols.length; i++) {
-            const symbol = symbols[i].name;
-            const value = values[i];
-
-            scope.symbolTable[symbol] = this.evalComponent(value, scope);
-        }
-    }
-    */
 
     isLiteral(component: any): boolean {
         return component.type === 'StringLiteral' 

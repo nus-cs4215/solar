@@ -466,17 +466,18 @@ exports.__esModule = true;
 var evaluator_1 = require("./evaluator");
 var parser = require('luaparse');
 // To run this file - npm start
-function interpret(program) {
-    // replace 'let' with 'local' - a workaround to allow the use of 'let' keyword
+function parseIntoAST(program) {
     var prog = program.replace(/let/g, 'local');
-    // parse program into AST
     var ast = parser.parse(prog, { luaVersion: '5.3' });
-    // evaluate AST
+    return ast;
+}
+function interpret(program) {
+    var ast = parseIntoAST(program);
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nfunction add(x,y) \n    let a = 1\n    if 5 > 3 then\n        a = a +5\n        print('bye')\n        print(a)\n        return x + y\n    end\n    print('can')\n    return 7\nend\nlet sum = add(1,2)\nprint(sum)\n";
+var userProgram = "\n\nfor i = 1, 10, 1 do\n    print(i)\n    if i == 5 then\n        break\n    end\nend\n\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){
