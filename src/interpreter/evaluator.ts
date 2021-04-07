@@ -254,11 +254,11 @@ export class Evaluator {
             || funcName === 'math_sqrt'
     }
 
-    // to add: str_substring
     inStringLibrary(funcName: string): boolean {
         return funcName === 'str_len'
             || funcName === 'str_reverse'
             || funcName === 'str_split'
+            || funcName === 'str_substring'
     }
 
     inArrayLibrary(funcName: string): boolean {
@@ -354,6 +354,13 @@ export class Evaluator {
                     return args[0].split(args[1]);
                 } else {
                     throw 'Split function - second arg must be of type string';
+                }
+            
+            case 'str_substring':
+                if (typeof args[1] === 'number' && typeof args[2] === 'number') {
+                    return args[0].substring(args[1], args[2]);
+                } else {
+                    throw 'Substring function - second and third arg must be of type number';
                 }
 
             default:
