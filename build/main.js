@@ -14,5 +14,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nfor i = 1, 10, 1 do\n    print(i)\n    if i == 5 then\n        break\n    end\nend\n\n";
+var userProgram = "\n\nlet t = { a=1,vc=45,fc=6,b=1}\nprint(t)\n\nfor x,y in t do\n    print(y)\nend\n";
 interpret(userProgram);

@@ -52,20 +52,24 @@ var Evaluator = /** @class */ (function () {
             case 'ReturnStatement':
                 var returnValue = this.evalComponent(component.arguments[0], scope);
                 throw returnValue;
+            // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
-                return this.evalTable(component, scope);
+                return this.evalContainer(component, scope);
+            /*
             case 'IndexExpression': {
-                var tableName = component.base.name;
-                var table = scope.lookup(tableName);
-                var index = this.evalComponent(component.index, scope);
+                const tableName = component.base.name;
+                const table = scope.lookup(tableName);
+                const index = this.evalComponent(component.index, scope);
                 return table[index];
             }
+
             case 'MemberExpression': {
-                var tableName = component.base.name;
-                var table = scope.lookup(tableName);
-                var key = component.identifier.name;
+                const tableName = component.base.name;
+                const table = scope.lookup(tableName);
+                const key = component.identifier.name;
                 return table[key];
             }
+            */
             default:
                 throw 'This syntax tree component is unrecognised';
         }
@@ -95,26 +99,42 @@ var Evaluator = /** @class */ (function () {
         var value = this.evalComponent(component.init[0], scope);
         scope.assign(symbol, value);
     };
-    Evaluator.prototype.isArray = function (tableComponent) {
-        return tableComponent[0].type === 'TableValue';
+    Evaluator.prototype.isArray = function (component) {
+        for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
+            var field = _a[_i];
+            if (field.type === 'TableKeyString') {
+                return false;
+            }
+        }
+        return true;
     };
-    Evaluator.prototype.evalTable = function (component, scope) {
+    Evaluator.prototype.isTable = function (component) {
+        for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
+            var field = _a[_i];
+            if (field.type === 'TableValue') {
+                return false;
+            }
+        }
+        return true;
+    };
+    Evaluator.prototype.evalContainer = function (component, scope) {
         var _this = this;
-        var tableComponent = component.fields;
-        // if the "table" is really just an array, we return an array
-        if (this.isArray(tableComponent)) {
-            var arr = tableComponent.map(function (c) { return _this.evalComponent(c.value, scope); });
+        if (this.isArray(component)) {
+            var arr = component.fields.map(function (field) { return _this.evalComponent(field.value, scope); });
             return arr;
         }
-        else {
+        else if (this.isTable(component)) {
             var tbl = {};
-            for (var _i = 0, tableComponent_1 = tableComponent; _i < tableComponent_1.length; _i++) {
-                var c = tableComponent_1[_i];
-                var k = c.key.name;
-                var v = this.evalComponent(c.value, scope);
+            for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var k = field.key.name;
+                var v = this.evalComponent(field.value, scope);
                 tbl[k] = v;
             }
             return tbl;
+        }
+        else {
+            throw 'Container is must either be an array or a table';
         }
     };
     Evaluator.prototype.hasElseClause = function (clauses) {
@@ -294,6 +314,21 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalGenericForLoop = function (component, scope) {
+        if (component.iterators.length !== 1)
+            throw 'Container needs to be length 1';
+        if (component.iterators[0].type !== 'Identifier')
+            throw 'Container referenced must be a symbol';
+        var container = this.evalComponent(component.iterators[0], scope);
+        if (Array.isArray(container)) {
+            return this.evalGenericForLoopThroughArray(component, scope);
+        }
+        else {
+            return this.evalGenericForLoopThroughTable(component, scope);
+        }
+    };
+    Evaluator.prototype.evalGenericForLoopThroughArray = function (component, scope) {
+        if (component.variables.length !== 1)
+            throw 'There should only be 1 loop variable for array';
         var forLoopScope = new scope_1.Scope(scope);
         var itemSymbol = component.variables[0].name;
         var container = this.evalComponent(component.iterators[0], scope);
@@ -302,6 +337,28 @@ var Evaluator = /** @class */ (function () {
             forLoopScope.symbolTable[itemSymbol] = item;
             for (var _a = 0, _b = component.body; _a < _b.length; _a++) {
                 var c = _b[_a];
+                try {
+                    this.evalComponent(c, forLoopScope);
+                }
+                catch (breakException) {
+                    return;
+                }
+            }
+        }
+    };
+    Evaluator.prototype.evalGenericForLoopThroughTable = function (component, scope) {
+        if (component.variables.length !== 2)
+            throw 'There should 2 loop variable for table - first variable for key and second variable for value';
+        var forLoopScope = new scope_1.Scope(scope);
+        var keySymbol = component.variables[0].name;
+        var valueSymbol = component.variables[1].name;
+        var container = this.evalComponent(component.iterators[0], scope);
+        for (var _i = 0, _a = Object.entries(container); _i < _a.length; _i++) {
+            var _b = _a[_i], key = _b[0], value = _b[1];
+            forLoopScope.symbolTable[keySymbol] = key;
+            forLoopScope.symbolTable[valueSymbol] = value;
+            for (var _c = 0, _d = component.body; _c < _d.length; _c++) {
+                var c = _d[_c];
                 try {
                     this.evalComponent(c, forLoopScope);
                 }
@@ -330,23 +387,6 @@ var Evaluator = /** @class */ (function () {
             }
         }
     };
-    /*
-    // currently unused. for minimalism, we only allow simple x = 1 assignments. don't allow x,y = 1,2
-    evalAssignment(component: any, scope: Scope): void {
-        
-        const symbols = component.variables;
-        const values = component.init;
-
-        // assert(symbols.length === values.length, "Length of symbols do not match values");
-        
-        for (let i = 0; i < symbols.length; i++) {
-            const symbol = symbols[i].name;
-            const value = values[i];
-
-            scope.symbolTable[symbol] = this.evalComponent(value, scope);
-        }
-    }
-    */
     Evaluator.prototype.isLiteral = function (component) {
         return component.type === 'StringLiteral'
             || component.type === 'NumericLiteral'
