@@ -1,9 +1,11 @@
 About Solar
 ===========
 
-The Solar programming language is a minimalist dialect of the Lua programming language.
+www.solar-lang.netlify.app
 
-Just like Lua, Solar is a lightweight and high-level programming language. It is meant to ease beginners into the world of programming by introducing fundamental yet powerful constructs of programming.
+The Solar programming language is a variant of the Lua programming language.
+
+Just like Lua, Solar is a lightweight and high-level programming language. Solar has been adapted from Lua to accomodate elegant language design decisions in other popular languages, such as C++, Java, JavaScript and Python.
 
 Local Setup
 ===========
@@ -15,10 +17,10 @@ $ cd solar
 $ npm install
 ```
 
-Solar is now on your local machine. To try it in a REPL environment, run
+Solar is now on your local machine. To try it in a console environment, run
 
 ``` {.}
-$ solar
+$ npm start
 ```
 
 Documentation
