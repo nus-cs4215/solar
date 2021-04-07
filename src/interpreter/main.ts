@@ -18,13 +18,8 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-for i = 1, 10, 1 do
-    print(i)
-    if i == 5 then
-        break
-    end
-end
-
+let t = { z=1, s=1, t = 2}
+print(t)
 `;
 
 interpret(userProgram);

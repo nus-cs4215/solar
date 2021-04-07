@@ -72,6 +72,7 @@ export class Evaluator {
             case 'TableConstructorExpression':
                 return this.evalTable(component, scope);
 
+            /*
             case 'IndexExpression': {
                 const tableName = component.base.name;
                 const table = scope.lookup(tableName);
@@ -85,7 +86,7 @@ export class Evaluator {
                 const key = component.identifier.name;
                 return table[key];
             }
-
+            */
             default:
                 throw 'This syntax tree component is unrecognised';
         }
