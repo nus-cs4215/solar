@@ -69,9 +69,11 @@ export class Evaluator {
                 const returnValue = this.evalComponent(component.arguments[0], scope);
                 throw returnValue;
 
+            // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
-                return this.evalTable(component, scope);
+                return this.evalContainer(component, scope);
 
+            /*
             case 'IndexExpression': {
                 const tableName = component.base.name;
                 const table = scope.lookup(tableName);
@@ -85,7 +87,7 @@ export class Evaluator {
                 const key = component.identifier.name;
                 return table[key];
             }
-
+            */
             default:
                 throw 'This syntax tree component is unrecognised';
         }
@@ -124,28 +126,45 @@ export class Evaluator {
         scope.assign(symbol, value);
     }
 
-    isArray(tableComponent: any): boolean {
-        return tableComponent[0].type === 'TableValue';
+    isArray(component: any): boolean {
+
+        for (const field of component.fields) {
+            if (field.type === 'TableKeyString') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    evalTable(component: any, scope: any): any {
+    isTable(component: any): boolean {
+
+        for (const field of component.fields) {
+            if (field.type === 'TableValue') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    evalContainer(component: any, scope: any): any {
         
-        const tableComponent = component.fields;
-        
-        // if the "table" is really just an array, we return an array
-        if (this.isArray(tableComponent)) {
-            const arr = tableComponent.map(c => this.evalComponent(c.value, scope));
+        if (this.isArray(component)) {
+            const arr = component.fields.map(field => this.evalComponent(field.value, scope));
             return arr;
-        } else {
+        } else if (this.isTable(component)) {
             let tbl = {}
 
-            for (const c of tableComponent) {
-                const k = c.key.name;
-                const v = this.evalComponent(c.value, scope);
+            for (const field of component.fields) {
+                const k = field.key.name;
+                const v = this.evalComponent(field.value, scope);
                 tbl[k] = v;
             }
 
             return tbl;
+        } else {
+            throw 'Container is must either be an array or a table';
         }
     }
 
@@ -369,7 +388,23 @@ export class Evaluator {
     }
 
     evalGenericForLoop(component: any, scope: Scope): void {
- 
+
+        if (component.iterators.length !== 1) throw 'Container needs to be length 1';
+        if (component.iterators[0].type !== 'Identifier') throw 'Container referenced must be a symbol';
+        
+        const container = this.evalComponent(component.iterators[0], scope);
+        
+        if (Array.isArray(container)) {
+            return this.evalGenericForLoopThroughArray(component, scope);
+        } else {
+            return this.evalGenericForLoopThroughTable(component, scope)
+        }
+    }
+
+    evalGenericForLoopThroughArray(component: any, scope: Scope): void {
+
+        if (component.variables.length !== 1) throw 'There should only be 1 loop variable for array';
+
         const forLoopScope = new Scope(scope);
 
         const itemSymbol = component.variables[0].name;
@@ -388,7 +423,32 @@ export class Evaluator {
                 }
             }
         }
+    }
 
+    evalGenericForLoopThroughTable(component: any, scope: Scope): void {
+        
+        if (component.variables.length !== 2) throw 'There should 2 loop variable for table - first variable for key and second variable for value';
+
+        const forLoopScope = new Scope(scope);
+
+        const keySymbol = component.variables[0].name;
+        const valueSymbol = component.variables[1].name;
+        const container = this.evalComponent(component.iterators[0], scope);
+
+        for (const [key, value] of Object.entries(container)) {
+            
+            forLoopScope.symbolTable[keySymbol] = key;
+            forLoopScope.symbolTable[valueSymbol] = value;
+
+            for (const c of component.body) {
+
+                try {
+                    this.evalComponent(c, forLoopScope);
+                } catch (breakException) {
+                    return;
+                }
+            }
+        }
     }
 
     evalNumericForLoop(component: any, scope: Scope): void {
