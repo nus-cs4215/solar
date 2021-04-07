@@ -1,7 +1,7 @@
 About Solar
 ===========
 
-https://www.solar-lang.netlify.app/
+https://solar-lang.netlify.app/
 
 The Solar programming language is a variant of the Lua programming language.
 
