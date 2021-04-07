@@ -1,4 +1,5 @@
 import { Scope } from './scope';
+import { Error } from './error';
 
 export class Evaluator {
 
