@@ -11,6 +11,7 @@ function parseIntoAST(program: string): any {
 
 function interpret(program: string): any {
     const ast = parseIntoAST(program);
+    console.log(ast.body[0].init[0].fields)
     const e = new Evaluator();
     e.evaluate(ast);
 }
@@ -18,7 +19,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let t = { z=1, s=1, t = 2}
+let t = { 1,45,6,1}
 print(t)
 `;
 

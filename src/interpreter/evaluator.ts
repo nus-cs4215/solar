@@ -69,8 +69,9 @@ export class Evaluator {
                 const returnValue = this.evalComponent(component.arguments[0], scope);
                 throw returnValue;
 
+            // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
-                return this.evalTable(component, scope);
+                return this.evalContainer(component, scope);
 
             /*
             case 'IndexExpression': {
@@ -125,28 +126,45 @@ export class Evaluator {
         scope.assign(symbol, value);
     }
 
-    isArray(tableComponent: any): boolean {
-        return tableComponent[0].type === 'TableValue';
+    isArray(fields: any): boolean {
+
+        for (const field of fields) {
+            if (field.type === 'TableKeyString') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    evalTable(component: any, scope: any): any {
+    isTable(fields: any): boolean {
+
+        for (const field of fields) {
+            if (field.type === 'TableValue') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    evalContainer(component: any, scope: any): any {
         
-        const tableComponent = component.fields;
-        
-        // if the "table" is really just an array, we return an array
-        if (this.isArray(tableComponent)) {
-            const arr = tableComponent.map(c => this.evalComponent(c.value, scope));
+        if (this.isArray(component.fields)) {
+            const arr = component.fields.map(field => this.evalComponent(field.value, scope));
             return arr;
-        } else {
+        } else if (this.isTable(component.fields)) {
             let tbl = {}
 
-            for (const c of tableComponent) {
-                const k = c.key.name;
-                const v = this.evalComponent(c.value, scope);
+            for (const field of component.fields) {
+                const k = field.key.name;
+                const v = this.evalComponent(field.value, scope);
                 tbl[k] = v;
             }
 
             return tbl;
+        } else {
+            throw 'Container is must either be an array or a table';
         }
     }
 
