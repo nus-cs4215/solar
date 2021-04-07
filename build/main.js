@@ -14,5 +14,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nlet t = { a=1,vc=45,fc=6,b=1}\nprint(t)\n\nfor x,y in t do\n    print(y)\nend\n";
+var userProgram = "\n\nlet ss = str_substring('hello', 0, 4);\nprint(ss)\n";
 interpret(userProgram);
