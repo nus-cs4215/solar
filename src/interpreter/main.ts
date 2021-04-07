@@ -18,8 +18,16 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let ss = str_substring('hello', 0, 4);
-print(ss)
+let b = true
+
+function w()
+while true do
+    print('hi')
+    return 5
+end
+end
+
+print(w())
 `;
 
 interpret(userProgram);

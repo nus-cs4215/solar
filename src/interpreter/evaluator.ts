@@ -240,8 +240,13 @@ export class Evaluator {
 
             try {
                 this.evalComponent(c, functionScope);
-            } catch (returnValue) {
-                return returnValue;
+            } catch (err) {
+                
+                if (err.type === 'Return') {
+                    return err.returnValue;
+                } else {
+                    return;
+                }
             }
         }
     }
@@ -387,8 +392,13 @@ export class Evaluator {
                         This is necessary when the while loop body modifies the while loop condition
                     */
                     condition = this.evalComponent(component.condition, scope);
-                } catch (breakException) {
-                    return;
+                } catch (err) {
+                    
+                    if (err.type === 'Return') {
+                        throw err;
+                    } else {
+                        return;
+                    }
                 }
             }
         }
@@ -452,8 +462,13 @@ export class Evaluator {
 
                 try {
                     this.evalComponent(c, forLoopScope);
-                } catch (breakException) {
-                    return;
+                } catch (err) {
+                    
+                    if (err.type === 'Return') {
+                        throw err;
+                    } else {
+                        return;
+                    }
                 }
             }
         }
@@ -476,8 +491,13 @@ export class Evaluator {
 
                 try {
                     this.evalComponent(c, forLoopScope);
-                } catch (breakException) {
-                    return;
+                } catch (err) {
+                    
+                    if (err.type === 'Return') {
+                        throw err;
+                    } else {
+                        return;
+                    }
                 }
             }
         }
