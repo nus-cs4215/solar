@@ -18,16 +18,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let b = true
-
-function w()
-while true do
-    print('hi')
-    return 5
-end
-end
-
-print(w())
+if 5>1 then return 11 end
 `;
 
 interpret(userProgram);

@@ -1,5 +1,6 @@
 import { Scope } from './scope';
 import { Error } from './error';
+import { isNamedImports } from 'typescript';
 
 export class Evaluator {
 
@@ -13,7 +14,7 @@ export class Evaluator {
         }
     }
     
-    evalComponent(component: any, scope: any): any {
+    evalComponent(component: any, scope: any, insideFunction: boolean = false): any {
         
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
@@ -67,8 +68,12 @@ export class Evaluator {
                 return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                const returnValue = this.evalComponent(component.arguments[0], scope);
-                throw new Error('Return', 'Return out of function', returnValue);
+                if (insideFunction) {
+                    const returnValue = this.evalComponent(component.arguments[0], scope);
+                    throw new Error('Return', 'Return out of function', returnValue);
+                } else {
+                    throw new Error('Syntax Error', 'Cannot use return outside a function');
+                }
 
             // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
@@ -239,7 +244,7 @@ export class Evaluator {
         for (const c of funcBody) {
 
             try {
-                this.evalComponent(c, functionScope);
+                this.evalComponent(c, functionScope, true);
             } catch (err) {
                 
                 if (err.type === 'Return') {
