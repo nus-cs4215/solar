@@ -389,7 +389,6 @@ export class Evaluator {
 
     evalGenericForLoop(component: any, scope: Scope): void {
 
-        console.log(component)
         if (component.iterators.length !== 1) throw 'Container needs to be length 1';
         if (component.iterators[0].type !== 'Identifier') throw 'Container referenced must be a symbol';
         
@@ -428,7 +427,7 @@ export class Evaluator {
 
     evalGenericForLoopThroughTable(component: any, scope: Scope): void {
         
-        if (component.variables.length !== 2) throw 'There should 2 loop variable for table - 1 for key and 1 for value';
+        if (component.variables.length !== 2) throw 'There should 2 loop variable for table - first variable for key and second variable for value';
 
         const forLoopScope = new Scope(scope);
 

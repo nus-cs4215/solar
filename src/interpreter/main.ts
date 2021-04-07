@@ -11,7 +11,6 @@ function parseIntoAST(program: string): any {
 
 function interpret(program: string): any {
     const ast = parseIntoAST(program);
-    //console.log(ast.body[0])
     const e = new Evaluator();
     e.evaluate(ast);
 }
