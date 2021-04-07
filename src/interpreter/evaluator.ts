@@ -1,4 +1,5 @@
 import { Scope } from './scope';
+import { Error } from './error';
 
 export class Evaluator {
 
@@ -54,7 +55,7 @@ export class Evaluator {
                 return this.evalGenericForLoop(component, scope);
                 
             case 'BreakStatement':
-                throw 'Break out of the loop!';
+                throw new Error('Break', 'Break out of loop');
 
             case 'FunctionDeclaration':
                 return this.evalFunctionDeclaration(component, scope);
@@ -67,7 +68,7 @@ export class Evaluator {
 
             case 'ReturnStatement':
                 const returnValue = this.evalComponent(component.arguments[0], scope);
-                throw returnValue;
+                throw new Error('Return', 'Return out of function', returnValue);
 
             // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
@@ -89,7 +90,7 @@ export class Evaluator {
             }
             */
             default:
-                throw 'This syntax tree component is unrecognised';
+                throw new Error('Syntax Error', 'This syntax tree component is unrecognised');
         }
     }
 
@@ -164,7 +165,7 @@ export class Evaluator {
 
             return tbl;
         } else {
-            throw 'Container is must either be an array or a table';
+            throw new Error('Type Error', 'Container is must either be an array or a table');
         }
     }
 
@@ -221,8 +222,8 @@ export class Evaluator {
         if (functionName === 'print')                   console.log(args[0]);
         else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
-        else if (this.inArrayLibrary(functionName))     throw "array library not implemented yet";
-        else if (this.inTableLibrary(functionName))     throw "table library not implemented yet";
+        else if (this.inArrayLibrary(functionName))     throw new Error('Implementation', 'array library not implemented yet');
+        else if (this.inTableLibrary(functionName))     throw new Error('Implementation', 'table library not implemented yet');
         else                                            return this.callSelfDefinedFunction(functionName, args);
     }
 
@@ -239,8 +240,13 @@ export class Evaluator {
 
             try {
                 this.evalComponent(c, functionScope);
-            } catch (returnValue) {
-                return returnValue;
+            } catch (err) {
+                
+                if (err.type === 'Return') {
+                    return err.returnValue;
+                } else {
+                    return;
+                }
             }
         }
     }
@@ -280,7 +286,7 @@ export class Evaluator {
         
         for (const arg of args) {
             if (typeof arg !== 'number') {
-                throw 'Math lib function - all args must be of type number';
+                throw new Error('Type Error', 'Math lib function - all args must be of type number');
             }
         }
 
@@ -327,7 +333,7 @@ export class Evaluator {
                 return Math.sqrt(arg);
 
             default:
-                throw 'No such math library function';
+                throw new Error('Syntax Error', 'No such math library function');
         }
     }
 
@@ -338,7 +344,7 @@ export class Evaluator {
     callStringLibrary(funcName: string, args: any[]): number  | string | string[] {
 
         if (typeof args[0] !== 'string') {
-            throw 'String lib function - first arg must be of type string';
+            throw new Error('Type Error', 'String lib function - first arg must be of type string');
         }
 
         switch (funcName) {
@@ -353,18 +359,18 @@ export class Evaluator {
                 if (typeof args[1] === 'string'){
                     return args[0].split(args[1]);
                 } else {
-                    throw 'Split function - second arg must be of type string';
+                    throw new Error('Type Error', 'Split function - second arg must be of type string');
                 }
             
             case 'str_substring':
                 if (typeof args[1] === 'number' && typeof args[2] === 'number') {
                     return args[0].substring(args[1], args[2]);
                 } else {
-                    throw 'Substring function - second and third arg must be of type number';
+                    throw new Error('Type Error', 'Substring function - second and third arg must be of type number');
                 }
 
             default:
-                throw 'No such string library function';
+                throw new Error('Syntax Error', 'No such string library function');
         }
     }
 
@@ -386,8 +392,13 @@ export class Evaluator {
                         This is necessary when the while loop body modifies the while loop condition
                     */
                     condition = this.evalComponent(component.condition, scope);
-                } catch (breakException) {
-                    return;
+                } catch (err) {
+                    
+                    if (err.type === 'Return') {
+                        throw err;
+                    } else {
+                        return;
+                    }
                 }
             }
         }
@@ -396,8 +407,8 @@ export class Evaluator {
 
     evalGenericForLoop(component: any, scope: Scope): void {
 
-        if (component.iterators.length !== 1) throw 'Container needs to be length 1';
-        if (component.iterators[0].type !== 'Identifier') throw 'Container referenced must be a symbol';
+        if (component.iterators.length !== 1) throw new Error('Syntax Error', 'Container needs to be length 1');
+        if (component.iterators[0].type !== 'Identifier') throw new Error('Syntax Error', 'Container referenced must be a symbol');
         
         const container = this.evalComponent(component.iterators[0], scope);
         
@@ -410,7 +421,7 @@ export class Evaluator {
 
     evalGenericForLoopThroughArray(component: any, scope: Scope): void {
 
-        if (component.variables.length !== 1) throw 'There should only be 1 loop variable for array';
+        if (component.variables.length !== 1) throw new Error('Syntax Error', 'There should only be 1 loop variable for array');
 
         const forLoopScope = new Scope(scope);
 
@@ -434,7 +445,7 @@ export class Evaluator {
 
     evalGenericForLoopThroughTable(component: any, scope: Scope): void {
         
-        if (component.variables.length !== 2) throw 'There should 2 loop variable for table - first variable for key and second variable for value';
+        if (component.variables.length !== 2) throw new Error('Syntax Error', 'There should 2 loop variable for table - first variable for key and second variable for value');
 
         const forLoopScope = new Scope(scope);
 
@@ -451,8 +462,13 @@ export class Evaluator {
 
                 try {
                     this.evalComponent(c, forLoopScope);
-                } catch (breakException) {
-                    return;
+                } catch (err) {
+                    
+                    if (err.type === 'Return') {
+                        throw err;
+                    } else {
+                        return;
+                    }
                 }
             }
         }
@@ -475,8 +491,13 @@ export class Evaluator {
 
                 try {
                     this.evalComponent(c, forLoopScope);
-                } catch (breakException) {
-                    return;
+                } catch (err) {
+                    
+                    if (err.type === 'Return') {
+                        throw err;
+                    } else {
+                        return;
+                    }
                 }
             }
         }
@@ -507,7 +528,7 @@ export class Evaluator {
         } else if (component.operator === '-' && typeof argument === 'number') {
             return -argument;
         } else {
-            throw 'no such unary operation';
+            throw new Error('Type Error', 'no such unary operation');
         }
     }
 
@@ -521,7 +542,7 @@ export class Evaluator {
         } else if (component.operator === 'or' && typeof left === 'boolean' && typeof right === 'boolean') {
             return left || right;
         } else {
-            throw 'no such logical operation';
+            throw new Error('Type Error', 'no such logical operation');
         }
     }
 
@@ -574,7 +595,7 @@ export class Evaluator {
         } else if (component.operator === '<=' && bothSidesAreNumbers) {
             return left <= right;
         } else {
-            throw 'no such binary operation';
+            throw new Error('Type Error', 'no such binary operation');
         }
     }
     
