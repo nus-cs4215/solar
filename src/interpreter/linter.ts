@@ -1,7 +1,7 @@
 export class Linter {
 
+    // entry point. ast is the syntax tree of the entire program.
     analyse(ast: any): any {
-
         for (const c of ast.body) {
             this.analyseComponent(c, false)
         }
