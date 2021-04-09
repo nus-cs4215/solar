@@ -1,5 +1,4 @@
 import { Scope } from './scope';
-import { Error } from './error';
 import { Break } from './instructions/break';
 import { Return } from './instructions/return';
 
@@ -217,8 +216,8 @@ export class Evaluator {
         if (functionName === 'print')                   console.log(args[0]);
         else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
-        else if (this.inArrayLibrary(functionName))     throw new Error('Implementation', 'array library not implemented yet');
-        else if (this.inTableLibrary(functionName))     throw new Error('Implementation', 'table library not implemented yet');
+        else if (this.inArrayLibrary(functionName))     throw 'array library not implemented yet';
+        else if (this.inTableLibrary(functionName))     throw 'table library not implemented yet';
         else                                            return this.callSelfDefinedFunction(functionName, args);
     }
 
@@ -275,7 +274,7 @@ export class Evaluator {
         
         for (const arg of args) {
             if (typeof arg !== 'number') {
-                throw new Error('Type Error', 'Math lib function - all args must be of type number');
+                throw 'Math lib function - all args must be of type number';
             }
         }
 
@@ -334,7 +333,7 @@ export class Evaluator {
 
     callStringLibrary(funcName: string, args: any[]): number  | string | string[] {
         if (typeof args[0] !== 'string') {
-            throw new Error('Type Error', 'String lib function - first arg must be of type string');
+            throw 'String lib function - first arg must be of type string';
         }
 
         switch (funcName) {
@@ -349,14 +348,14 @@ export class Evaluator {
                 if (typeof args[1] === 'string'){
                     return args[0].split(args[1]);
                 } else {
-                    throw new Error('Type Error', 'Split function - second arg must be of type string');
+                    throw 'Split function - second arg must be of type string';
                 }
             
             case 'str_substring':
                 if (typeof args[1] === 'number' && typeof args[2] === 'number') {
                     return args[0].substring(args[1], args[2]);
                 } else {
-                    throw new Error('Type Error', 'Substring function - second and third arg must be of type number');
+                    throw 'Substring function - second and third arg must be of type number';
                 }
 
             default:
@@ -374,7 +373,6 @@ export class Evaluator {
         while (condition === true) {
 
             for (const c of component.body) {
-                
                 const evaluatedC = this.evalComponent(c, whileLoopScope);
                 condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
 
@@ -386,9 +384,17 @@ export class Evaluator {
     }
 
     evalGenericForLoop(component: any, scope: Scope): void {
+        if (component.iterators.length !== 1) {
+            const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
 
-        if (component.iterators.length !== 1) throw new Error('Syntax Error', 'Container needs to be length 1');
-        if (component.iterators[0].type !== 'Identifier') throw new Error('Syntax Error', 'Container referenced must be a symbol');
+        if (component.iterators[0].type !== 'Identifier') {
+            const errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
         
         const container = this.evalComponent(component.iterators[0], scope);
         
@@ -399,9 +405,12 @@ export class Evaluator {
         }
     }
 
-    evalGenericForLoopThroughArray(component: any, scope: Scope): void {
-
-        if (component.variables.length !== 1) throw new Error('Syntax Error', 'There should only be 1 loop variable for array');
+    evalGenericForLoopThroughArray(component: any, scope: Scope): any {
+        if (component.variables.length !== 1) {
+            const errorMsg = 'Syntax Error: There should only be 1 loop variable'
+            console.log(errorMsg);
+            throw errorMsg;
+        }
 
         const forLoopScope = new Scope(scope);
 
@@ -409,23 +418,24 @@ export class Evaluator {
         const container = this.evalComponent(component.iterators[0], scope);
 
         for (const item of container) {
-            
             forLoopScope.symbolTable[itemSymbol] = item;
 
             for (const c of component.body) {
-
-                try {
-                    this.evalComponent(c, forLoopScope);
-                } catch (breakException) {
-                    return;
+                const evaluatedC = this.evalComponent(c, forLoopScope);
+                
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                    return evaluatedC;
                 }
             }
         }
     }
 
-    evalGenericForLoopThroughTable(component: any, scope: Scope): void {
-        
-        if (component.variables.length !== 2) throw new Error('Syntax Error', 'There should 2 loop variable for table - first variable for key and second variable for value');
+    evalGenericForLoopThroughTable(component: any, scope: Scope): any {
+        if (component.variables.length !== 2) {
+            const errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
 
         const forLoopScope = new Scope(scope);
 
@@ -434,27 +444,20 @@ export class Evaluator {
         const container = this.evalComponent(component.iterators[0], scope);
 
         for (const [key, value] of Object.entries(container)) {
-            
             forLoopScope.symbolTable[keySymbol] = key;
             forLoopScope.symbolTable[valueSymbol] = value;
 
             for (const c of component.body) {
+                const evaluatedC = this.evalComponent(c, forLoopScope);
 
-                try {
-                    this.evalComponent(c, forLoopScope);
-                } catch (err) {
-                    
-                    if (err.type === 'Return') {
-                        throw err;
-                    } else {
-                        return;
-                    }
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                    return evaluatedC;
                 }
             }
         }
     }
 
-    evalNumericForLoop(component: any, scope: Scope): void {
+    evalNumericForLoop(component: any, scope: Scope): any {
         const forLoopScope = new Scope(scope);
         
         const loopControlVariable = component.variable.name;
@@ -463,20 +466,13 @@ export class Evaluator {
         const step = this.evalComponent(component.step, scope);
 
         for (let i = start; i < end; i += step) {
-
             forLoopScope.symbolTable[loopControlVariable] = i; 
 
             for (const c of component.body) {
+                const evaluatedC = this.evalComponent(c, forLoopScope);
 
-                try {
-                    this.evalComponent(c, forLoopScope);
-                } catch (err) {
-                    
-                    if (err.type === 'Return') {
-                        throw err;
-                    } else {
-                        return;
-                    }
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                    return evaluatedC;
                 }
             }
         }

@@ -24,13 +24,14 @@ function interpret(program: string): any {
 const userProgram = `
 
 function f(x)
-
-while true do
-return 5
+    for i = x,10,1 do
+        print(i)
+        if i == 5 then
+            return i+2
+        end
+    end
 end
-
-end
-print(f(1))
+print(f(2))
 `;
 
 interpret(userProgram);
