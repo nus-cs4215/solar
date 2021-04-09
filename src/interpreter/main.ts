@@ -1,5 +1,5 @@
 import { Evaluator } from './evaluator';
-import { Linter } from './linter';
+import { Linter } from './return-statement-analyser';
 const parser = require('luaparse');
 
 // To run this file - npm start

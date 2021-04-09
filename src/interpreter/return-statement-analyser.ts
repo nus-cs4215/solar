@@ -1,3 +1,4 @@
+// Scans an if block or loop block to see if it illegally contains a return statement
 export class ReturnStatementAnalyser {
 
     // entry point. ast is the syntax tree of the entire program.
