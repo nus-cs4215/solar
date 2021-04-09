@@ -7,8 +7,8 @@
     "start": "ts-node src/interpreter/main.ts",
     "test": "jest",
     "transpile": "tsc src/interpreter/main.ts --outDir build",
-    "bundle": "browserify build/main.js -o src/ide/lib/js/bundle.js",
-    "globalise": "rexreplace '// user program' 'window.interpret = interpret;' src/ide/lib/js/bundle.js",
+    "bundle": "browserify build/main.js -o src/site/lib/js/bundle.js",
+    "globalise": "rexreplace '// user program' 'window.interpret = interpret;' src/site/lib/js/bundle.js",
     "build": "npm run transpile && npm run bundle && npm run globalise"
   },
   "repository": {

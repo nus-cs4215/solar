@@ -1,8 +1,24 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
+exports.Error = void 0;
+var Error = /** @class */ (function () {
+    function Error(type, message, returnValue) {
+        if (returnValue === void 0) { returnValue = 'Nope'; }
+        this.type = type;
+        this.message = message;
+        this.returnValue = returnValue;
+    }
+    return Error;
+}());
+exports.Error = Error;
+
+},{}],2:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
 exports.Evaluator = void 0;
 var scope_1 = require("./scope");
+var error_1 = require("./error");
 var Evaluator = /** @class */ (function () {
     function Evaluator() {
         this.globalScope = new scope_1.Scope(null);
@@ -14,7 +30,8 @@ var Evaluator = /** @class */ (function () {
             this.evalComponent(c, this.globalScope);
         }
     };
-    Evaluator.prototype.evalComponent = function (component, scope) {
+    Evaluator.prototype.evalComponent = function (component, scope, insideFunction) {
+        if (insideFunction === void 0) { insideFunction = false; }
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
         }
@@ -43,7 +60,7 @@ var Evaluator = /** @class */ (function () {
             case 'ForGenericStatement':
                 return this.evalGenericForLoop(component, scope);
             case 'BreakStatement':
-                throw 'Break out of the loop!';
+                throw new error_1.Error('Break', 'Break out of loop');
             case 'FunctionDeclaration':
                 return this.evalFunctionDeclaration(component, scope);
             case 'CallStatement':
@@ -51,8 +68,13 @@ var Evaluator = /** @class */ (function () {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
             case 'ReturnStatement':
-                var returnValue = this.evalComponent(component.arguments[0], scope);
-                throw returnValue;
+                if (insideFunction) {
+                    var returnValue = this.evalComponent(component.arguments[0], scope);
+                    throw new error_1.Error('Return', 'Return out of function', returnValue);
+                }
+                else {
+                    throw new error_1.Error('Syntax Error', 'Cannot use return outside a function');
+                }
             // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
                 return this.evalContainer(component, scope);
@@ -72,7 +94,7 @@ var Evaluator = /** @class */ (function () {
             }
             */
             default:
-                throw 'This syntax tree component is unrecognised';
+                throw new error_1.Error('Syntax Error', 'This syntax tree component is unrecognised');
         }
     };
     Evaluator.prototype.evalFunctionDeclaration = function (component, scope) {
@@ -135,7 +157,7 @@ var Evaluator = /** @class */ (function () {
             return tbl;
         }
         else {
-            throw 'Container is must either be an array or a table';
+            throw new error_1.Error('Type Error', 'Container is must either be an array or a table');
         }
     };
     Evaluator.prototype.hasElseClause = function (clauses) {
@@ -182,9 +204,9 @@ var Evaluator = /** @class */ (function () {
         else if (this.inStringLibrary(functionName))
             return this.callStringLibrary(functionName, args);
         else if (this.inArrayLibrary(functionName))
-            throw "array library not implemented yet";
+            throw new error_1.Error('Implementation', 'array library not implemented yet');
         else if (this.inTableLibrary(functionName))
-            throw "table library not implemented yet";
+            throw new error_1.Error('Implementation', 'table library not implemented yet');
         else
             return this.callSelfDefinedFunction(functionName, args);
     };
@@ -196,10 +218,15 @@ var Evaluator = /** @class */ (function () {
         for (var _i = 0, funcBody_1 = funcBody; _i < funcBody_1.length; _i++) {
             var c = funcBody_1[_i];
             try {
-                this.evalComponent(c, functionScope);
+                this.evalComponent(c, functionScope, true);
             }
-            catch (returnValue) {
-                return returnValue;
+            catch (err) {
+                if (err.type === 'Return') {
+                    return err.returnValue;
+                }
+                else {
+                    return;
+                }
             }
         }
     };
@@ -234,7 +261,7 @@ var Evaluator = /** @class */ (function () {
         for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
             var arg_1 = args_1[_i];
             if (typeof arg_1 !== 'number') {
-                throw 'Math lib function - all args must be of type number';
+                throw new error_1.Error('Type Error', 'Math lib function - all args must be of type number');
             }
         }
         if (funcName === 'math_max') {
@@ -268,7 +295,7 @@ var Evaluator = /** @class */ (function () {
             case 'math_sqrt':
                 return Math.sqrt(arg);
             default:
-                throw 'No such math library function';
+                throw new error_1.Error('Syntax Error', 'No such math library function');
         }
     };
     Evaluator.prototype.reverseString = function (str) {
@@ -276,7 +303,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.callStringLibrary = function (funcName, args) {
         if (typeof args[0] !== 'string') {
-            throw 'String lib function - first arg must be of type string';
+            throw new error_1.Error('Type Error', 'String lib function - first arg must be of type string');
         }
         switch (funcName) {
             case 'str_len':
@@ -288,17 +315,17 @@ var Evaluator = /** @class */ (function () {
                     return args[0].split(args[1]);
                 }
                 else {
-                    throw 'Split function - second arg must be of type string';
+                    throw new error_1.Error('Type Error', 'Split function - second arg must be of type string');
                 }
             case 'str_substring':
                 if (typeof args[1] === 'number' && typeof args[2] === 'number') {
                     return args[0].substring(args[1], args[2]);
                 }
                 else {
-                    throw 'Substring function - second and third arg must be of type number';
+                    throw new error_1.Error('Type Error', 'Substring function - second and third arg must be of type number');
                 }
             default:
-                throw 'No such string library function';
+                throw new error_1.Error('Syntax Error', 'No such string library function');
         }
     };
     Evaluator.prototype.evalWhileLoop = function (component, scope) {
@@ -315,17 +342,22 @@ var Evaluator = /** @class */ (function () {
                     */
                     condition = this.evalComponent(component.condition, scope);
                 }
-                catch (breakException) {
-                    return;
+                catch (err) {
+                    if (err.type === 'Return') {
+                        throw err;
+                    }
+                    else {
+                        return;
+                    }
                 }
             }
         }
     };
     Evaluator.prototype.evalGenericForLoop = function (component, scope) {
         if (component.iterators.length !== 1)
-            throw 'Container needs to be length 1';
+            throw new error_1.Error('Syntax Error', 'Container needs to be length 1');
         if (component.iterators[0].type !== 'Identifier')
-            throw 'Container referenced must be a symbol';
+            throw new error_1.Error('Syntax Error', 'Container referenced must be a symbol');
         var container = this.evalComponent(component.iterators[0], scope);
         if (Array.isArray(container)) {
             return this.evalGenericForLoopThroughArray(component, scope);
@@ -336,7 +368,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalGenericForLoopThroughArray = function (component, scope) {
         if (component.variables.length !== 1)
-            throw 'There should only be 1 loop variable for array';
+            throw new error_1.Error('Syntax Error', 'There should only be 1 loop variable for array');
         var forLoopScope = new scope_1.Scope(scope);
         var itemSymbol = component.variables[0].name;
         var container = this.evalComponent(component.iterators[0], scope);
@@ -356,7 +388,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalGenericForLoopThroughTable = function (component, scope) {
         if (component.variables.length !== 2)
-            throw 'There should 2 loop variable for table - first variable for key and second variable for value';
+            throw new error_1.Error('Syntax Error', 'There should 2 loop variable for table - first variable for key and second variable for value');
         var forLoopScope = new scope_1.Scope(scope);
         var keySymbol = component.variables[0].name;
         var valueSymbol = component.variables[1].name;
@@ -370,8 +402,13 @@ var Evaluator = /** @class */ (function () {
                 try {
                     this.evalComponent(c, forLoopScope);
                 }
-                catch (breakException) {
-                    return;
+                catch (err) {
+                    if (err.type === 'Return') {
+                        throw err;
+                    }
+                    else {
+                        return;
+                    }
                 }
             }
         }
@@ -389,8 +426,13 @@ var Evaluator = /** @class */ (function () {
                 try {
                     this.evalComponent(c, forLoopScope);
                 }
-                catch (breakException) {
-                    return;
+                catch (err) {
+                    if (err.type === 'Return') {
+                        throw err;
+                    }
+                    else {
+                        return;
+                    }
                 }
             }
         }
@@ -418,7 +460,7 @@ var Evaluator = /** @class */ (function () {
             return -argument;
         }
         else {
-            throw 'no such unary operation';
+            throw new error_1.Error('Type Error', 'no such unary operation');
         }
     };
     Evaluator.prototype.evalLogicalExpression = function (component, scope) {
@@ -431,7 +473,7 @@ var Evaluator = /** @class */ (function () {
             return left || right;
         }
         else {
-            throw 'no such logical operation';
+            throw new error_1.Error('Type Error', 'no such logical operation');
         }
     };
     Evaluator.prototype.evalBinaryExpression = function (component, scope) {
@@ -500,14 +542,14 @@ var Evaluator = /** @class */ (function () {
             return left <= right;
         }
         else {
-            throw 'no such binary operation';
+            throw new error_1.Error('Type Error', 'no such binary operation');
         }
     };
     return Evaluator;
 }());
 exports.Evaluator = Evaluator;
 
-},{"./scope":3}],2:[function(require,module,exports){
+},{"./error":1,"./scope":4}],3:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var evaluator_1 = require("./evaluator");
@@ -524,10 +566,10 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nlet ss = str_substring('hello', 0, 4);\nprint(ss)\n";
+var userProgram = "\n\nif 5>1 then return 11 end\n";
 interpret(userProgram);
 
-},{"./evaluator":1,"luaparse":4}],3:[function(require,module,exports){
+},{"./evaluator":2,"luaparse":5}],4:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Scope = void 0;
@@ -582,7 +624,7 @@ var Scope = /** @class */ (function () {
 }());
 exports.Scope = Scope;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 
@@ -3256,4 +3298,4 @@ exports.Scope = Scope;
 /* vim: set sw=2 ts=2 et tw=79 : */
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[2]);
+},{}]},{},[3]);

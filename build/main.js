@@ -14,5 +14,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nlet ss = str_substring('hello', 0, 4);\nprint(ss)\n";
+var userProgram = "\n\nif 5>1 then return 11 end\n";
 interpret(userProgram);
