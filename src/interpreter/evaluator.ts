@@ -71,7 +71,7 @@ export class Evaluator {
                     const returnValue = this.evalComponent(component.arguments[0], scope);
                     throw new Error('Return', 'Return out of function', returnValue);
                 } else {
-                    throw new Error('Syntax Error', 'Cannot use return outside a function');
+                    //throw new Error('Syntax Error', 'Cannot use return outside a function');
                 }
 
             // 'ContainerConstructorExpression'

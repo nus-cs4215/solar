@@ -18,7 +18,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-if 5>1 then return 11 end
+return 5
 `;
 
 interpret(userProgram);
