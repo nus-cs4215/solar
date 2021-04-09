@@ -57,26 +57,11 @@ var Evaluator = /** @class */ (function () {
                     throw new error_1.Error('Return', 'Return out of function', returnValue);
                 }
                 else {
-                    throw new error_1.Error('Syntax Error', 'Cannot use return outside a function');
+                    //throw new Error('Syntax Error', 'Cannot use return outside a function');
                 }
             // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
                 return this.evalContainer(component, scope);
-            /*
-            case 'IndexExpression': {
-                const tableName = component.base.name;
-                const table = scope.lookup(tableName);
-                const index = this.evalComponent(component.index, scope);
-                return table[index];
-            }
-
-            case 'MemberExpression': {
-                const tableName = component.base.name;
-                const table = scope.lookup(tableName);
-                const key = component.identifier.name;
-                return table[key];
-            }
-            */
             default:
                 throw new error_1.Error('Syntax Error', 'This syntax tree component is unrecognised');
         }

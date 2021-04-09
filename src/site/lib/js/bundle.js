@@ -73,26 +73,11 @@ var Evaluator = /** @class */ (function () {
                     throw new error_1.Error('Return', 'Return out of function', returnValue);
                 }
                 else {
-                    throw new error_1.Error('Syntax Error', 'Cannot use return outside a function');
+                    //throw new Error('Syntax Error', 'Cannot use return outside a function');
                 }
             // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
                 return this.evalContainer(component, scope);
-            /*
-            case 'IndexExpression': {
-                const tableName = component.base.name;
-                const table = scope.lookup(tableName);
-                const index = this.evalComponent(component.index, scope);
-                return table[index];
-            }
-
-            case 'MemberExpression': {
-                const tableName = component.base.name;
-                const table = scope.lookup(tableName);
-                const key = component.identifier.name;
-                return table[key];
-            }
-            */
             default:
                 throw new error_1.Error('Syntax Error', 'This syntax tree component is unrecognised');
         }
@@ -549,10 +534,75 @@ var Evaluator = /** @class */ (function () {
 }());
 exports.Evaluator = Evaluator;
 
-},{"./error":1,"./scope":4}],3:[function(require,module,exports){
+},{"./error":1,"./scope":5}],3:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.Linter = void 0;
+var Linter = /** @class */ (function () {
+    function Linter() {
+    }
+    Linter.prototype.analyse = function (ast) {
+        for (var _i = 0, _a = ast.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c, false);
+        }
+    };
+    Linter.prototype.analyseComponent = function (component, insideFunction) {
+        switch (component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component, insideFunction);
+            case 'WhileStatement':
+                return this.analyseWhileLoop(component, insideFunction);
+            case 'ForNumericStatement':
+                return this.analyseNumericForLoop(component, insideFunction);
+            case 'ForGenericStatement':
+                return this.analyseGenericForLoop(component, insideFunction);
+            case 'ReturnStatement':
+                if (!insideFunction) {
+                    var errorMsg = 'Syntax Error: return cannot be used outside a function';
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            default:
+                console.debug("This component is a " + component.type + ", no need to analyse.");
+        }
+    };
+    Linter.prototype.analyseIfStatement = function (component, insideFunction) {
+        for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
+            var clause = _a[_i];
+            for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
+                var c = _c[_b];
+                this.analyseComponent(c, insideFunction);
+            }
+        }
+    };
+    Linter.prototype.analyseWhileLoop = function (component, insideFunction) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c, insideFunction);
+        }
+    };
+    Linter.prototype.analyseNumericForLoop = function (component, insideFunction) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c, insideFunction);
+        }
+    };
+    Linter.prototype.analyseGenericForLoop = function (component, insideFunction) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c, insideFunction);
+        }
+    };
+    return Linter;
+}());
+exports.Linter = Linter;
+
+},{}],4:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var evaluator_1 = require("./evaluator");
+var linter_1 = require("./linter");
 var parser = require('luaparse');
 // To run this file - npm start
 function parseIntoAST(program) {
@@ -562,14 +612,16 @@ function parseIntoAST(program) {
 }
 function interpret(program) {
     var ast = parseIntoAST(program);
+    var lntr = new linter_1.Linter();
+    lntr.analyse(ast);
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nif 5>1 then return 11 end\n";
+var userProgram = "\n\nif true then return 5 else print(1) end\n\n";
 interpret(userProgram);
 
-},{"./evaluator":2,"luaparse":5}],4:[function(require,module,exports){
+},{"./evaluator":2,"./linter":3,"luaparse":6}],5:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Scope = void 0;
@@ -624,7 +676,7 @@ var Scope = /** @class */ (function () {
 }());
 exports.Scope = Scope;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 
@@ -3298,4 +3350,4 @@ exports.Scope = Scope;
 /* vim: set sw=2 ts=2 et tw=79 : */
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[3]);
+},{}]},{},[4]);

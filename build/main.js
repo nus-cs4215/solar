@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
 var evaluator_1 = require("./evaluator");
+var linter_1 = require("./linter");
 var parser = require('luaparse');
 // To run this file - npm start
 function parseIntoAST(program) {
@@ -10,9 +11,11 @@ function parseIntoAST(program) {
 }
 function interpret(program) {
     var ast = parseIntoAST(program);
+    var lntr = new linter_1.Linter();
+    lntr.analyse(ast);
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nif 5>1 then return 11 end\n";
+var userProgram = "\n\nif true then return 5 else print(1) end\n\n";
 interpret(userProgram);
