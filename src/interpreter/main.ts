@@ -23,20 +23,8 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let x = 0
-while x < 10 do
-    print(x)    
-    if x == 11 then 
-        break 
-    elseif x == 12 then 
-        break 
-    else
-        print(5)
-        break 
-    end
-    x = x + 1
-end
-
+let x = { 1,2,43, a= 1}
+print(x)
 `;
 
 interpret(userProgram);

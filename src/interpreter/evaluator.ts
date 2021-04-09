@@ -9,7 +9,6 @@ export class Evaluator {
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
-        
         for (const c of ast.body) {
             this.evalComponent(c, this.globalScope);
         }
@@ -84,9 +83,10 @@ export class Evaluator {
     }
 
     evalFunctionDeclaration(component: any, scope: Scope): any {
-        
         if (scope !== this.globalScope) {
-            throw 'Functions can only be declared in the global scope';
+            const errorMsg = 'Syntax Error: Functions can only be declared in the global scope';
+            console.log(errorMsg);
+            throw errorMsg;
         }
 
         const funcSymbol = component.identifier.name;
@@ -97,49 +97,44 @@ export class Evaluator {
         scope.symbolTable[funcSymbol] = value;
     }
 
-    evalDeclaration(component: any, scope: any): any {
-
+    evalDeclaration(component: any, scope: Scope): void {
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
 
         if (symbol in scope.symbolTable) {
-            throw `${symbol} was already declared!`;
+            const errorMsg = `${symbol} was already declared`;
+            console.log(errorMsg);
+            throw errorMsg;
         } else {
             scope.symbolTable[symbol] = value;
         }
     }
 
-    evalAssignment(component: any, scope: any): any {
-
+    evalAssignment(component: any, scope: Scope): void {
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
         scope.assign(symbol, value);
     }
 
     isArray(component: any): boolean {
-
         for (const field of component.fields) {
             if (field.type === 'TableKeyString') {
                 return false;
             }
         }
-
         return true;
     }
 
     isTable(component: any): boolean {
-
         for (const field of component.fields) {
             if (field.type === 'TableValue') {
                 return false;
             }
         }
-
         return true;
     }
 
-    evalContainer(component: any, scope: any): any {
-        
+    evalContainer(component: any, scope: Scope): any {
         if (this.isArray(component)) {
             const arr = component.fields.map(field => this.evalComponent(field.value, scope));
             return arr;
@@ -151,20 +146,20 @@ export class Evaluator {
                 const v = this.evalComponent(field.value, scope);
                 tbl[k] = v;
             }
-
             return tbl;
         } else {
-            throw new Error('Type Error', 'Container is must either be an array or a table');
+            const errorMsg = 'Type Error: Container is neither an array nor table';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     }
 
-    hasElseClause(clauses: any[]): boolean {
-        const lastClause = clauses[clauses.length - 1];
+    hasElseClause(component: any): boolean {
+        const lastClause = component.clauses[component.clauses.length - 1];
         return lastClause.type === 'ElseClause';
     }
 
-    evalNonElseClauses(component: any, scope: any): any {
-        
+    evalNonElseClauses(component: any, scope: Scope): any {
         for (const clause of component.clauses) {
             if (clause.type === 'ElseClause') return false;
             
@@ -187,8 +182,8 @@ export class Evaluator {
         }
     }
 
-    evalElseClause(component: any, scope: any): any {
-        if (this.hasElseClause(component.clauses)) {
+    evalElseClause(component: any, scope: Scope): any {
+        if (this.hasElseClause(component)) {
 
             const elseClause = component.clauses[component.clauses.length - 1];     // last clause
             const elseClauseScope = new Scope(scope);
@@ -203,7 +198,7 @@ export class Evaluator {
         }
     }
 
-    evalIfStatement(component: any, scope: any): any {
+    evalIfStatement(component: any, scope: Scope): any {
         const res = this.evalNonElseClauses(component, scope);
 
         if (res === false) {
@@ -213,8 +208,7 @@ export class Evaluator {
         }
     }
 
-    evalCallExpression(component: any, scope: any): any {
-
+    evalCallExpression(component: any, scope: Scope): any {
         const functionName = component.base.name;
 
         const argsComponent = component.arguments;
@@ -334,7 +328,9 @@ export class Evaluator {
                 return Math.sqrt(arg);
 
             default:
-                throw new Error('Syntax Error', 'No such math library function');
+                const errorMessage = 'Syntax Error: No such math library function';
+                console.log(errorMessage);
+                throw errorMessage;
         }
     }
 
@@ -371,7 +367,9 @@ export class Evaluator {
                 }
 
             default:
-                throw new Error('Syntax Error', 'No such string library function');
+                const errorMsg = 'Syntax Error: No such string library function';
+                console.log(errorMsg);
+                throw errorMsg;
         }
     }
 
@@ -518,7 +516,9 @@ export class Evaluator {
         } else if (component.operator === '-' && typeof argument === 'number') {
             return -argument;
         } else {
-            throw new Error('Type Error', 'no such unary operation');
+            const errorMsg = 'Type Error: No such unary operation';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     }
 
@@ -532,7 +532,9 @@ export class Evaluator {
         } else if (component.operator === 'or' && typeof left === 'boolean' && typeof right === 'boolean') {
             return left || right;
         } else {
-            throw new Error('Type Error', 'no such logical operation');
+            const errorMsg = 'Type Error: No such logical operation';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     }
 
@@ -585,7 +587,9 @@ export class Evaluator {
         } else if (component.operator === '<=' && bothSidesAreNumbers) {
             return left <= right;
         } else {
-            throw new Error('Type Error', 'no such binary operation');
+            const errorMsg = 'Type Error: No such binary operation';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     }
     
