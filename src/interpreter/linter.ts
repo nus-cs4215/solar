@@ -1,4 +1,4 @@
-export class Linter {
+export class ReturnStatementAnalyser {
 
     // entry point. ast is the syntax tree of the entire program.
     analyse(ast: any): any {
