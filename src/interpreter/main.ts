@@ -23,8 +23,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-if true then return 5 else print(1) end
-
+print(5)
 `;
 
 interpret(userProgram);

@@ -31,7 +31,7 @@ export class Linter {
                 }
 
             default:
-                console.debug(`This component is a ${component.type}, no need to analyse.`);
+                console.debug(`Linter: This component is a ${component.type}, no need to analyse.`);
         }
     }
 

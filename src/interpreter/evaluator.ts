@@ -13,7 +13,7 @@ export class Evaluator {
         }
     }
     
-    evalComponent(component: any, scope: any, insideFunction: boolean = false): any {
+    evalComponent(component: any, scope: any): any {
         
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
@@ -67,13 +67,9 @@ export class Evaluator {
                 return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                if (insideFunction) {
-                    const returnValue = this.evalComponent(component.arguments[0], scope);
-                    throw new Error('Return', 'Return out of function', returnValue);
-                } else {
-                    //throw new Error('Syntax Error', 'Cannot use return outside a function');
-                }
-
+                const returnValue = this.evalComponent(component.arguments[0], scope);
+                throw new Error('Return', 'Return out of function', returnValue);
+                
             // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
                 return this.evalContainer(component, scope);
@@ -228,7 +224,7 @@ export class Evaluator {
         for (const c of funcBody) {
 
             try {
-                this.evalComponent(c, functionScope, true);
+                this.evalComponent(c, functionScope);
             } catch (err) {
                 
                 if (err.type === 'Return') {
