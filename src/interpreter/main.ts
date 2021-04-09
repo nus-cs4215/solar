@@ -1,4 +1,5 @@
 import { Evaluator } from './evaluator';
+import { Linter } from './linter';
 const parser = require('luaparse');
 
 // To run this file - npm start
@@ -11,14 +12,17 @@ function parseIntoAST(program: string): any {
 
 function interpret(program: string): any {
     const ast = parseIntoAST(program);
+
+    const lntr = new Linter();
+    lntr.analyse(ast);
+
     const e = new Evaluator();
     e.evaluate(ast);
 }
 
 // user program
 const userProgram = `
-
-if 5>1 then return 11 end
+return 5
 `;
 
 interpret(userProgram);
