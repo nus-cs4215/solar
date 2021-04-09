@@ -26,8 +26,7 @@ export class Evaluator {
                 return scope.lookup(symbol);
             }
 
-            // 'LetStatement'
-            case 'LocalStatement':
+            case 'LetStatement':
                 return this.evalDeclaration(component, scope);
     
             case 'AssignmentStatement': 
@@ -70,8 +69,7 @@ export class Evaluator {
                 const returnValue = this.evalComponent(component.arguments[0], scope);
                 return new Return(returnValue);
                 
-            // 'ContainerConstructorExpression'
-            case 'TableConstructorExpression':
+            case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
 
             default:
