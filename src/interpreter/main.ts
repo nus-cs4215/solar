@@ -23,15 +23,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-function f(x)
-    for i = x,10,1 do
-        print(i)
-        if i == 5 then
-            return i+2
-        end
-    end
-end
-print(f(2))
+return 5
 `;
 
 interpret(userProgram);
