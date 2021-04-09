@@ -77,7 +77,9 @@ export class Evaluator {
                 return this.evalContainer(component, scope);
 
             default:
-                throw new Error('Syntax Error', 'This syntax tree component is unrecognised');
+                console.debug('This syntax tree component is unrecognised');
+                console.log('Syntax Error');
+                throw 'Syntax Error';
         }
     }
 
