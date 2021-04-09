@@ -1,6 +1,5 @@
 import { Scope } from './scope';
 import { Error } from './error';
-import { isNamedImports } from 'typescript';
 
 export class Evaluator {
 
