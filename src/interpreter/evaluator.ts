@@ -69,7 +69,7 @@ export class Evaluator {
 
             case 'ReturnStatement':
                 const returnValue = this.evalComponent(component.arguments[0], scope);
-                throw new Error('Return', 'Return out of function', returnValue);
+                return new Return(returnValue);
                 
             // 'ContainerConstructorExpression'
             case 'TableConstructorExpression':
@@ -223,7 +223,6 @@ export class Evaluator {
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
-        
         const functionScope = new Scope(null);
         
         const params = this.globalScope.symbolTable[funcName].params;
@@ -233,15 +232,10 @@ export class Evaluator {
 
         for (const c of funcBody) {
 
-            try {
-                this.evalComponent(c, functionScope);
-            } catch (err) {
-                
-                if (err.type === 'Return') {
-                    return err.returnValue;
-                } else {
-                    return;
-                }
+            const evaluatedC = this.evalComponent(c, functionScope);
+            
+            if (evaluatedC instanceof Return) {
+                return evaluatedC.returnValue;
             }
         }
     }
@@ -339,7 +333,6 @@ export class Evaluator {
     }
 
     callStringLibrary(funcName: string, args: any[]): number  | string | string[] {
-
         if (typeof args[0] !== 'string') {
             throw new Error('Type Error', 'String lib function - first arg must be of type string');
         }
@@ -373,8 +366,7 @@ export class Evaluator {
         }
     }
 
-    evalWhileLoop(component: any, scope: any): void {
-
+    evalWhileLoop(component: any, scope: any): any {
         const whileLoopScope = new Scope(scope);
 
         let condition = this.evalComponent(component.condition, scope);
@@ -386,8 +378,8 @@ export class Evaluator {
                 const evaluatedC = this.evalComponent(c, whileLoopScope);
                 condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
 
-                if (evaluatedC instanceof Break) {
-                    return;
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                    return evaluatedC;
                 }
             }
         }
@@ -463,7 +455,6 @@ export class Evaluator {
     }
 
     evalNumericForLoop(component: any, scope: Scope): void {
-
         const forLoopScope = new Scope(scope);
         
         const loopControlVariable = component.variable.name;
@@ -498,7 +489,6 @@ export class Evaluator {
     }
 
     evalLiteral(component: any): string | number | boolean | null {
-
         if (component.type === 'StringLiteral') {
             const strLiteral = component.raw.slice(1, -1);  // remove the outermost quotes
             return strLiteral;
@@ -508,7 +498,6 @@ export class Evaluator {
     }
 
     evalUnaryExpression(component: any, scope: any): number | boolean {
-
         const argument = this.evalComponent(component.argument, scope);
 
         if (component.operator === 'not' && typeof argument === 'boolean') {
@@ -523,7 +512,6 @@ export class Evaluator {
     }
 
     evalLogicalExpression(component: any, scope: any): boolean {
-        
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
 
@@ -539,7 +527,6 @@ export class Evaluator {
     }
 
     evalBinaryExpression(component: any, scope: Scope): string | number | boolean {
-        
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
 

@@ -23,8 +23,14 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let x = { 1,2,43, a= 1}
-print(x)
+function f(x)
+
+while true do
+return 5
+end
+
+end
+print(f(1))
 `;
 
 interpret(userProgram);
