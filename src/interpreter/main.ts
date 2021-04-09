@@ -18,7 +18,8 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-print(5)
+let x = {vb=-1,a=2,c=4}
+print(x)
 `;
 
 interpret(userProgram);
