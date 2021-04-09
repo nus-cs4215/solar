@@ -26,7 +26,14 @@ const userProgram = `
 let x = 0
 while x < 10 do
     print(x)    
-    if x == 5 then break end
+    if x == 11 then 
+        break 
+    elseif x == 12 then 
+        break 
+    else
+        print(5)
+        break 
+    end
     x = x + 1
 end
 

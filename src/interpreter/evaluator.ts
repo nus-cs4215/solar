@@ -161,46 +161,54 @@ export class Evaluator {
         return lastClause.type === 'ElseClause';
     }
 
-    evalIfStatement(component: any, scope: any): any {
+    evalNonElseClauses(component: any, scope: any): any {
         
         for (const clause of component.clauses) {
-
-            if (clause.type !== 'ElseClause') {
-                
-                const condition = this.evalComponent(clause.condition, scope);
-
-                if (condition === true) {
-
-                    const clauseScope = new Scope(scope)
-                    
-                    for (const c of clause.body) {
-                        const evaluatedC = this.evalComponent(c, clauseScope);
-                        
-                        if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
-                            return evaluatedC;
-                        }
-                    }
-
-                    return;
-                }
-            }
+            if (clause.type === 'ElseClause') return false;
             
-        }
+            // we only evaluate the non-else clauses, and short circuit if necessary
+            const condition = this.evalComponent(clause.condition, scope);
+            
+            if (condition === true) {
+                
+                const clauseScope = new Scope(scope);
+                
+                for (const c of clause.body) {
+                    const evaluatedC = this.evalComponent(c, clauseScope);
 
-        /* 
-            if we reach here, means none of the if and elseif branches were evaluated.
-            hence we will have to evaluate the else branch.
-        */
+                    if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                        return evaluatedC;
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    evalElseClause(component: any, scope: any): any {
         if (this.hasElseClause(component.clauses)) {
 
             const elseClause = component.clauses[component.clauses.length - 1];     // last clause
             const elseClauseScope = new Scope(scope);
 
             for (const c of elseClause.body) {
-                this.evalComponent(c, elseClauseScope);
+                const evaluatedC = this.evalComponent(c, elseClauseScope);
+                
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                    return evaluatedC;
+                }
             }
         }
+    }
 
+    evalIfStatement(component: any, scope: any): any {
+        const res = this.evalNonElseClauses(component, scope);
+
+        if (res === false) {
+            return this.evalElseClause(component, scope);
+        } else {
+            return res;
+        }
     }
 
     evalCallExpression(component: any, scope: any): any {
