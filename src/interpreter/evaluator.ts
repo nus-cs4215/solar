@@ -1,5 +1,7 @@
 import { Scope } from './scope';
 import { Error } from './error';
+import { Break } from './instructions/break';
+import { Return } from './instructions/return';
 
 export class Evaluator {
 
@@ -55,7 +57,7 @@ export class Evaluator {
                 return this.evalGenericForLoop(component, scope);
                 
             case 'BreakStatement':
-                throw new Error('Break', 'Break out of loop');
+                return new Break();
 
             case 'FunctionDeclaration':
                 return this.evalFunctionDeclaration(component, scope);
@@ -172,7 +174,11 @@ export class Evaluator {
                     const clauseScope = new Scope(scope)
                     
                     for (const c of clause.body) {
-                        this.evalComponent(c, clauseScope);
+                        const evaluatedC = this.evalComponent(c, clauseScope);
+                        
+                        if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                            return evaluatedC;
+                        }
                     }
 
                     return;
@@ -369,25 +375,14 @@ export class Evaluator {
 
             for (const c of component.body) {
                 
-                try {
-                    this.evalComponent(c, whileLoopScope);
+                const evaluatedC = this.evalComponent(c, whileLoopScope);
+                condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
 
-                    /*
-                        'refresh' / update the while loop condition.
-                        This is necessary when the while loop body modifies the while loop condition
-                    */
-                    condition = this.evalComponent(component.condition, scope);
-                } catch (err) {
-                    
-                    if (err.type === 'Return') {
-                        throw err;
-                    } else {
-                        return;
-                    }
+                if (evaluatedC instanceof Break) {
+                    return;
                 }
             }
         }
-
     }
 
     evalGenericForLoop(component: any, scope: Scope): void {
