@@ -30,7 +30,7 @@ export class ReturnStatementAnalyser {
                 throw errorMsg;
 
             default:
-                console.debug(`Linter: This component is a ${component.type}, no need to analyse.`);
+                console.debug(`ReturnStatementAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     }
 

@@ -1,20 +1,15 @@
 import { Evaluator } from './evaluator';
-import { Linter } from './return-statement-analyser';
-const parser = require('luaparse');
+import { ReturnStatementAnalyser } from './return-statement-analyser';
+import { Parser } from './parser';
 
 // To run this file - npm start
 
-function parseIntoAST(program: string): any {
-    const prog = program.replace(/let/g, 'local');
-    const ast = parser.parse(prog, { luaVersion: '5.3' });
-    return ast;
-}
-
 function interpret(program: string): any {
-    const ast = parseIntoAST(program);
+    const p = new Parser();
+    const ast = p.parseIntoAst(program);
 
-    const lntr = new Linter();
-    lntr.analyse(ast);
+    const r = new ReturnStatementAnalyser();
+    r.analyse(ast);
 
     const e = new Evaluator();
     e.evaluate(ast);
@@ -23,7 +18,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-return 5
+print(5)
 `;
 
 interpret(userProgram);
