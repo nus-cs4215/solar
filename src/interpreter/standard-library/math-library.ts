@@ -1,7 +1,7 @@
 export class MathLibrary {
 
     callLibraryFunction(funcName: string, args: number[]): number {
-        // run time type check
+        // TODO: run time type check
 
         switch (funcName) {
             case 'math_abs':

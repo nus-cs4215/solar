@@ -1,7 +1,7 @@
 export class ArrayLibrary {
 
     callLibraryFunction(funcName: string, args: any[]): any {
-        // run time type check
+        // TODO: run time type check
         
         const arr = args[0];
         switch (funcName) {

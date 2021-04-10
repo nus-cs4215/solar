@@ -1,7 +1,7 @@
 export class StringLibrary {
 
     callLibraryFunction(funcName: string, args: any[]): number | string | string[] {
-        // run time type check
+        // TODO: run time type check
 
         switch (funcName) {
             case 'str_len':
