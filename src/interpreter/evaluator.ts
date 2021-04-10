@@ -268,37 +268,37 @@ export class Evaluator {
             || funcName === 'tbl_contains'
     }
 
-    callMathLibrary(funcName: string, args: any[]): number {
-        
+    typeCheckMathLibrary(funcName: string, args: any[]): void {
         for (const arg of args) {
             if (typeof arg !== 'number') {
-                throw 'Math lib function - all args must be of type number';
+                const errorMsg = `Type Error: ${funcName} - ${arg} is not a number`;
+                console.log(errorMsg);
+                throw errorMsg;
             }
         }
+    }
+
+    callMathLibrary(funcName: string, args: any[]): number {
+        // run time type check
+        this.typeCheckMathLibrary(funcName, args);
 
         if (funcName === 'math_max') {
-            
             let max = args[0];
-
             for (const arg of args) {
                 if (arg > max) {
                     max = arg;
                 }
             }
-
             return max;
         }
 
         if (funcName === 'math_min') {
-            
             let min = args[0];
-
             for (const arg of args) {
                 if (arg < min) {
                     min = arg;
                 }
             }
-
             return min;
         }
         
@@ -326,7 +326,7 @@ export class Evaluator {
     }
 
     reverseString(str: string): string {
-        return str.split("").reverse().join("");
+        return str.split('').reverse().join('');
     }
 
     callStringLibrary(funcName: string, args: any[]): number  | string | string[] {
