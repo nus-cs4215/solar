@@ -1,5 +1,5 @@
-import { ReturnStatementAnalyser } from "./return-statement-analyser";
-import { ArgsLengthAnalyser } from "./args-length-analyser";
+import { ReturnStatementAnalyser } from './return-statement-analyser';
+import { ArgsLengthAnalyser } from './args-length-analyser';
 
 export class SemanticAnalyser {
 

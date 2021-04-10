@@ -1,5 +1,5 @@
 import { Parser } from './parser';
-import { SemanticAnalyser } from './semantic-analyser';
+import { SemanticAnalyser } from './semantic-analyser/semantic-analyser';
 import { Evaluator } from './evaluator';
 
 // To run this file - npm start
