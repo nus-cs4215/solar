@@ -1,7 +1,6 @@
 import { Parser } from './parser';
-import { ReturnStatementAnalyser } from './return-statement-analyser';
-import { Evaluator } from './evaluator';
 import { SemanticAnalyser } from './semantic-analyser';
+import { Evaluator } from './evaluator';
 
 // To run this file - npm start
 
