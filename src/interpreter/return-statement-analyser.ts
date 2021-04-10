@@ -9,9 +9,7 @@ export class ReturnStatementAnalyser {
     }
 
     analyseComponent(component: any): void {
-
         switch (component.type) {
-
             case 'IfStatement':
                 return this.analyseIfStatement(component);
 
