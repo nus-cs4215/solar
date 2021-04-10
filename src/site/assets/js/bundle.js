@@ -182,7 +182,7 @@ var Evaluator = /** @class */ (function () {
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
         if (functionName === 'print')
-            return this.callPrintFunction(args);
+            console.log(args[0]);
         else if (this.inMathLibrary(functionName))
             return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))
@@ -207,9 +207,6 @@ var Evaluator = /** @class */ (function () {
                 throw errorMsg;
             }
         }
-    };
-    Evaluator.prototype.callPrintFunction = function (args) {
-        console.log(args[0]);
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
         var functionScope = new scope_1.Scope(null);
@@ -576,7 +573,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nlet x = 1\nx = x +1\nprint(x)\n";
+var userProgram = "\n\nlet x = 1\nx = x +1\nprint(x+1)\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"./parser":5,"./semantic-analyser/semantic-analyser":9}],5:[function(require,module,exports){
