@@ -273,8 +273,7 @@ export class Evaluator {
             if (evaluatedC instanceof TailCall) {
                 const newArgs = evaluatedC.args;
                 functionScope.storeArguments(params, newArgs);
-                i = -1; // restarts the loop
-                // -1 would immediately be incremented to 0 because of i++, hence the loop would effectively start at 0 again
+                i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
             }
         }
     }
