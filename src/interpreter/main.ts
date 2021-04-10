@@ -18,9 +18,18 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let a = {z= 11, b = 2, a=1}
-a = tbl_put(a, 'a', 3)
-print(a)
+function fib(x)
+    if x == 0 then
+        return 0
+    elseif x == 1 then
+        return 1
+    else
+        return fib(x-1) + fib(x-2)
+    end
+end
+
+print(fib(30))
+
 `;
 
 interpret(userProgram);
