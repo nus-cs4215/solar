@@ -569,7 +569,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nfunction hitZero_tailrec(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero_tailrec(n-1)\n    end\nend\n\nlet res = hitZero_tailrec(1100)\nprint(res)\n\n";
+var userProgram = "\n\nfunction hitZero_tailrec(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero_tailrec(n-1)\n    end\nend\n\nlet res = hitZero_tailrec(5000)\nprint(res)\n\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"./parser":6,"./semantic-analyser/semantic-analyser":10}],6:[function(require,module,exports){
