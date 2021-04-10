@@ -234,7 +234,22 @@ export class Evaluator {
             const tableLibray = new TableLibrary();
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
-            return this.callSelfDefinedFunction(funcName, args);
+            return this.callSelfDefinedFunctionTCO(funcName, args);
+        }
+    }
+
+    callSelfDefinedFunctionTCO(funcName: string, args: any[]): any {
+        const functionScope = new Scope(null);
+        const params = this.globalScope.symbolTable[funcName].params;
+        functionScope.storeArguments(params, args);
+        const funcBody = this.globalScope.symbolTable[funcName].body;
+
+        for (const c of funcBody) {
+            const evaluatedC = this.evalComponent(c, functionScope);
+            
+            if (evaluatedC instanceof Return) {
+                return evaluatedC.returnValue;
+            }
         }
     }
 
