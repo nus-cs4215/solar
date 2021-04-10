@@ -1,4 +1,4 @@
-export class TailCall {
+export class TailRecursion {
 
     args: any[];
 

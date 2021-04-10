@@ -4,32 +4,31 @@ import { Evaluator } from './evaluator';
 
 // To run this file - npm start
 
-// tco stands for tail call optimization
-function interpret(program: string, tco: boolean): any {
+function interpret(program: string): any {
     const p = new Parser();
     const ast = p.parseIntoAst(program);
 
     const s = new SemanticAnalyser();
     s.analyse(ast);
 
-    const e = new Evaluator(tco);
+    const e = new Evaluator();
     e.evaluate(ast);
 }
 
 // user program
 const userProgram = `
 
-function hitZero(n)
+function hitZero_tailrec(n)
     if n == 0 then
         return 'We have hit zero!!'
     else
-        return hitZero(n-1)
+        return hitZero_tailrec(n-1)
     end
 end
 
-let res = hitZero(1100)
+let res = hitZero_tailrec(1100)
 print(res)
 
 `;
 
-interpret(userProgram, true);
+interpret(userProgram);
