@@ -218,6 +218,14 @@ export class Evaluator {
     argsLengthCheck(funcName: string, args: any[]) {
         switch (funcName) {
             case 'print':
+            case 'math_abs':
+            case 'math_ceil':
+            case 'math_floor':
+            case 'math_sqrt':
+            case 'str_len':
+            case 'str_reverse':
+            case 'arr_len':
+            case 'tbl_len':
                 if (args.length !== 1) {
                     const errorMsg = `Syntax Error: ${funcName} has 1 parameter`;
                     console.log(errorMsg);
@@ -231,7 +239,7 @@ export class Evaluator {
 
     typeCheck(funcName: string, args: any[]) {
         switch (funcName) {
-            
+
         }
     }
 
