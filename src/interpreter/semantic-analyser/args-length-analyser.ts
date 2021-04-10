@@ -67,6 +67,8 @@ export class ArgsLengthAnalyser {
                     const errorMsg = `Syntax Error: ${funcName}() takes 3 parameters`;
                     console.log(errorMsg);
                     throw errorMsg;
+                } else {
+                    return;
                 }
 
             default:
