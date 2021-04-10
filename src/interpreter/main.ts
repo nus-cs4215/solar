@@ -4,6 +4,7 @@ import { Evaluator } from './evaluator';
 
 // To run this file - npm start
 
+// tco stands for tail call optimization
 function interpret(program: string, tco: boolean): any {
     const p = new Parser();
     const ast = p.parseIntoAst(program);
@@ -18,16 +19,20 @@ function interpret(program: string, tco: boolean): any {
 // user program
 const userProgram = `
 
-function fact(n, res)
-    if n == 0 then 
-        return res
-    else
-        return fact(n-1, res * n)
+-- tail recursive fibonacci
+
+function fib(n, a, b)
+    if n == 0 then
+        return a
     end
+    if n == 1 then
+        return b
+    end
+    return fib(n-1, b, a+b)
 end
 
-print(fact(99, 1))
+print(fib(2000,0,1))
 
 `;
 
-interpret(userProgram, false);
+interpret(userProgram, true);

@@ -1,11 +1,11 @@
 import { Scope } from './scope';
 import { Break } from './instructions/break';
 import { Return } from './instructions/return';
+import { TailCall } from './instructions/tail-call';
 import { MathLibrary } from './standard-library/math-library';
 import { StringLibrary } from './standard-library/string-library';
 import { ArrayLibrary } from './standard-library/array-library';
 import { TableLibrary } from './standard-library/table-library';
-import { TailCall } from './instructions/tail-call';
 
 export class Evaluator {
 
