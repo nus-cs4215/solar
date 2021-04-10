@@ -13,11 +13,9 @@ export class Scope {
     }
 
     lookup(symbol: string): any {
-
         if (symbol in this.symbolTable) {
             return this.symbolTable[symbol];
         } else {
-            
             if (this.parent === null) {
                 throw 'symbol not defined';
             } else {
@@ -27,11 +25,9 @@ export class Scope {
     }
 
     assign(symbol: string, value: any): void {
-
         if (symbol in this.symbolTable) {
             this.symbolTable[symbol] = value;
         } else {
-
             if (this.parent === null) {
                 throw 'symbol not defined'
             } else {
@@ -42,13 +38,10 @@ export class Scope {
 
     // this method is only called by function scopes
     storeArguments(params: string[], args: any[]): void {
-
         if (params.length != args.length) {
             throw 'Number of params should be equals to number of args';
         }
-
         const n = params.length;
-
         for (let i = 0; i < n; ++i) {
             
             const symbol = params[i];
