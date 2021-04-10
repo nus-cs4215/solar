@@ -3,7 +3,7 @@ const parser = require('luaparse');
 export class Parser {
 
     parseIntoAst(program: string): any {
-        const prog = program.replace(/let/g, 'local');
+        const prog = program.replace(/let/g, 'local').replace(/!=/, '~=');
         const defaultAST = parser.parse(prog, { luaVersion: '5.3' });
         const ast = this.modifyDefaultAST(defaultAST);
         return ast;
