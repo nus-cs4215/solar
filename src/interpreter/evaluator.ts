@@ -222,15 +222,42 @@ export class Evaluator {
             case 'math_ceil':
             case 'math_floor':
             case 'math_sqrt':
+            case 'str_len':
+            case 'str_reverse':
+            case 'arr_len':
+            case 'arr_reverse':
+            case 'arr_sort':
+            case 'arr_pop':
+            case 'tbl_len':
                 if (args.length !== 1) {
                     const errorMsg = `Syntax Error: ${funcName}() takes 1 parameter`;
                     console.log(errorMsg);
                     throw errorMsg;
-                }           
+                }
+            
+            case 'str_split':
+            case 'arr_push':
+            case 'arr_get':
+            case 'tbl_contains':
+            case 'tbl_remove':
+            case 'tbl_get':
+                if (args.length !== 2) {
+                    const errorMsg = `Syntax Error: ${funcName}() takes 2 parameters`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
 
+            case 'str_substring':
+            case 'arr_set':
+            case 'tbl_put':
+                if (args.length !== 3) {
+                    const errorMsg = `Syntax Error: ${funcName}() takes 3 parameters`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
 
             default:
-                console.log('hi');
+                console.debug(`${funcName}() is not a library function`)
         }
     }
 
@@ -283,28 +310,28 @@ export class Evaluator {
     }
 
     inStringLibrary(funcName: string): boolean {
-        return funcName === 'str_len'
-            || funcName === 'str_reverse'
-            || funcName === 'str_split'
-            || funcName === 'str_substring';
+        return funcName === 'str_len'//1
+            || funcName === 'str_reverse'//1
+            || funcName === 'str_split'//2
+            || funcName === 'str_substring';//3
     }
 
     inArrayLibrary(funcName: string): boolean {
-        return funcName === 'arr_len'
-            || funcName === 'arr_reverse'
-            || funcName === 'arr_sort'
-            || funcName === 'arr_pop'
-            || funcName === 'arr_push'
-            || funcName === 'arr_get'
-            || funcName === 'arr_set';
+        return funcName === 'arr_len'//1
+            || funcName === 'arr_reverse'//1
+            || funcName === 'arr_sort'//1
+            || funcName === 'arr_pop'//1
+            || funcName === 'arr_push'//2
+            || funcName === 'arr_get'//2
+            || funcName === 'arr_set';//3
     }
 
     inTableLibrary(funcName: string): boolean {
-        return funcName === 'tbl_len'
-            || funcName === 'tbl_contains'
-            || funcName === 'tbl_remove'
-            || funcName === 'tbl_get'
-            || funcName === 'tbl_put';
+        return funcName === 'tbl_len'//1
+            || funcName === 'tbl_contains'//2
+            || funcName === 'tbl_remove'//2
+            || funcName === 'tbl_get'//2
+            || funcName === 'tbl_put';//3
     }
 
     callMathLibrary(funcName: string, args: any[]): number {
