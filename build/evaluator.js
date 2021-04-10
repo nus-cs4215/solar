@@ -4,11 +4,11 @@ exports.Evaluator = void 0;
 var scope_1 = require("./scope");
 var break_1 = require("./instructions/break");
 var return_1 = require("./instructions/return");
+var tail_call_1 = require("./instructions/tail-call");
 var math_library_1 = require("./standard-library/math-library");
 var string_library_1 = require("./standard-library/string-library");
 var array_library_1 = require("./standard-library/array-library");
 var table_library_1 = require("./standard-library/table-library");
-var tail_call_1 = require("./instructions/tail-call");
 var Evaluator = /** @class */ (function () {
     function Evaluator(tailCallOptimization) {
         this.globalScope = new scope_1.Scope(null);

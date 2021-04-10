@@ -4,6 +4,7 @@ var parser_1 = require("./parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator");
 // To run this file - npm start
+// tco stands for tail call optimization
 function interpret(program, tco) {
     var p = new parser_1.Parser();
     var ast = p.parseIntoAst(program);
@@ -13,5 +14,5 @@ function interpret(program, tco) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nfunction fact(n, res)\n    if n == 0 then \n        return res\n    else\n        return fact(n-1, res * n)\n    end\nend\n\nprint(fact(99, 1))\n\n";
-interpret(userProgram, false);
+var userProgram = "\n\n-- tail recursive fibonacci\n\nfunction fib(n, a, b)\n    if n == 0 then\n        return a\n    end\n    if n == 1 then\n        return b\n    end\n    return fib(n-1, b, a+b)\nend\n\nprint(fib(2000,0,1))\n\n";
+interpret(userProgram, true);

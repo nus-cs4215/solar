@@ -5,11 +5,11 @@ exports.Evaluator = void 0;
 var scope_1 = require("./scope");
 var break_1 = require("./instructions/break");
 var return_1 = require("./instructions/return");
+var tail_call_1 = require("./instructions/tail-call");
 var math_library_1 = require("./standard-library/math-library");
 var string_library_1 = require("./standard-library/string-library");
 var array_library_1 = require("./standard-library/array-library");
 var table_library_1 = require("./standard-library/table-library");
-var tail_call_1 = require("./instructions/tail-call");
 var Evaluator = /** @class */ (function () {
     function Evaluator(tailCallOptimization) {
         this.globalScope = new scope_1.Scope(null);
@@ -551,6 +551,7 @@ var parser_1 = require("./parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator");
 // To run this file - npm start
+// tco stands for tail call optimization
 function interpret(program, tco) {
     var p = new parser_1.Parser();
     var ast = p.parseIntoAst(program);
@@ -560,8 +561,8 @@ function interpret(program, tco) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nfunction fact(n, res)\n    if n == 0 then \n        return res\n    else\n        return fact(n-1, res * n)\n    end\nend\n\nprint(fact(99, 1))\n\n";
-interpret(userProgram, false);
+var userProgram = "\n\n-- tail recursive fibonacci\n\nfunction fib(n, a, b)\n    if n == 0 then\n        return a\n    end\n    if n == 1 then\n        return b\n    end\n    return fib(n-1, b, a+b)\nend\n\nprint(fib(2000,0,1))\n\n";
+interpret(userProgram, true);
 
 },{"./evaluator":1,"./parser":6,"./semantic-analyser/semantic-analyser":10}],6:[function(require,module,exports){
 "use strict";
