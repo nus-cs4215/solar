@@ -14,17 +14,14 @@ export class Evaluator {
     }
     
     evalComponent(component: any, scope: any): any {
-        
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
         }
 
         switch (component.type) {
-
-            case 'Identifier': {
+            case 'Identifier':
                 const symbol = component.name;
                 return scope.lookup(symbol);
-            }
 
             case 'LetStatement':
                 return this.evalDeclaration(component, scope);
@@ -99,7 +96,7 @@ export class Evaluator {
         const value = this.evalComponent(component.init[0], scope);
 
         if (symbol in scope.symbolTable) {
-            const errorMsg = `${symbol} was already declared`;
+            const errorMsg = `Syntax Error: ${symbol} has already been declared`;
             console.log(errorMsg);
             throw errorMsg;
         } else {
@@ -207,16 +204,82 @@ export class Evaluator {
 
     evalCallExpression(component: any, scope: Scope): any {
         const functionName = component.base.name;
-
         const argsComponent = component.arguments;
         const args = argsComponent.map(c => this.evalComponent(c, scope));
 
-        if (functionName === 'print')                   console.log(args[0]);
+        if (functionName === 'print')                   return this.callPrintFunction(args);
         else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
         else if (this.inArrayLibrary(functionName))     throw 'array library not implemented yet';
         else if (this.inTableLibrary(functionName))     throw 'table library not implemented yet';
         else                                            return this.callSelfDefinedFunction(functionName, args);
+    }
+
+    argsLengthCheck(funcName: string, args: any[]) {
+        switch (funcName) {
+            case 'print':
+            case 'math_abs':
+            case 'math_ceil':
+            case 'math_floor':
+            case 'math_sqrt':
+            case 'str_len':
+            case 'str_reverse':
+            case 'arr_len':
+            case 'arr_reverse':
+            case 'arr_sort':
+            case 'arr_pop':
+            case 'tbl_len':
+                if (args.length !== 1) {
+                    const errorMsg = `Syntax Error: ${funcName}() takes 1 parameter`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            
+            case 'str_split':
+            case 'arr_push':
+            case 'arr_get':
+            case 'tbl_contains':
+            case 'tbl_remove':
+            case 'tbl_get':
+                if (args.length !== 2) {
+                    const errorMsg = `Syntax Error: ${funcName}() takes 2 parameters`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+
+            case 'str_substring':
+            case 'arr_set':
+            case 'tbl_put':
+                if (args.length !== 3) {
+                    const errorMsg = `Syntax Error: ${funcName}() takes 3 parameters`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+
+            default:
+                console.debug(`${funcName}() is not a library function`)
+        }
+    }
+
+    typeCheck(funcName: string, args: any[]) {
+        switch (funcName) {
+
+        }
+    }
+
+    typeCheckMathLibrary(funcName: string, args: any[]): void {
+        for (const arg of args) {
+            if (typeof arg !== 'number') {
+                const errorMsg = `Type Error: ${funcName} - ${arg} is not a number`;
+                console.log(errorMsg);
+                throw errorMsg;
+            }
+        }
+    }
+
+    callPrintFunction(args: any[]): void {
+        this.argsLengthCheck('print', args);
+        console.log(args[0]);
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
@@ -238,74 +301,66 @@ export class Evaluator {
     }
 
     inMathLibrary(funcName: string): boolean {
-        return funcName === 'math_max'
-            || funcName === 'math_min'
-            || funcName === 'math_abs'
+        return funcName === 'math_abs'
             || funcName === 'math_ceil'
             || funcName === 'math_floor'
             || funcName === 'math_sqrt'
+            || funcName === 'math_max'
+            || funcName === 'math_min';
     }
 
     inStringLibrary(funcName: string): boolean {
-        return funcName === 'str_len'
-            || funcName === 'str_reverse'
-            || funcName === 'str_split'
-            || funcName === 'str_substring'
+        return funcName === 'str_len'//1
+            || funcName === 'str_reverse'//1
+            || funcName === 'str_split'//2
+            || funcName === 'str_substring';//3
     }
 
     inArrayLibrary(funcName: string): boolean {
-        return funcName === 'arr_len'
-            || funcName === 'arr_push'
-            || funcName === 'arr_pop'
-            || funcName === 'arr_set'
-            || funcName === 'arr_sort'
+        return funcName === 'arr_len'//1
+            || funcName === 'arr_reverse'//1
+            || funcName === 'arr_sort'//1
+            || funcName === 'arr_pop'//1
+            || funcName === 'arr_push'//2
+            || funcName === 'arr_get'//2
+            || funcName === 'arr_set';//3
     }
 
     inTableLibrary(funcName: string): boolean {
-        return funcName === 'tbl_len'
-            || funcName === 'tbl_put'
-            || funcName === 'tbl_remove'
-            || funcName === 'tbl_contains'
+        return funcName === 'tbl_len'//1
+            || funcName === 'tbl_contains'//2
+            || funcName === 'tbl_remove'//2
+            || funcName === 'tbl_get'//2
+            || funcName === 'tbl_put';//3
     }
 
     callMathLibrary(funcName: string, args: any[]): number {
-        
-        for (const arg of args) {
-            if (typeof arg !== 'number') {
-                throw 'Math lib function - all args must be of type number';
-            }
-        }
+        // run time type check
+        this.typeCheckMathLibrary(funcName, args);
 
         if (funcName === 'math_max') {
-            
             let max = args[0];
-
             for (const arg of args) {
                 if (arg > max) {
                     max = arg;
                 }
             }
-
             return max;
         }
 
         if (funcName === 'math_min') {
-            
             let min = args[0];
-
             for (const arg of args) {
                 if (arg < min) {
                     min = arg;
                 }
             }
-
             return min;
         }
         
         const arg = args[0];
 
         switch (funcName) {
-
             case 'math_abs':
                 return Math.abs(arg);
 
@@ -326,7 +381,7 @@ export class Evaluator {
     }
 
     reverseString(str: string): string {
-        return str.split("").reverse().join("");
+        return str.split('').reverse().join('');
     }
 
     callStringLibrary(funcName: string, args: any[]): number  | string | string[] {
@@ -479,7 +534,7 @@ export class Evaluator {
     isLiteral(component: any): boolean {
         return component.type === 'StringLiteral' 
             || component.type === 'NumericLiteral'
-            || component.type === 'BooleanLiteral'
+            || component.type === 'BooleanLiteral';
     }
 
     evalLiteral(component: any): string | number | boolean | null {
