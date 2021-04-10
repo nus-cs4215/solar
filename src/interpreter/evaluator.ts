@@ -14,17 +14,14 @@ export class Evaluator {
     }
     
     evalComponent(component: any, scope: any): any {
-        
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
         }
 
         switch (component.type) {
-
-            case 'Identifier': {
+            case 'Identifier':
                 const symbol = component.name;
                 return scope.lookup(symbol);
-            }
 
             case 'LetStatement':
                 return this.evalDeclaration(component, scope);
@@ -207,16 +204,50 @@ export class Evaluator {
 
     evalCallExpression(component: any, scope: Scope): any {
         const functionName = component.base.name;
-
         const argsComponent = component.arguments;
         const args = argsComponent.map(c => this.evalComponent(c, scope));
 
-        if (functionName === 'print')                   console.log(args[0]);
+        if (functionName === 'print')                   return this.callPrintFunction(args);
         else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
         else if (this.inArrayLibrary(functionName))     throw 'array library not implemented yet';
         else if (this.inTableLibrary(functionName))     throw 'table library not implemented yet';
         else                                            return this.callSelfDefinedFunction(functionName, args);
+    }
+
+    argsLengthCheck(funcName: string, args: any[]) {
+        switch (funcName) {
+            case 'print':
+                if (args.length !== 1) {
+                    const errorMsg = `Syntax Error: ${funcName} has 1 parameter`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            
+            default:
+                console.log('hi');
+        }
+    }
+
+    typeCheck(funcName: string, args: any[]) {
+        switch (funcName) {
+            
+        }
+    }
+
+    typeCheckMathLibrary(funcName: string, args: any[]): void {
+        for (const arg of args) {
+            if (typeof arg !== 'number') {
+                const errorMsg = `Type Error: ${funcName} - ${arg} is not a number`;
+                console.log(errorMsg);
+                throw errorMsg;
+            }
+        }
+    }
+
+    callPrintFunction(args: any[]): void {
+        this.argsLengthCheck('print', args);
+        console.log(args[0]);
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
@@ -268,16 +299,6 @@ export class Evaluator {
             || funcName === 'tbl_contains'
     }
 
-    typeCheckMathLibrary(funcName: string, args: any[]): void {
-        for (const arg of args) {
-            if (typeof arg !== 'number') {
-                const errorMsg = `Type Error: ${funcName} - ${arg} is not a number`;
-                console.log(errorMsg);
-                throw errorMsg;
-            }
-        }
-    }
-
     callMathLibrary(funcName: string, args: any[]): number {
         // run time type check
         this.typeCheckMathLibrary(funcName, args);
@@ -305,7 +326,6 @@ export class Evaluator {
         const arg = args[0];
 
         switch (funcName) {
-
             case 'math_abs':
                 return Math.abs(arg);
 
