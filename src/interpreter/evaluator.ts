@@ -291,19 +291,20 @@ export class Evaluator {
 
     inArrayLibrary(funcName: string): boolean {
         return funcName === 'arr_len'
-            || funcName === 'arr_get'
-            || funcName === 'arr_push'
+            || funcName === 'arr_reverse'
+            || funcName === 'arr_sort'
             || funcName === 'arr_pop'
-            || funcName === 'arr_set'
-            || funcName === 'arr_sort';
+            || funcName === 'arr_push'
+            || funcName === 'arr_get'
+            || funcName === 'arr_set';
     }
 
     inTableLibrary(funcName: string): boolean {
         return funcName === 'tbl_len'
-            || funcName === 'tbl_get'
-            || funcName === 'tbl_put'
+            || funcName === 'tbl_contains'
             || funcName === 'tbl_remove'
-            || funcName === 'tbl_contains';
+            || funcName === 'tbl_get'
+            || funcName === 'tbl_put';
     }
 
     callMathLibrary(funcName: string, args: any[]): number {
