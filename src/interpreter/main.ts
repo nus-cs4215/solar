@@ -19,8 +19,11 @@ function interpret(program: string): any {
 const userProgram = `
 
 function fact(n, res)
-    if n == 0 then return res end
-    return fact(n-1, res * n)
+    if n == 0 then 
+        return res
+    else
+        return fact(n-1, res * n)
+    end
 end
 
 print(fact(5, 1))
