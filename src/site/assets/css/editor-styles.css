@@ -2359,6 +2359,7 @@ body.is-preload .wrapper.fade > .inner {
 }
 
 .editor__console-logs {
+  color: #000000;
   padding: 10px;
   list-style: none;
 }

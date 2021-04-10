@@ -36,12 +36,11 @@ let editorLib = {
 
         // Set language
         codeEditor.session.setMode("ace/mode/lua");
+        codeEditor.session.setUseWorker(false);
 
         // Set Options
         codeEditor.setOptions({
             fontSize: '12pt',
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
         });
 
         // Set Default Code
