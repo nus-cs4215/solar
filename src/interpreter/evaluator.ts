@@ -5,9 +5,11 @@ import { MathLibrary } from './standard-library/math-library';
 import { StringLibrary } from './standard-library/string-library';
 import { ArrayLibrary } from './standard-library/array-library';
 import { TableLibrary } from './standard-library/table-library';
+import { TailCall } from './instructions/tail-call';
 
 export class Evaluator {
 
+    tailCallOptimization = false;
     globalScope = new Scope(null);
 
     // entry point. ast is the syntax tree of the entire program.
@@ -67,9 +69,12 @@ export class Evaluator {
                 return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                const returnValue = this.evalComponent(component.arguments[0], scope);
-                return new Return(returnValue);
-                
+                if (this.tailCallOptimization) {
+                    return this.evalReturnStatementTCO(component, scope);
+                } else {
+                    return this.evalReturnStatement(component, scope);
+                }
+
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
 
@@ -78,6 +83,23 @@ export class Evaluator {
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
+    }
+
+    evalReturnStatementTCO(component: any, scope: Scope) {
+        const returnValueComponent = component.arguments[0];
+        if (returnValueComponent.type === 'CallExpression') {
+            const argsComponent = returnValueComponent.arguments;
+            const args = argsComponent.map(c => this.evalComponent(c, scope));
+            return new TailCall(args);
+        } else {
+            const returnValue = this.evalComponent(component.arguments[0], scope);
+            return new Return(returnValue);
+        }
+    }
+
+    evalReturnStatement(component: any, scope: Scope) {
+        const returnValue = this.evalComponent(component.arguments[0], scope);
+        return new Return(returnValue);
     }
 
     evalFunctionDeclaration(component: any, scope: Scope): any {
@@ -171,7 +193,7 @@ export class Evaluator {
                 for (const c of clause.body) {
                     const evaluatedC = this.evalComponent(c, clauseScope);
 
-                    if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                    if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailCall) {
                         return evaluatedC;
                     }
                 }
@@ -189,7 +211,7 @@ export class Evaluator {
             for (const c of elseClause.body) {
                 const evaluatedC = this.evalComponent(c, elseClauseScope);
                 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailCall) {
                     return evaluatedC;
                 }
             }
@@ -226,7 +248,34 @@ export class Evaluator {
             const tableLibray = new TableLibrary();
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
-            return this.callSelfDefinedFunction(funcName, args);
+            if (this.tailCallOptimization) {
+                return this.callSelfDefinedFunctionTCO(funcName, args);
+            } else {
+                return this.callSelfDefinedFunction(funcName, args);
+            }
+        }
+    }
+
+    callSelfDefinedFunctionTCO(funcName: string, args: any[]): any {
+        const functionScope = new Scope(null);
+        const params = this.globalScope.symbolTable[funcName].params;
+        functionScope.storeArguments(params, args);
+        const funcBody = this.globalScope.symbolTable[funcName].body;
+
+        for (let i = 0; i < funcBody.length; i++) {
+            const c = funcBody[i];
+            const evaluatedC = this.evalComponent(c, functionScope);
+            
+            if (evaluatedC instanceof Return) {
+                return evaluatedC.returnValue;
+            }
+
+            if (evaluatedC instanceof TailCall) {
+                const newArgs = evaluatedC.args;
+                functionScope.storeArguments(params, newArgs);
+                i = -1; // restarts the loop
+                // -1 would immediately be incremented to 0 because of i++, hence the loop would effectively start at 0 again
+            }
         }
     }
 
