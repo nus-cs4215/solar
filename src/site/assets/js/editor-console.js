@@ -13,6 +13,8 @@ let console = (function (oldConsole) {
                 case "array":
                     outputArgMessage = `Array ${JSON.stringify(arg)}`;
                     break;
+                case 'undefined':
+                    break;
                 default:
                     outputArgMessage = arg;
                     break;

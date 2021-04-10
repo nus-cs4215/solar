@@ -70,7 +70,7 @@ export class Evaluator {
                 return this.evalContainer(component, scope);
 
             default:
-                console.error('This syntax tree component is unrecognised');
+                console.warn('This syntax tree component is unrecognised');
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
