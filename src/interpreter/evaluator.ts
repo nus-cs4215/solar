@@ -222,16 +222,13 @@ export class Evaluator {
             case 'math_ceil':
             case 'math_floor':
             case 'math_sqrt':
-            case 'str_len':
-            case 'str_reverse':
-            case 'arr_len':
-            case 'tbl_len':
                 if (args.length !== 1) {
                     const errorMsg = `Syntax Error: ${funcName}() takes 1 parameter`;
                     console.log(errorMsg);
                     throw errorMsg;
-                }
-            
+                }           
+
+
             default:
                 console.log('hi');
         }
@@ -277,34 +274,36 @@ export class Evaluator {
     }
 
     inMathLibrary(funcName: string): boolean {
-        return funcName === 'math_max'
-            || funcName === 'math_min'
-            || funcName === 'math_abs'
+        return funcName === 'math_abs'
             || funcName === 'math_ceil'
             || funcName === 'math_floor'
             || funcName === 'math_sqrt'
+            || funcName === 'math_max'
+            || funcName === 'math_min';
     }
 
     inStringLibrary(funcName: string): boolean {
         return funcName === 'str_len'
             || funcName === 'str_reverse'
             || funcName === 'str_split'
-            || funcName === 'str_substring'
+            || funcName === 'str_substring';
     }
 
     inArrayLibrary(funcName: string): boolean {
         return funcName === 'arr_len'
+            || funcName === 'arr_get'
             || funcName === 'arr_push'
             || funcName === 'arr_pop'
             || funcName === 'arr_set'
-            || funcName === 'arr_sort'
+            || funcName === 'arr_sort';
     }
 
     inTableLibrary(funcName: string): boolean {
         return funcName === 'tbl_len'
+            || funcName === 'tbl_get'
             || funcName === 'tbl_put'
             || funcName === 'tbl_remove'
-            || funcName === 'tbl_contains'
+            || funcName === 'tbl_contains';
     }
 
     callMathLibrary(funcName: string, args: any[]): number {
@@ -507,7 +506,7 @@ export class Evaluator {
     isLiteral(component: any): boolean {
         return component.type === 'StringLiteral' 
             || component.type === 'NumericLiteral'
-            || component.type === 'BooleanLiteral'
+            || component.type === 'BooleanLiteral';
     }
 
     evalLiteral(component: any): string | number | boolean | null {
