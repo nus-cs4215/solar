@@ -257,6 +257,12 @@ export class Evaluator {
     }
 
     callSelfDefinedFunctionTailRec(funcName: string, args: any[]): any {
+        if (!(funcName in this.globalScope.symbolTable)) {
+            const errorMsg = `Syntax Error: ${funcName}() is not defined`;
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+
         const functionScope = new Scope(null);
         const params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);
@@ -279,6 +285,12 @@ export class Evaluator {
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
+        if (!(funcName in this.globalScope.symbolTable)) {
+            const errorMsg = `Syntax Error: ${funcName}() is not defined`;
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+
         const functionScope = new Scope(null);
         const params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);

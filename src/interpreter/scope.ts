@@ -17,7 +17,9 @@ export class Scope {
             return this.symbolTable[symbol];
         } else {
             if (this.parent === null) {
-                throw 'symbol not defined';
+                const errorMsg = `Syntax Error: ${symbol} not defined`;
+                console.log(errorMsg);
+                throw errorMsg;
             } else {
                 return this.parent.lookup(symbol);
             }
@@ -29,7 +31,9 @@ export class Scope {
             this.symbolTable[symbol] = value;
         } else {
             if (this.parent === null) {
-                throw 'symbol not defined'
+                const errorMsg = `Syntax Error: ${symbol} not defined`;
+                console.log(errorMsg);
+                throw errorMsg;
             } else {
                 this.parent.assign(symbol, value);
             }
@@ -39,14 +43,14 @@ export class Scope {
     // this method is only called by function scopes
     storeArguments(params: string[], args: any[]): void {
         if (params.length != args.length) {
-            throw 'Number of params should be equals to number of args';
+            const errorMsg = 'Syntax Error: Number of parameters not equal to number of arguments';
+            console.log(errorMsg);
+            throw errorMsg;
         }
         const n = params.length;
         for (let i = 0; i < n; ++i) {
-            
             const symbol = params[i];
             const value = args[i];
-            
             this.symbolTable[symbol] = value;
         }
     }
