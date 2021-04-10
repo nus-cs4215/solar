@@ -5,15 +5,14 @@ exports.Evaluator = void 0;
 var scope_1 = require("./scope");
 var break_1 = require("./instructions/break");
 var return_1 = require("./instructions/return");
-var tail_call_1 = require("./instructions/tail-call");
+var tail_recursion_1 = require("./instructions/tail-recursion");
 var math_library_1 = require("./standard-library/math-library");
 var string_library_1 = require("./standard-library/string-library");
 var array_library_1 = require("./standard-library/array-library");
 var table_library_1 = require("./standard-library/table-library");
 var Evaluator = /** @class */ (function () {
-    function Evaluator(tailCallOptimization) {
+    function Evaluator() {
         this.globalScope = new scope_1.Scope(null);
-        this.tailCallOptimization = tailCallOptimization;
     }
     // entry point. ast is the syntax tree of the entire program.
     Evaluator.prototype.evaluate = function (ast) {
@@ -57,12 +56,7 @@ var Evaluator = /** @class */ (function () {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
             case 'ReturnStatement':
-                if (this.tailCallOptimization) {
-                    return this.evalReturnStatementTCO(component, scope);
-                }
-                else {
-                    return this.evalReturnStatement(component, scope);
-                }
+                return this.evalReturnStatement(component, scope);
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
             default:
@@ -71,22 +65,27 @@ var Evaluator = /** @class */ (function () {
                 throw 'Syntax Error';
         }
     };
-    Evaluator.prototype.evalReturnStatementTCO = function (component, scope) {
+    Evaluator.prototype.isTailRecursion = function (returnValueComponent) {
+        if (returnValueComponent.type !== 'CallExpression') {
+            return false;
+        }
+        else {
+            var funcName = returnValueComponent.base.name;
+            return funcName.endsWith('_tailrec');
+        }
+    };
+    Evaluator.prototype.evalReturnStatement = function (component, scope) {
         var _this = this;
         var returnValueComponent = component.arguments[0];
-        if (returnValueComponent.type === 'CallExpression') {
+        if (this.isTailRecursion(returnValueComponent)) {
             var argsComponent = returnValueComponent.arguments;
             var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
-            return new tail_call_1.TailCall(args);
+            return new tail_recursion_1.TailRecursion(args);
         }
         else {
             var returnValue = this.evalComponent(component.arguments[0], scope);
             return new return_1.Return(returnValue);
         }
-    };
-    Evaluator.prototype.evalReturnStatement = function (component, scope) {
-        var returnValue = this.evalComponent(component.arguments[0], scope);
-        return new return_1.Return(returnValue);
     };
     Evaluator.prototype.evalFunctionDeclaration = function (component, scope) {
         if (scope !== this.globalScope) {
@@ -173,7 +172,7 @@ var Evaluator = /** @class */ (function () {
                 for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
                     var c = _c[_b];
                     var evaluatedC = this.evalComponent(c, clauseScope);
-                    if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_call_1.TailCall) {
+                    if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_recursion_1.TailRecursion) {
                         return evaluatedC;
                     }
                 }
@@ -188,7 +187,7 @@ var Evaluator = /** @class */ (function () {
             for (var _i = 0, _a = elseClause.body; _i < _a.length; _i++) {
                 var c = _a[_i];
                 var evaluatedC = this.evalComponent(c, elseClauseScope);
-                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_call_1.TailCall) {
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_recursion_1.TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -228,15 +227,20 @@ var Evaluator = /** @class */ (function () {
             return tableLibray.callLibraryFunction(funcName, args);
         }
         else {
-            if (this.tailCallOptimization) {
-                return this.callSelfDefinedFunctionTCO(funcName, args);
+            if (funcName.endsWith('_tailrec')) {
+                return this.callSelfDefinedFunctionTailRec(funcName, args);
             }
             else {
                 return this.callSelfDefinedFunction(funcName, args);
             }
         }
     };
-    Evaluator.prototype.callSelfDefinedFunctionTCO = function (funcName, args) {
+    Evaluator.prototype.callSelfDefinedFunctionTailRec = function (funcName, args) {
+        if (!(funcName in this.globalScope.symbolTable)) {
+            var errorMsg = "Syntax Error: " + funcName + "() is not defined";
+            console.log(errorMsg);
+            throw errorMsg;
+        }
         var functionScope = new scope_1.Scope(null);
         var params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);
@@ -247,7 +251,7 @@ var Evaluator = /** @class */ (function () {
             if (evaluatedC instanceof return_1.Return) {
                 return evaluatedC.returnValue;
             }
-            if (evaluatedC instanceof tail_call_1.TailCall) {
+            if (evaluatedC instanceof tail_recursion_1.TailRecursion) {
                 var newArgs = evaluatedC.args;
                 functionScope.storeArguments(params, newArgs);
                 i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
@@ -255,6 +259,11 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
+        if (!(funcName in this.globalScope.symbolTable)) {
+            var errorMsg = "Syntax Error: " + funcName + "() is not defined";
+            console.log(errorMsg);
+            throw errorMsg;
+        }
         var functionScope = new scope_1.Scope(null);
         var params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);
@@ -276,26 +285,26 @@ var Evaluator = /** @class */ (function () {
             || funcName === 'math_min';
     };
     Evaluator.prototype.inStringLibrary = function (funcName) {
-        return funcName === 'str_len' //1
-            || funcName === 'str_reverse' //1
-            || funcName === 'str_split' //2
-            || funcName === 'str_substring'; //3
+        return funcName === 'str_len'
+            || funcName === 'str_reverse'
+            || funcName === 'str_split'
+            || funcName === 'str_substring';
     };
     Evaluator.prototype.inArrayLibrary = function (funcName) {
-        return funcName === 'arr_len' //1
-            || funcName === 'arr_reverse' //1
-            || funcName === 'arr_sort' //1
-            || funcName === 'arr_pop' //1
-            || funcName === 'arr_push' //2
-            || funcName === 'arr_get' //2
-            || funcName === 'arr_set'; //3
+        return funcName === 'arr_len'
+            || funcName === 'arr_reverse'
+            || funcName === 'arr_sort'
+            || funcName === 'arr_pop'
+            || funcName === 'arr_push'
+            || funcName === 'arr_get'
+            || funcName === 'arr_set';
     };
     Evaluator.prototype.inTableLibrary = function (funcName) {
-        return funcName === 'tbl_len' //1
-            || funcName === 'tbl_contains' //2
-            || funcName === 'tbl_remove' //2
-            || funcName === 'tbl_get' //2
-            || funcName === 'tbl_put'; //3
+        return funcName === 'tbl_len'
+            || funcName === 'tbl_contains'
+            || funcName === 'tbl_remove'
+            || funcName === 'tbl_get'
+            || funcName === 'tbl_put';
     };
     Evaluator.prototype.evalWhileLoop = function (component, scope) {
         var whileLoopScope = new scope_1.Scope(scope);
@@ -509,7 +518,7 @@ var Evaluator = /** @class */ (function () {
 }());
 exports.Evaluator = Evaluator;
 
-},{"./instructions/break":2,"./instructions/return":3,"./instructions/tail-call":4,"./scope":7,"./standard-library/array-library":11,"./standard-library/math-library":12,"./standard-library/string-library":13,"./standard-library/table-library":14}],2:[function(require,module,exports){
+},{"./instructions/break":2,"./instructions/return":3,"./instructions/tail-recursion":4,"./scope":7,"./standard-library/array-library":11,"./standard-library/math-library":12,"./standard-library/string-library":13,"./standard-library/table-library":14}],2:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Break = void 0;
@@ -535,14 +544,14 @@ exports.Return = Return;
 },{}],4:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
-exports.TailCall = void 0;
-var TailCall = /** @class */ (function () {
-    function TailCall(args) {
+exports.TailRecursion = void 0;
+var TailRecursion = /** @class */ (function () {
+    function TailRecursion(args) {
         this.args = args;
     }
-    return TailCall;
+    return TailRecursion;
 }());
-exports.TailCall = TailCall;
+exports.TailRecursion = TailRecursion;
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -551,18 +560,17 @@ var parser_1 = require("./parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator");
 // To run this file - npm start
-// tco stands for tail call optimization
-function interpret(program, tco) {
+function interpret(program) {
     var p = new parser_1.Parser();
     var ast = p.parseIntoAst(program);
     var s = new semantic_analyser_1.SemanticAnalyser();
     s.analyse(ast);
-    var e = new evaluator_1.Evaluator(tco);
+    var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nfunction hitZero(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero(n-1)\n    end\nend\n\nlet res = hitZero(1100)\nprint(res)\n\n";
-interpret(userProgram, true);
+var userProgram = "\n\nfunction hitZero_tailrec(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero_tailrec(n-1)\n    end\nend\n\nlet res = hitZero_tailrec(1100)\nprint(res)\n\n";
+interpret(userProgram);
 
 },{"./evaluator":1,"./parser":6,"./semantic-analyser/semantic-analyser":10}],6:[function(require,module,exports){
 "use strict";
@@ -608,7 +616,9 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                throw 'symbol not defined';
+                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                console.log(errorMsg);
+                throw errorMsg;
             }
             else {
                 return this.parent.lookup(symbol);
@@ -621,7 +631,9 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                throw 'symbol not defined';
+                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                console.log(errorMsg);
+                throw errorMsg;
             }
             else {
                 this.parent.assign(symbol, value);
@@ -631,7 +643,9 @@ var Scope = /** @class */ (function () {
     // this method is only called by function scopes
     Scope.prototype.storeArguments = function (params, args) {
         if (params.length != args.length) {
-            throw 'Number of params should be equals to number of args';
+            var errorMsg = 'Syntax Error: Number of parameters not equal to number of arguments';
+            console.log(errorMsg);
+            throw errorMsg;
         }
         var n = params.length;
         for (var i = 0; i < n; ++i) {

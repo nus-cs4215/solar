@@ -16,7 +16,9 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                throw 'symbol not defined';
+                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                console.log(errorMsg);
+                throw errorMsg;
             }
             else {
                 return this.parent.lookup(symbol);
@@ -29,7 +31,9 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                throw 'symbol not defined';
+                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                console.log(errorMsg);
+                throw errorMsg;
             }
             else {
                 this.parent.assign(symbol, value);
@@ -39,7 +43,9 @@ var Scope = /** @class */ (function () {
     // this method is only called by function scopes
     Scope.prototype.storeArguments = function (params, args) {
         if (params.length != args.length) {
-            throw 'Number of params should be equals to number of args';
+            var errorMsg = 'Syntax Error: Number of parameters not equal to number of arguments';
+            console.log(errorMsg);
+            throw errorMsg;
         }
         var n = params.length;
         for (var i = 0; i < n; ++i) {
