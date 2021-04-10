@@ -4,8 +4,6 @@ let console = (function (oldConsole) {
             let outputArgMessage;
 
             switch (this.getType(arg)) {
-                case "undefined":
-                    break;
                 case "string":
                     outputArgMessage = `${arg}`;
                     break;
