@@ -21,10 +21,9 @@ var Evaluator = /** @class */ (function () {
             return this.evalLiteral(component);
         }
         switch (component.type) {
-            case 'Identifier': {
+            case 'Identifier':
                 var symbol = component.name;
                 return scope.lookup(symbol);
-            }
             case 'LetStatement':
                 return this.evalDeclaration(component, scope);
             case 'AssignmentStatement':
@@ -78,7 +77,7 @@ var Evaluator = /** @class */ (function () {
         var symbol = component.variables[0].name;
         var value = this.evalComponent(component.init[0], scope);
         if (symbol in scope.symbolTable) {
-            var errorMsg = symbol + " was already declared";
+            var errorMsg = "Syntax Error: " + symbol + " has already been declared";
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -183,7 +182,7 @@ var Evaluator = /** @class */ (function () {
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
         if (functionName === 'print')
-            console.log(args[0]);
+            return this.callPrintFunction(args);
         else if (this.inMathLibrary(functionName))
             return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))
@@ -194,6 +193,23 @@ var Evaluator = /** @class */ (function () {
             throw 'table library not implemented yet';
         else
             return this.callSelfDefinedFunction(functionName, args);
+    };
+    Evaluator.prototype.typeCheck = function (funcName, args) {
+        switch (funcName) {
+        }
+    };
+    Evaluator.prototype.typeCheckMathLibrary = function (funcName, args) {
+        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
+            var arg = args_1[_i];
+            if (typeof arg !== 'number') {
+                var errorMsg = "Type Error: " + funcName + " - " + arg + " is not a number";
+                console.log(errorMsg);
+                throw errorMsg;
+            }
+        }
+    };
+    Evaluator.prototype.callPrintFunction = function (args) {
+        console.log(args[0]);
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
         var functionScope = new scope_1.Scope(null);
@@ -209,55 +225,54 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.inMathLibrary = function (funcName) {
-        return funcName === 'math_max'
-            || funcName === 'math_min'
-            || funcName === 'math_abs'
+        return funcName === 'math_abs'
             || funcName === 'math_ceil'
             || funcName === 'math_floor'
-            || funcName === 'math_sqrt';
+            || funcName === 'math_sqrt'
+            || funcName === 'math_max'
+            || funcName === 'math_min';
     };
     Evaluator.prototype.inStringLibrary = function (funcName) {
-        return funcName === 'str_len'
-            || funcName === 'str_reverse'
-            || funcName === 'str_split'
-            || funcName === 'str_substring';
+        return funcName === 'str_len' //1
+            || funcName === 'str_reverse' //1
+            || funcName === 'str_split' //2
+            || funcName === 'str_substring'; //3
     };
     Evaluator.prototype.inArrayLibrary = function (funcName) {
-        return funcName === 'arr_len'
-            || funcName === 'arr_push'
-            || funcName === 'arr_pop'
-            || funcName === 'arr_set'
-            || funcName === 'arr_sort';
+        return funcName === 'arr_len' //1
+            || funcName === 'arr_reverse' //1
+            || funcName === 'arr_sort' //1
+            || funcName === 'arr_pop' //1
+            || funcName === 'arr_push' //2
+            || funcName === 'arr_get' //2
+            || funcName === 'arr_set'; //3
     };
     Evaluator.prototype.inTableLibrary = function (funcName) {
-        return funcName === 'tbl_len'
-            || funcName === 'tbl_put'
-            || funcName === 'tbl_remove'
-            || funcName === 'tbl_contains';
+        return funcName === 'tbl_len' //1
+            || funcName === 'tbl_contains' //2
+            || funcName === 'tbl_remove' //2
+            || funcName === 'tbl_get' //2
+            || funcName === 'tbl_put'; //3
     };
     Evaluator.prototype.callMathLibrary = function (funcName, args) {
-        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
-            var arg_1 = args_1[_i];
-            if (typeof arg_1 !== 'number') {
-                throw 'Math lib function - all args must be of type number';
-            }
-        }
+        // run time type check
+        this.typeCheckMathLibrary(funcName, args);
         if (funcName === 'math_max') {
             var max = args[0];
-            for (var _a = 0, args_2 = args; _a < args_2.length; _a++) {
-                var arg_2 = args_2[_a];
-                if (arg_2 > max) {
-                    max = arg_2;
+            for (var _i = 0, args_2 = args; _i < args_2.length; _i++) {
+                var arg_1 = args_2[_i];
+                if (arg_1 > max) {
+                    max = arg_1;
                 }
             }
             return max;
         }
         if (funcName === 'math_min') {
             var min = args[0];
-            for (var _b = 0, args_3 = args; _b < args_3.length; _b++) {
-                var arg_3 = args_3[_b];
-                if (arg_3 < min) {
-                    min = arg_3;
+            for (var _a = 0, args_3 = args; _a < args_3.length; _a++) {
+                var arg_2 = args_3[_a];
+                if (arg_2 < min) {
+                    min = arg_2;
                 }
             }
             return min;
@@ -279,7 +294,7 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.reverseString = function (str) {
-        return str.split("").reverse().join("");
+        return str.split('').reverse().join('');
     };
     Evaluator.prototype.callStringLibrary = function (funcName, args) {
         if (typeof args[0] !== 'string') {
@@ -522,7 +537,7 @@ var Evaluator = /** @class */ (function () {
 }());
 exports.Evaluator = Evaluator;
 
-},{"./instructions/break":2,"./instructions/return":3,"./scope":7}],2:[function(require,module,exports){
+},{"./instructions/break":2,"./instructions/return":3,"./scope":6}],2:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Break = void 0;
@@ -549,22 +564,22 @@ exports.Return = Return;
 "use strict";
 exports.__esModule = true;
 var parser_1 = require("./parser");
-var return_statement_analyser_1 = require("./return-statement-analyser");
+var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator");
 // To run this file - npm start
 function interpret(program) {
     var p = new parser_1.Parser();
     var ast = p.parseIntoAst(program);
-    var r = new return_statement_analyser_1.ReturnStatementAnalyser();
-    r.analyse(ast);
+    var s = new semantic_analyser_1.SemanticAnalyser();
+    s.analyse(ast);
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nlet x = {vb=-1,a=2,c=4}\nprint(x)\n";
+var userProgram = "\n\nmath_abs(1,2)\n";
 interpret(userProgram);
 
-},{"./evaluator":1,"./parser":5,"./return-statement-analyser":6}],5:[function(require,module,exports){
+},{"./evaluator":1,"./parser":5,"./semantic-analyser/semantic-analyser":9}],5:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Parser = void 0;
@@ -589,7 +604,136 @@ var Parser = /** @class */ (function () {
 }());
 exports.Parser = Parser;
 
-},{"luaparse":8}],6:[function(require,module,exports){
+},{"luaparse":10}],6:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.Scope = void 0;
+/*
+    Every scope has its own symbol table.
+    It also has a link to its parent scope.
+*/
+var Scope = /** @class */ (function () {
+    function Scope(parent) {
+        this.symbolTable = {};
+        this.parent = parent;
+    }
+    Scope.prototype.lookup = function (symbol) {
+        if (symbol in this.symbolTable) {
+            return this.symbolTable[symbol];
+        }
+        else {
+            if (this.parent === null) {
+                throw 'symbol not defined';
+            }
+            else {
+                return this.parent.lookup(symbol);
+            }
+        }
+    };
+    Scope.prototype.assign = function (symbol, value) {
+        if (symbol in this.symbolTable) {
+            this.symbolTable[symbol] = value;
+        }
+        else {
+            if (this.parent === null) {
+                throw 'symbol not defined';
+            }
+            else {
+                this.parent.assign(symbol, value);
+            }
+        }
+    };
+    // this method is only called by function scopes
+    Scope.prototype.storeArguments = function (params, args) {
+        if (params.length != args.length) {
+            throw 'Number of params should be equals to number of args';
+        }
+        var n = params.length;
+        for (var i = 0; i < n; ++i) {
+            var symbol = params[i];
+            var value = args[i];
+            this.symbolTable[symbol] = value;
+        }
+    };
+    return Scope;
+}());
+exports.Scope = Scope;
+
+},{}],7:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.ArgsLengthAnalyser = void 0;
+// Scans for any library function call with the incorrect number of arguments
+var ArgsLengthAnalyser = /** @class */ (function () {
+    function ArgsLengthAnalyser() {
+    }
+    // entry point. ast is the syntax tree of the entire program.
+    ArgsLengthAnalyser.prototype.analyse = function (ast) {
+        for (var _i = 0, _a = ast.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
+    };
+    ArgsLengthAnalyser.prototype.analyseComponent = function (component) {
+        switch (component.type) {
+            case 'CallStatement':
+                return this.analyseCallExpression(component.expression);
+            case 'CallExpression':
+                return this.analyseCallExpression(component);
+        }
+    };
+    ArgsLengthAnalyser.prototype.analyseCallExpression = function (component) {
+        var funcName = component.base.name;
+        var argsLength = component.arguments.length;
+        this.argsLengthCheck(funcName, argsLength);
+    };
+    ArgsLengthAnalyser.prototype.argsLengthCheck = function (funcName, argsLen) {
+        switch (funcName) {
+            case 'print':
+            case 'math_abs':
+            case 'math_ceil':
+            case 'math_floor':
+            case 'math_sqrt':
+            case 'str_len':
+            case 'str_reverse':
+            case 'arr_len':
+            case 'arr_reverse':
+            case 'arr_sort':
+            case 'arr_pop':
+            case 'tbl_len':
+                if (argsLen !== 1) {
+                    var errorMsg = "Syntax Error: " + funcName + "() takes 1 parameter";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'str_split':
+            case 'arr_push':
+            case 'arr_get':
+            case 'tbl_contains':
+            case 'tbl_remove':
+            case 'tbl_get':
+                if (argsLen !== 2) {
+                    var errorMsg = "Syntax Error: " + funcName + "() takes 2 parameters";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'str_substring':
+            case 'arr_set':
+            case 'tbl_put':
+                if (argsLen !== 3) {
+                    var errorMsg = "Syntax Error: " + funcName + "() takes 3 parameters";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            default:
+                console.debug("ArgsLengthAnalyser: " + funcName + "() is not a library function, no need to analyse");
+        }
+    };
+    return ArgsLengthAnalyser;
+}());
+exports.ArgsLengthAnalyser = ArgsLengthAnalyser;
+
+},{}],8:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ReturnStatementAnalyser = void 0;
@@ -653,62 +797,26 @@ var ReturnStatementAnalyser = /** @class */ (function () {
 }());
 exports.ReturnStatementAnalyser = ReturnStatementAnalyser;
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
-exports.Scope = void 0;
-/*
-    Every scope has its own symbol table.
-    It also has a link to its parent scope.
-*/
-var Scope = /** @class */ (function () {
-    function Scope(parent) {
-        this.symbolTable = {};
-        this.parent = parent;
+exports.SemanticAnalyser = void 0;
+var return_statement_analyser_1 = require("./return-statement-analyser");
+var args_length_analyser_1 = require("./args-length-analyser");
+var SemanticAnalyser = /** @class */ (function () {
+    function SemanticAnalyser() {
+        this.returnStatementAnalyser = new return_statement_analyser_1.ReturnStatementAnalyser();
+        this.argsLengthAnalyser = new args_length_analyser_1.ArgsLengthAnalyser();
     }
-    Scope.prototype.lookup = function (symbol) {
-        if (symbol in this.symbolTable) {
-            return this.symbolTable[symbol];
-        }
-        else {
-            if (this.parent === null) {
-                throw 'symbol not defined';
-            }
-            else {
-                return this.parent.lookup(symbol);
-            }
-        }
+    SemanticAnalyser.prototype.analyse = function (ast) {
+        this.returnStatementAnalyser.analyse(ast);
+        this.argsLengthAnalyser.analyse(ast);
     };
-    Scope.prototype.assign = function (symbol, value) {
-        if (symbol in this.symbolTable) {
-            this.symbolTable[symbol] = value;
-        }
-        else {
-            if (this.parent === null) {
-                throw 'symbol not defined';
-            }
-            else {
-                this.parent.assign(symbol, value);
-            }
-        }
-    };
-    // this method is only called by function scopes
-    Scope.prototype.storeArguments = function (params, args) {
-        if (params.length != args.length) {
-            throw 'Number of params should be equals to number of args';
-        }
-        var n = params.length;
-        for (var i = 0; i < n; ++i) {
-            var symbol = params[i];
-            var value = args[i];
-            this.symbolTable[symbol] = value;
-        }
-    };
-    return Scope;
+    return SemanticAnalyser;
 }());
-exports.Scope = Scope;
+exports.SemanticAnalyser = SemanticAnalyser;
 
-},{}],8:[function(require,module,exports){
+},{"./args-length-analyser":7,"./return-statement-analyser":8}],10:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 

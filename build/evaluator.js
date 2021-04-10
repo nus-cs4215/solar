@@ -20,10 +20,9 @@ var Evaluator = /** @class */ (function () {
             return this.evalLiteral(component);
         }
         switch (component.type) {
-            case 'Identifier': {
+            case 'Identifier':
                 var symbol = component.name;
                 return scope.lookup(symbol);
-            }
             case 'LetStatement':
                 return this.evalDeclaration(component, scope);
             case 'AssignmentStatement':
@@ -77,7 +76,7 @@ var Evaluator = /** @class */ (function () {
         var symbol = component.variables[0].name;
         var value = this.evalComponent(component.init[0], scope);
         if (symbol in scope.symbolTable) {
-            var errorMsg = symbol + " was already declared";
+            var errorMsg = "Syntax Error: " + symbol + " has already been declared";
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -182,7 +181,7 @@ var Evaluator = /** @class */ (function () {
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
         if (functionName === 'print')
-            console.log(args[0]);
+            return this.callPrintFunction(args);
         else if (this.inMathLibrary(functionName))
             return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))
@@ -193,6 +192,23 @@ var Evaluator = /** @class */ (function () {
             throw 'table library not implemented yet';
         else
             return this.callSelfDefinedFunction(functionName, args);
+    };
+    Evaluator.prototype.typeCheck = function (funcName, args) {
+        switch (funcName) {
+        }
+    };
+    Evaluator.prototype.typeCheckMathLibrary = function (funcName, args) {
+        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
+            var arg = args_1[_i];
+            if (typeof arg !== 'number') {
+                var errorMsg = "Type Error: " + funcName + " - " + arg + " is not a number";
+                console.log(errorMsg);
+                throw errorMsg;
+            }
+        }
+    };
+    Evaluator.prototype.callPrintFunction = function (args) {
+        console.log(args[0]);
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
         var functionScope = new scope_1.Scope(null);
@@ -208,55 +224,54 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.inMathLibrary = function (funcName) {
-        return funcName === 'math_max'
-            || funcName === 'math_min'
-            || funcName === 'math_abs'
+        return funcName === 'math_abs'
             || funcName === 'math_ceil'
             || funcName === 'math_floor'
-            || funcName === 'math_sqrt';
+            || funcName === 'math_sqrt'
+            || funcName === 'math_max'
+            || funcName === 'math_min';
     };
     Evaluator.prototype.inStringLibrary = function (funcName) {
-        return funcName === 'str_len'
-            || funcName === 'str_reverse'
-            || funcName === 'str_split'
-            || funcName === 'str_substring';
+        return funcName === 'str_len' //1
+            || funcName === 'str_reverse' //1
+            || funcName === 'str_split' //2
+            || funcName === 'str_substring'; //3
     };
     Evaluator.prototype.inArrayLibrary = function (funcName) {
-        return funcName === 'arr_len'
-            || funcName === 'arr_push'
-            || funcName === 'arr_pop'
-            || funcName === 'arr_set'
-            || funcName === 'arr_sort';
+        return funcName === 'arr_len' //1
+            || funcName === 'arr_reverse' //1
+            || funcName === 'arr_sort' //1
+            || funcName === 'arr_pop' //1
+            || funcName === 'arr_push' //2
+            || funcName === 'arr_get' //2
+            || funcName === 'arr_set'; //3
     };
     Evaluator.prototype.inTableLibrary = function (funcName) {
-        return funcName === 'tbl_len'
-            || funcName === 'tbl_put'
-            || funcName === 'tbl_remove'
-            || funcName === 'tbl_contains';
+        return funcName === 'tbl_len' //1
+            || funcName === 'tbl_contains' //2
+            || funcName === 'tbl_remove' //2
+            || funcName === 'tbl_get' //2
+            || funcName === 'tbl_put'; //3
     };
     Evaluator.prototype.callMathLibrary = function (funcName, args) {
-        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
-            var arg_1 = args_1[_i];
-            if (typeof arg_1 !== 'number') {
-                throw 'Math lib function - all args must be of type number';
-            }
-        }
+        // run time type check
+        this.typeCheckMathLibrary(funcName, args);
         if (funcName === 'math_max') {
             var max = args[0];
-            for (var _a = 0, args_2 = args; _a < args_2.length; _a++) {
-                var arg_2 = args_2[_a];
-                if (arg_2 > max) {
-                    max = arg_2;
+            for (var _i = 0, args_2 = args; _i < args_2.length; _i++) {
+                var arg_1 = args_2[_i];
+                if (arg_1 > max) {
+                    max = arg_1;
                 }
             }
             return max;
         }
         if (funcName === 'math_min') {
             var min = args[0];
-            for (var _b = 0, args_3 = args; _b < args_3.length; _b++) {
-                var arg_3 = args_3[_b];
-                if (arg_3 < min) {
-                    min = arg_3;
+            for (var _a = 0, args_3 = args; _a < args_3.length; _a++) {
+                var arg_2 = args_3[_a];
+                if (arg_2 < min) {
+                    min = arg_2;
                 }
             }
             return min;
@@ -278,7 +293,7 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.reverseString = function (str) {
-        return str.split("").reverse().join("");
+        return str.split('').reverse().join('');
     };
     Evaluator.prototype.callStringLibrary = function (funcName, args) {
         if (typeof args[0] !== 'string') {
