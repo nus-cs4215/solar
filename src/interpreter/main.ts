@@ -18,7 +18,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-print(math_abs(1))
+print(1,1)
 `;
 
 interpret(userProgram);

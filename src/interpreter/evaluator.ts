@@ -227,7 +227,7 @@ export class Evaluator {
             case 'arr_len':
             case 'tbl_len':
                 if (args.length !== 1) {
-                    const errorMsg = `Syntax Error: ${funcName} has 1 parameter`;
+                    const errorMsg = `Syntax Error: ${funcName}() takes 1 parameter`;
                     console.log(errorMsg);
                     throw errorMsg;
                 }
