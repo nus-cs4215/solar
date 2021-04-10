@@ -9,8 +9,13 @@ import { TailCall } from './instructions/tail-call';
 
 export class Evaluator {
 
-    tailCallOptimization = false;
     globalScope = new Scope(null);
+
+    tailCallOptimization: boolean;
+
+    constructor(tailCallOptimization: boolean) {
+        this.tailCallOptimization = tailCallOptimization;
+    }
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {

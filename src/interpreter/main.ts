@@ -4,14 +4,14 @@ import { Evaluator } from './evaluator';
 
 // To run this file - npm start
 
-function interpret(program: string): any {
+function interpret(program: string, tco: boolean): any {
     const p = new Parser();
     const ast = p.parseIntoAst(program);
 
     const s = new SemanticAnalyser();
     s.analyse(ast);
 
-    const e = new Evaluator();
+    const e = new Evaluator(tco);
     e.evaluate(ast);
 }
 
@@ -30,4 +30,4 @@ print(fact(99, 1))
 
 `;
 
-interpret(userProgram);
+interpret(userProgram, false);
