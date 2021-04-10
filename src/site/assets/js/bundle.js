@@ -731,6 +731,9 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     console.log(errorMsg);
                     throw errorMsg;
                 }
+                else {
+                    return;
+                }
             default:
                 console.debug("ArgsLengthAnalyser: " + funcName + "() is not a library function, no need to analyse");
         }
