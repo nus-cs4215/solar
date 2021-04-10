@@ -18,17 +18,12 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-function fib(x)
-    if x == 0 then
-        return 0
-    elseif x == 1 then
-        return 1
-    else
-        return fib(x-1) + fib(x-2)
-    end
+function fact(n, res)
+    if n == 0 then return res end
+    return fact(n-1, res * n)
 end
 
-print(fib(30))
+print(fact(5, 1))
 
 `;
 

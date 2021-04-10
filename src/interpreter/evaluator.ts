@@ -66,9 +66,11 @@ export class Evaluator {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
 
-            case 'ReturnStatement':
+            case 'ReturnStatement': {
+                console.log(component.arguments[0].type);
                 const returnValue = this.evalComponent(component.arguments[0], scope);
                 return new Return(returnValue);
+            }
                 
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
