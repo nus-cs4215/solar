@@ -28,7 +28,7 @@ export class ReturnStatementAnalyser {
                 throw errorMsg;
 
             default:
-                console.debug(`ReturnStatementAnalyser: This component is a ${component.type}, no need to analyse.`);
+                console.error(`ReturnStatementAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     }
 

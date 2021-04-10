@@ -56,7 +56,7 @@ var Evaluator = /** @class */ (function () {
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
             default:
-                console.debug('This syntax tree component is unrecognised');
+                console.error('This syntax tree component is unrecognised');
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
@@ -735,7 +735,7 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     return;
                 }
             default:
-                console.debug("ArgsLengthAnalyser: " + funcName + "() is not a library function, no need to analyse");
+                console.error("ArgsLengthAnalyser: " + funcName + "() is not a library function, no need to analyse");
         }
     };
     return ArgsLengthAnalyser;
@@ -772,7 +772,7 @@ var ReturnStatementAnalyser = /** @class */ (function () {
                 console.log(errorMsg);
                 throw errorMsg;
             default:
-                console.debug("ReturnStatementAnalyser: This component is a " + component.type + ", no need to analyse.");
+                console.error("ReturnStatementAnalyser: This component is a " + component.type + ", no need to analyse.");
         }
     };
     ReturnStatementAnalyser.prototype.analyseIfStatement = function (component) {
