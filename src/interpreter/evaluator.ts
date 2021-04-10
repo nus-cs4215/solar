@@ -278,7 +278,7 @@ export class Evaluator {
     }
 
     callPrintFunction(args: any[]): void {
-        this.argsLengthCheck('print', args);
+        //this.argsLengthCheck('print', args);
         console.log(args[0]);
     }
 
