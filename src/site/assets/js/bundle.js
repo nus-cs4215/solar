@@ -5,6 +5,10 @@ exports.Evaluator = void 0;
 var scope_1 = require("./scope");
 var break_1 = require("./instructions/break");
 var return_1 = require("./instructions/return");
+var math_library_1 = require("./standard-library/math-library");
+var string_library_1 = require("./standard-library/string-library");
+var array_library_1 = require("./standard-library/array-library");
+var table_library_1 = require("./standard-library/table-library");
 var Evaluator = /** @class */ (function () {
     function Evaluator() {
         this.globalScope = new scope_1.Scope(null);
@@ -178,34 +182,30 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalCallExpression = function (component, scope) {
         var _this = this;
-        var functionName = component.base.name;
+        var funcName = component.base.name;
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
-        if (functionName === 'print')
+        if (funcName === 'print') {
             console.log(args[0]);
-        else if (this.inMathLibrary(functionName))
-            return this.callMathLibrary(functionName, args);
-        else if (this.inStringLibrary(functionName))
-            return this.callStringLibrary(functionName, args);
-        else if (this.inArrayLibrary(functionName))
-            throw 'array library not implemented yet';
-        else if (this.inTableLibrary(functionName))
-            throw 'table library not implemented yet';
-        else
-            return this.callSelfDefinedFunction(functionName, args);
-    };
-    Evaluator.prototype.typeCheck = function (funcName, args) {
-        switch (funcName) {
         }
-    };
-    Evaluator.prototype.typeCheckMathLibrary = function (funcName, args) {
-        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
-            var arg = args_1[_i];
-            if (typeof arg !== 'number') {
-                var errorMsg = "Type Error: " + funcName + " - " + arg + " is not a number";
-                console.log(errorMsg);
-                throw errorMsg;
-            }
+        else if (this.inMathLibrary(funcName)) {
+            var mathLibrary = new math_library_1.MathLibrary();
+            return mathLibrary.callLibraryFunction(funcName, args);
+        }
+        else if (this.inStringLibrary(funcName)) {
+            var stringLibrary = new string_library_1.StringLibrary();
+            return stringLibrary.callLibraryFunction(funcName, args);
+        }
+        else if (this.inArrayLibrary(funcName)) {
+            var arrayLibrary = new array_library_1.ArrayLibrary();
+            return arrayLibrary.callLibraryFunction(funcName, args);
+        }
+        else if (this.inTableLibrary(funcName)) {
+            var tableLibray = new table_library_1.TableLibrary();
+            return tableLibray.callLibraryFunction(funcName, args);
+        }
+        else {
+            return this.callSelfDefinedFunction(funcName, args);
         }
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
@@ -250,77 +250,6 @@ var Evaluator = /** @class */ (function () {
             || funcName === 'tbl_remove' //2
             || funcName === 'tbl_get' //2
             || funcName === 'tbl_put'; //3
-    };
-    Evaluator.prototype.callMathLibrary = function (funcName, args) {
-        // run time type check
-        this.typeCheckMathLibrary(funcName, args);
-        if (funcName === 'math_max') {
-            var max = args[0];
-            for (var _i = 0, args_2 = args; _i < args_2.length; _i++) {
-                var arg_1 = args_2[_i];
-                if (arg_1 > max) {
-                    max = arg_1;
-                }
-            }
-            return max;
-        }
-        if (funcName === 'math_min') {
-            var min = args[0];
-            for (var _a = 0, args_3 = args; _a < args_3.length; _a++) {
-                var arg_2 = args_3[_a];
-                if (arg_2 < min) {
-                    min = arg_2;
-                }
-            }
-            return min;
-        }
-        var arg = args[0];
-        switch (funcName) {
-            case 'math_abs':
-                return Math.abs(arg);
-            case 'math_ceil':
-                return Math.ceil(arg);
-            case 'math_floor':
-                return Math.floor(arg);
-            case 'math_sqrt':
-                return Math.sqrt(arg);
-            default:
-                var errorMessage = 'Syntax Error: No such math library function';
-                console.log(errorMessage);
-                throw errorMessage;
-        }
-    };
-    Evaluator.prototype.reverseString = function (str) {
-        return str.split('').reverse().join('');
-    };
-    Evaluator.prototype.callStringLibrary = function (funcName, args) {
-        if (typeof args[0] !== 'string') {
-            throw 'String lib function - first arg must be of type string';
-        }
-        switch (funcName) {
-            case 'str_len':
-                return args[0].length;
-            case 'str_reverse':
-                return this.reverseString(args[0]);
-            case 'str_split':
-                if (typeof args[1] === 'string') {
-                    return args[0].split(args[1]);
-                }
-                else {
-                    throw 'Split function - second arg must be of type string';
-                }
-            case 'str_substring':
-                if (typeof args[1] === 'number' && typeof args[2] === 'number') {
-                    return args[0].substring(args[1], args[2]);
-                }
-                else {
-                    throw 'Substring function - second and third arg must be of type number';
-                }
-            default:
-                var errorMsg = 'Syntax Error: No such string library function';
-                console.log(errorMsg);
-                throw errorMsg;
-        }
     };
     Evaluator.prototype.evalWhileLoop = function (component, scope) {
         var whileLoopScope = new scope_1.Scope(scope);
@@ -534,7 +463,7 @@ var Evaluator = /** @class */ (function () {
 }());
 exports.Evaluator = Evaluator;
 
-},{"./instructions/break":2,"./instructions/return":3,"./scope":6}],2:[function(require,module,exports){
+},{"./instructions/break":2,"./instructions/return":3,"./scope":6,"./standard-library/array-library":10,"./standard-library/math-library":11,"./standard-library/string-library":12,"./standard-library/table-library":13}],2:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Break = void 0;
@@ -573,7 +502,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nlet x = 1\nx = x +1\nprint(x+1)\n";
+var userProgram = "\n\nlet a = {7,2,4}\na = arr_pop(a)\na = arr_sort(a)\na = arr_set(a, 1, 3)\nprint(a)\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"./parser":5,"./semantic-analyser/semantic-analyser":9}],5:[function(require,module,exports){
@@ -601,7 +530,7 @@ var Parser = /** @class */ (function () {
 }());
 exports.Parser = Parser;
 
-},{"luaparse":10}],6:[function(require,module,exports){
+},{"luaparse":14}],6:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Scope = void 0;
@@ -823,6 +752,147 @@ var SemanticAnalyser = /** @class */ (function () {
 exports.SemanticAnalyser = SemanticAnalyser;
 
 },{"./args-length-analyser":7,"./return-statement-analyser":8}],10:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.ArrayLibrary = void 0;
+var ArrayLibrary = /** @class */ (function () {
+    function ArrayLibrary() {
+    }
+    ArrayLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+        var arr = args[0];
+        switch (funcName) {
+            case 'arr_len':
+                return arr.length;
+            case 'arr_reverse':
+                arr.reverse();
+                return arr;
+            case 'arr_sort':
+                arr.sort();
+                return arr;
+            case 'arr_pop':
+                arr.pop();
+                return arr;
+            case 'arr_push':
+                arr.push(args[1]);
+                return arr;
+            case 'arr_get': {
+                var idx = args[1];
+                return arr[idx];
+            }
+            case 'arr_set': {
+                var idx = args[1];
+                arr[idx] = args[2];
+                return arr;
+            }
+            default:
+                var errorMsg = 'Syntax Error: No such function in String Library';
+                console.log(errorMsg);
+                throw errorMsg;
+        }
+    };
+    return ArrayLibrary;
+}());
+exports.ArrayLibrary = ArrayLibrary;
+
+},{}],11:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.MathLibrary = void 0;
+var MathLibrary = /** @class */ (function () {
+    function MathLibrary() {
+    }
+    MathLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+        switch (funcName) {
+            case 'math_abs':
+                return Math.abs(args[0]);
+            case 'math_ceil':
+                return Math.ceil(args[0]);
+            case 'math_floor':
+                return Math.floor(args[0]);
+            case 'math_sqrt':
+                return Math.sqrt(args[0]);
+            case 'math_max':
+                return this.max(args);
+            case 'math_min':
+                return this.min(args);
+            default:
+                var errorMessage = 'Syntax Error: No such function in Math Library';
+                console.log(errorMessage);
+                throw errorMessage;
+        }
+    };
+    MathLibrary.prototype.max = function (args) {
+        var max = args[0];
+        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
+            var arg = args_1[_i];
+            if (arg > max) {
+                max = arg;
+            }
+        }
+        return max;
+    };
+    MathLibrary.prototype.min = function (args) {
+        var min = args[0];
+        for (var _i = 0, args_2 = args; _i < args_2.length; _i++) {
+            var arg = args_2[_i];
+            if (arg < min) {
+                min = arg;
+            }
+        }
+        return min;
+    };
+    return MathLibrary;
+}());
+exports.MathLibrary = MathLibrary;
+
+},{}],12:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.StringLibrary = void 0;
+var StringLibrary = /** @class */ (function () {
+    function StringLibrary() {
+    }
+    StringLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+        switch (funcName) {
+            case 'str_len':
+                return args[0].length;
+            case 'str_reverse':
+                return this.reverseString(args[0]);
+            case 'str_split':
+                return args[0].split(args[1]);
+            case 'str_substring':
+                return args[0].substring(args[1], args[2]);
+            default:
+                var errorMsg = 'Syntax Error: No such function in String Library';
+                console.log(errorMsg);
+                throw errorMsg;
+        }
+    };
+    StringLibrary.prototype.reverseString = function (str) {
+        return str.split('').reverse().join('');
+    };
+    return StringLibrary;
+}());
+exports.StringLibrary = StringLibrary;
+
+},{}],13:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.TableLibrary = void 0;
+var TableLibrary = /** @class */ (function () {
+    function TableLibrary() {
+    }
+    TableLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+    };
+    return TableLibrary;
+}());
+exports.TableLibrary = TableLibrary;
+
+},{}],14:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 

@@ -4,6 +4,10 @@ exports.Evaluator = void 0;
 var scope_1 = require("./scope");
 var break_1 = require("./instructions/break");
 var return_1 = require("./instructions/return");
+var math_library_1 = require("./standard-library/math-library");
+var string_library_1 = require("./standard-library/string-library");
+var array_library_1 = require("./standard-library/array-library");
+var table_library_1 = require("./standard-library/table-library");
 var Evaluator = /** @class */ (function () {
     function Evaluator() {
         this.globalScope = new scope_1.Scope(null);
@@ -177,34 +181,30 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalCallExpression = function (component, scope) {
         var _this = this;
-        var functionName = component.base.name;
+        var funcName = component.base.name;
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
-        if (functionName === 'print')
+        if (funcName === 'print') {
             console.log(args[0]);
-        else if (this.inMathLibrary(functionName))
-            return this.callMathLibrary(functionName, args);
-        else if (this.inStringLibrary(functionName))
-            return this.callStringLibrary(functionName, args);
-        else if (this.inArrayLibrary(functionName))
-            throw 'array library not implemented yet';
-        else if (this.inTableLibrary(functionName))
-            throw 'table library not implemented yet';
-        else
-            return this.callSelfDefinedFunction(functionName, args);
-    };
-    Evaluator.prototype.typeCheck = function (funcName, args) {
-        switch (funcName) {
         }
-    };
-    Evaluator.prototype.typeCheckMathLibrary = function (funcName, args) {
-        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
-            var arg = args_1[_i];
-            if (typeof arg !== 'number') {
-                var errorMsg = "Type Error: " + funcName + " - " + arg + " is not a number";
-                console.log(errorMsg);
-                throw errorMsg;
-            }
+        else if (this.inMathLibrary(funcName)) {
+            var mathLibrary = new math_library_1.MathLibrary();
+            return mathLibrary.callLibraryFunction(funcName, args);
+        }
+        else if (this.inStringLibrary(funcName)) {
+            var stringLibrary = new string_library_1.StringLibrary();
+            return stringLibrary.callLibraryFunction(funcName, args);
+        }
+        else if (this.inArrayLibrary(funcName)) {
+            var arrayLibrary = new array_library_1.ArrayLibrary();
+            return arrayLibrary.callLibraryFunction(funcName, args);
+        }
+        else if (this.inTableLibrary(funcName)) {
+            var tableLibray = new table_library_1.TableLibrary();
+            return tableLibray.callLibraryFunction(funcName, args);
+        }
+        else {
+            return this.callSelfDefinedFunction(funcName, args);
         }
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
@@ -249,77 +249,6 @@ var Evaluator = /** @class */ (function () {
             || funcName === 'tbl_remove' //2
             || funcName === 'tbl_get' //2
             || funcName === 'tbl_put'; //3
-    };
-    Evaluator.prototype.callMathLibrary = function (funcName, args) {
-        // run time type check
-        this.typeCheckMathLibrary(funcName, args);
-        if (funcName === 'math_max') {
-            var max = args[0];
-            for (var _i = 0, args_2 = args; _i < args_2.length; _i++) {
-                var arg_1 = args_2[_i];
-                if (arg_1 > max) {
-                    max = arg_1;
-                }
-            }
-            return max;
-        }
-        if (funcName === 'math_min') {
-            var min = args[0];
-            for (var _a = 0, args_3 = args; _a < args_3.length; _a++) {
-                var arg_2 = args_3[_a];
-                if (arg_2 < min) {
-                    min = arg_2;
-                }
-            }
-            return min;
-        }
-        var arg = args[0];
-        switch (funcName) {
-            case 'math_abs':
-                return Math.abs(arg);
-            case 'math_ceil':
-                return Math.ceil(arg);
-            case 'math_floor':
-                return Math.floor(arg);
-            case 'math_sqrt':
-                return Math.sqrt(arg);
-            default:
-                var errorMessage = 'Syntax Error: No such math library function';
-                console.log(errorMessage);
-                throw errorMessage;
-        }
-    };
-    Evaluator.prototype.reverseString = function (str) {
-        return str.split('').reverse().join('');
-    };
-    Evaluator.prototype.callStringLibrary = function (funcName, args) {
-        if (typeof args[0] !== 'string') {
-            throw 'String lib function - first arg must be of type string';
-        }
-        switch (funcName) {
-            case 'str_len':
-                return args[0].length;
-            case 'str_reverse':
-                return this.reverseString(args[0]);
-            case 'str_split':
-                if (typeof args[1] === 'string') {
-                    return args[0].split(args[1]);
-                }
-                else {
-                    throw 'Split function - second arg must be of type string';
-                }
-            case 'str_substring':
-                if (typeof args[1] === 'number' && typeof args[2] === 'number') {
-                    return args[0].substring(args[1], args[2]);
-                }
-                else {
-                    throw 'Substring function - second and third arg must be of type number';
-                }
-            default:
-                var errorMsg = 'Syntax Error: No such string library function';
-                console.log(errorMsg);
-                throw errorMsg;
-        }
     };
     Evaluator.prototype.evalWhileLoop = function (component, scope) {
         var whileLoopScope = new scope_1.Scope(scope);
