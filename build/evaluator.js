@@ -2,7 +2,8 @@
 exports.__esModule = true;
 exports.Evaluator = void 0;
 var scope_1 = require("./scope");
-var error_1 = require("./error");
+var break_1 = require("./instructions/break");
+var return_1 = require("./instructions/return");
 var Evaluator = /** @class */ (function () {
     function Evaluator() {
         this.globalScope = new scope_1.Scope(null);
@@ -14,8 +15,7 @@ var Evaluator = /** @class */ (function () {
             this.evalComponent(c, this.globalScope);
         }
     };
-    Evaluator.prototype.evalComponent = function (component, scope, insideFunction) {
-        if (insideFunction === void 0) { insideFunction = false; }
+    Evaluator.prototype.evalComponent = function (component, scope) {
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
         }
@@ -24,8 +24,7 @@ var Evaluator = /** @class */ (function () {
                 var symbol = component.name;
                 return scope.lookup(symbol);
             }
-            // 'LetStatement'
-            case 'LocalStatement':
+            case 'LetStatement':
                 return this.evalDeclaration(component, scope);
             case 'AssignmentStatement':
                 return this.evalAssignment(component, scope);
@@ -44,7 +43,7 @@ var Evaluator = /** @class */ (function () {
             case 'ForGenericStatement':
                 return this.evalGenericForLoop(component, scope);
             case 'BreakStatement':
-                throw new error_1.Error('Break', 'Break out of loop');
+                return new break_1.Break();
             case 'FunctionDeclaration':
                 return this.evalFunctionDeclaration(component, scope);
             case 'CallStatement':
@@ -52,38 +51,21 @@ var Evaluator = /** @class */ (function () {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
             case 'ReturnStatement':
-                if (insideFunction) {
-                    var returnValue = this.evalComponent(component.arguments[0], scope);
-                    throw new error_1.Error('Return', 'Return out of function', returnValue);
-                }
-                else {
-                    throw new error_1.Error('Syntax Error', 'Cannot use return outside a function');
-                }
-            // 'ContainerConstructorExpression'
-            case 'TableConstructorExpression':
+                var returnValue = this.evalComponent(component.arguments[0], scope);
+                return new return_1.Return(returnValue);
+            case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
-            /*
-            case 'IndexExpression': {
-                const tableName = component.base.name;
-                const table = scope.lookup(tableName);
-                const index = this.evalComponent(component.index, scope);
-                return table[index];
-            }
-
-            case 'MemberExpression': {
-                const tableName = component.base.name;
-                const table = scope.lookup(tableName);
-                const key = component.identifier.name;
-                return table[key];
-            }
-            */
             default:
-                throw new error_1.Error('Syntax Error', 'This syntax tree component is unrecognised');
+                console.debug('This syntax tree component is unrecognised');
+                console.log('Syntax Error');
+                throw 'Syntax Error';
         }
     };
     Evaluator.prototype.evalFunctionDeclaration = function (component, scope) {
         if (scope !== this.globalScope) {
-            throw 'Functions can only be declared in the global scope';
+            var errorMsg = 'Syntax Error: Functions can only be declared in the global scope';
+            console.log(errorMsg);
+            throw errorMsg;
         }
         var funcSymbol = component.identifier.name;
         var funcParams = component.parameters.map(function (p) { return p.name; });
@@ -95,7 +77,9 @@ var Evaluator = /** @class */ (function () {
         var symbol = component.variables[0].name;
         var value = this.evalComponent(component.init[0], scope);
         if (symbol in scope.symbolTable) {
-            throw symbol + " was already declared!";
+            var errorMsg = symbol + " was already declared";
+            console.log(errorMsg);
+            throw errorMsg;
         }
         else {
             scope.symbolTable[symbol] = value;
@@ -141,39 +125,55 @@ var Evaluator = /** @class */ (function () {
             return tbl;
         }
         else {
-            throw new error_1.Error('Type Error', 'Container is must either be an array or a table');
+            var errorMsg = 'Type Error: Container is neither an array nor table';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     };
-    Evaluator.prototype.hasElseClause = function (clauses) {
-        var lastClause = clauses[clauses.length - 1];
+    Evaluator.prototype.hasElseClause = function (component) {
+        var lastClause = component.clauses[component.clauses.length - 1];
         return lastClause.type === 'ElseClause';
     };
-    Evaluator.prototype.evalIfStatement = function (component, scope) {
+    Evaluator.prototype.evalNonElseClauses = function (component, scope) {
         for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
             var clause = _a[_i];
-            if (clause.type !== 'ElseClause') {
-                var condition = this.evalComponent(clause.condition, scope);
-                if (condition === true) {
-                    var clauseScope = new scope_1.Scope(scope);
-                    for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
-                        var c = _c[_b];
-                        this.evalComponent(c, clauseScope);
+            if (clause.type === 'ElseClause')
+                return false;
+            // we only evaluate the non-else clauses, and short circuit if necessary
+            var condition = this.evalComponent(clause.condition, scope);
+            if (condition === true) {
+                var clauseScope = new scope_1.Scope(scope);
+                for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
+                    var c = _c[_b];
+                    var evaluatedC = this.evalComponent(c, clauseScope);
+                    if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                        return evaluatedC;
                     }
-                    return;
+                }
+                return;
+            }
+        }
+    };
+    Evaluator.prototype.evalElseClause = function (component, scope) {
+        if (this.hasElseClause(component)) {
+            var elseClause = component.clauses[component.clauses.length - 1]; // last clause
+            var elseClauseScope = new scope_1.Scope(scope);
+            for (var _i = 0, _a = elseClause.body; _i < _a.length; _i++) {
+                var c = _a[_i];
+                var evaluatedC = this.evalComponent(c, elseClauseScope);
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                    return evaluatedC;
                 }
             }
         }
-        /*
-            if we reach here, means none of the if and elseif branches were evaluated.
-            hence we will have to evaluate the else branch.
-        */
-        if (this.hasElseClause(component.clauses)) {
-            var elseClause = component.clauses[component.clauses.length - 1]; // last clause
-            var elseClauseScope = new scope_1.Scope(scope);
-            for (var _d = 0, _e = elseClause.body; _d < _e.length; _d++) {
-                var c = _e[_d];
-                this.evalComponent(c, elseClauseScope);
-            }
+    };
+    Evaluator.prototype.evalIfStatement = function (component, scope) {
+        var res = this.evalNonElseClauses(component, scope);
+        if (res === false) {
+            return this.evalElseClause(component, scope);
+        }
+        else {
+            return res;
         }
     };
     Evaluator.prototype.evalCallExpression = function (component, scope) {
@@ -188,9 +188,9 @@ var Evaluator = /** @class */ (function () {
         else if (this.inStringLibrary(functionName))
             return this.callStringLibrary(functionName, args);
         else if (this.inArrayLibrary(functionName))
-            throw new error_1.Error('Implementation', 'array library not implemented yet');
+            throw 'array library not implemented yet';
         else if (this.inTableLibrary(functionName))
-            throw new error_1.Error('Implementation', 'table library not implemented yet');
+            throw 'table library not implemented yet';
         else
             return this.callSelfDefinedFunction(functionName, args);
     };
@@ -201,16 +201,9 @@ var Evaluator = /** @class */ (function () {
         var funcBody = this.globalScope.symbolTable[funcName].body;
         for (var _i = 0, funcBody_1 = funcBody; _i < funcBody_1.length; _i++) {
             var c = funcBody_1[_i];
-            try {
-                this.evalComponent(c, functionScope, true);
-            }
-            catch (err) {
-                if (err.type === 'Return') {
-                    return err.returnValue;
-                }
-                else {
-                    return;
-                }
+            var evaluatedC = this.evalComponent(c, functionScope);
+            if (evaluatedC instanceof return_1.Return) {
+                return evaluatedC.returnValue;
             }
         }
     };
@@ -245,7 +238,7 @@ var Evaluator = /** @class */ (function () {
         for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
             var arg_1 = args_1[_i];
             if (typeof arg_1 !== 'number') {
-                throw new error_1.Error('Type Error', 'Math lib function - all args must be of type number');
+                throw 'Math lib function - all args must be of type number';
             }
         }
         if (funcName === 'math_max') {
@@ -279,7 +272,9 @@ var Evaluator = /** @class */ (function () {
             case 'math_sqrt':
                 return Math.sqrt(arg);
             default:
-                throw new error_1.Error('Syntax Error', 'No such math library function');
+                var errorMessage = 'Syntax Error: No such math library function';
+                console.log(errorMessage);
+                throw errorMessage;
         }
     };
     Evaluator.prototype.reverseString = function (str) {
@@ -287,7 +282,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.callStringLibrary = function (funcName, args) {
         if (typeof args[0] !== 'string') {
-            throw new error_1.Error('Type Error', 'String lib function - first arg must be of type string');
+            throw 'String lib function - first arg must be of type string';
         }
         switch (funcName) {
             case 'str_len':
@@ -299,17 +294,19 @@ var Evaluator = /** @class */ (function () {
                     return args[0].split(args[1]);
                 }
                 else {
-                    throw new error_1.Error('Type Error', 'Split function - second arg must be of type string');
+                    throw 'Split function - second arg must be of type string';
                 }
             case 'str_substring':
                 if (typeof args[1] === 'number' && typeof args[2] === 'number') {
                     return args[0].substring(args[1], args[2]);
                 }
                 else {
-                    throw new error_1.Error('Type Error', 'Substring function - second and third arg must be of type number');
+                    throw 'Substring function - second and third arg must be of type number';
                 }
             default:
-                throw new error_1.Error('Syntax Error', 'No such string library function');
+                var errorMsg = 'Syntax Error: No such string library function';
+                console.log(errorMsg);
+                throw errorMsg;
         }
     };
     Evaluator.prototype.evalWhileLoop = function (component, scope) {
@@ -318,30 +315,25 @@ var Evaluator = /** @class */ (function () {
         while (condition === true) {
             for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
                 var c = _a[_i];
-                try {
-                    this.evalComponent(c, whileLoopScope);
-                    /*
-                        'refresh' / update the while loop condition.
-                        This is necessary when the while loop body modifies the while loop condition
-                    */
-                    condition = this.evalComponent(component.condition, scope);
-                }
-                catch (err) {
-                    if (err.type === 'Return') {
-                        throw err;
-                    }
-                    else {
-                        return;
-                    }
+                var evaluatedC = this.evalComponent(c, whileLoopScope);
+                condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                    return evaluatedC;
                 }
             }
         }
     };
     Evaluator.prototype.evalGenericForLoop = function (component, scope) {
-        if (component.iterators.length !== 1)
-            throw new error_1.Error('Syntax Error', 'Container needs to be length 1');
-        if (component.iterators[0].type !== 'Identifier')
-            throw new error_1.Error('Syntax Error', 'Container referenced must be a symbol');
+        if (component.iterators.length !== 1) {
+            var errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+        if (component.iterators[0].type !== 'Identifier') {
+            var errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
         var container = this.evalComponent(component.iterators[0], scope);
         if (Array.isArray(container)) {
             return this.evalGenericForLoopThroughArray(component, scope);
@@ -351,8 +343,11 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalGenericForLoopThroughArray = function (component, scope) {
-        if (component.variables.length !== 1)
-            throw new error_1.Error('Syntax Error', 'There should only be 1 loop variable for array');
+        if (component.variables.length !== 1) {
+            var errorMsg = 'Syntax Error: There should only be 1 loop variable';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
         var forLoopScope = new scope_1.Scope(scope);
         var itemSymbol = component.variables[0].name;
         var container = this.evalComponent(component.iterators[0], scope);
@@ -361,18 +356,19 @@ var Evaluator = /** @class */ (function () {
             forLoopScope.symbolTable[itemSymbol] = item;
             for (var _a = 0, _b = component.body; _a < _b.length; _a++) {
                 var c = _b[_a];
-                try {
-                    this.evalComponent(c, forLoopScope);
-                }
-                catch (breakException) {
-                    return;
+                var evaluatedC = this.evalComponent(c, forLoopScope);
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                    return evaluatedC;
                 }
             }
         }
     };
     Evaluator.prototype.evalGenericForLoopThroughTable = function (component, scope) {
-        if (component.variables.length !== 2)
-            throw new error_1.Error('Syntax Error', 'There should 2 loop variable for table - first variable for key and second variable for value');
+        if (component.variables.length !== 2) {
+            var errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
         var forLoopScope = new scope_1.Scope(scope);
         var keySymbol = component.variables[0].name;
         var valueSymbol = component.variables[1].name;
@@ -383,16 +379,9 @@ var Evaluator = /** @class */ (function () {
             forLoopScope.symbolTable[valueSymbol] = value;
             for (var _c = 0, _d = component.body; _c < _d.length; _c++) {
                 var c = _d[_c];
-                try {
-                    this.evalComponent(c, forLoopScope);
-                }
-                catch (err) {
-                    if (err.type === 'Return') {
-                        throw err;
-                    }
-                    else {
-                        return;
-                    }
+                var evaluatedC = this.evalComponent(c, forLoopScope);
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                    return evaluatedC;
                 }
             }
         }
@@ -407,16 +396,9 @@ var Evaluator = /** @class */ (function () {
             forLoopScope.symbolTable[loopControlVariable] = i;
             for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
                 var c = _a[_i];
-                try {
-                    this.evalComponent(c, forLoopScope);
-                }
-                catch (err) {
-                    if (err.type === 'Return') {
-                        throw err;
-                    }
-                    else {
-                        return;
-                    }
+                var evaluatedC = this.evalComponent(c, forLoopScope);
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                    return evaluatedC;
                 }
             }
         }
@@ -444,7 +426,9 @@ var Evaluator = /** @class */ (function () {
             return -argument;
         }
         else {
-            throw new error_1.Error('Type Error', 'no such unary operation');
+            var errorMsg = 'Type Error: No such unary operation';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     };
     Evaluator.prototype.evalLogicalExpression = function (component, scope) {
@@ -457,7 +441,9 @@ var Evaluator = /** @class */ (function () {
             return left || right;
         }
         else {
-            throw new error_1.Error('Type Error', 'no such logical operation');
+            var errorMsg = 'Type Error: No such logical operation';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     };
     Evaluator.prototype.evalBinaryExpression = function (component, scope) {
@@ -526,7 +512,9 @@ var Evaluator = /** @class */ (function () {
             return left <= right;
         }
         else {
-            throw new error_1.Error('Type Error', 'no such binary operation');
+            var errorMsg = 'Type Error: No such binary operation';
+            console.log(errorMsg);
+            throw errorMsg;
         }
     };
     return Evaluator;

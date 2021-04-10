@@ -1,18 +1,17 @@
 "use strict";
 exports.__esModule = true;
+var parser_1 = require("./parser");
+var return_statement_analyser_1 = require("./return-statement-analyser");
 var evaluator_1 = require("./evaluator");
-var parser = require('luaparse');
 // To run this file - npm start
-function parseIntoAST(program) {
-    var prog = program.replace(/let/g, 'local');
-    var ast = parser.parse(prog, { luaVersion: '5.3' });
-    return ast;
-}
 function interpret(program) {
-    var ast = parseIntoAST(program);
+    var p = new parser_1.Parser();
+    var ast = p.parseIntoAst(program);
+    var r = new return_statement_analyser_1.ReturnStatementAnalyser();
+    r.analyse(ast);
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nif 5>1 then return 11 end\n";
+var userProgram = "\n\nlet x = {vb=-1,a=2,c=4}\nprint(x)\n";
 interpret(userProgram);
