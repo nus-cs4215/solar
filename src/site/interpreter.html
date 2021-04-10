@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Solar Online Interpreter</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=no"
+    />
+    <link rel="stylesheet" href="assets/css/editor-styles.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header id="header">
+      <a href="index.html" class="title">Solar</a>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li>
+            <a href="cheatsheet.html">Syntax Cheatsheet</a>
+          </li>
+          <li>
+            <a href="interpreter.html" class="active">Online Interpreter</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Editor -->
+    <div class="editor">
+      <h1 class="major">Solar Interpreter</h1>
+      <div class="editor__wrapper">
+        <div class="editor__body">
+          <div id="editorCode" class="editor__code"></div>
+        </div>
+        <div class="editor__footer">
+          <div class="editor__footer--left">
+            <button class="editor__btn editor__run">Run ></button>
+            <button class="editor__btn editor__reset">Clear console ></button>
+          </div>
+          <div class="editor__footer--right">
+            <div class="editor__console">
+              <ul class="editor__console-logs"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="footer" class="wrapper alt">
+      <div class="inner">
+        <ul class="menu">
+          <li>&copy; Solar. All rights reserved.</li>
+          <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <!-- Required Ace Libraries -->
+    <script src="assets/js/ace-editor/src-min/ace.js"></script>
+    <script src="assets/js/ace-editor/src-min/mode-lua.js"></script>
+    <script src="assets/js/ace-editor/src-min/ext-language_tools.js"></script>
+    <!-- Custom Scripts -->
+    <script src="assets/js/bundle.js"></script>
+    <script src="assets/js/editor.js"></script>
+    <script src="assets/js/editor-console.js"></script>
+  </body>
+</html>
