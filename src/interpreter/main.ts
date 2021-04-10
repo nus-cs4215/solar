@@ -19,19 +19,16 @@ function interpret(program: string, tco: boolean): any {
 // user program
 const userProgram = `
 
--- tail recursive fibonacci
-
-function fib(n, a, b)
+function hitZero(n)
     if n == 0 then
-        return a
+        return 'We have hit zero!!'
+    else
+        return hitZero(n-1)
     end
-    if n == 1 then
-        return b
-    end
-    return fib(n-1, b, a+b)
 end
 
-print(fib(2000,0,1))
+let res = hitZero(1100)
+print(res)
 
 `;
 
