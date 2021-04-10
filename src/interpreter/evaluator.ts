@@ -215,52 +215,6 @@ export class Evaluator {
         else                                            return this.callSelfDefinedFunction(functionName, args);
     }
 
-    argsLengthCheck(funcName: string, args: any[]) {
-        switch (funcName) {
-            case 'print':
-            case 'math_abs':
-            case 'math_ceil':
-            case 'math_floor':
-            case 'math_sqrt':
-            case 'str_len':
-            case 'str_reverse':
-            case 'arr_len':
-            case 'arr_reverse':
-            case 'arr_sort':
-            case 'arr_pop':
-            case 'tbl_len':
-                if (args.length !== 1) {
-                    const errorMsg = `Syntax Error: ${funcName}() takes 1 parameter`;
-                    console.log(errorMsg);
-                    throw errorMsg;
-                }
-            
-            case 'str_split':
-            case 'arr_push':
-            case 'arr_get':
-            case 'tbl_contains':
-            case 'tbl_remove':
-            case 'tbl_get':
-                if (args.length !== 2) {
-                    const errorMsg = `Syntax Error: ${funcName}() takes 2 parameters`;
-                    console.log(errorMsg);
-                    throw errorMsg;
-                }
-
-            case 'str_substring':
-            case 'arr_set':
-            case 'tbl_put':
-                if (args.length !== 3) {
-                    const errorMsg = `Syntax Error: ${funcName}() takes 3 parameters`;
-                    console.log(errorMsg);
-                    throw errorMsg;
-                }
-
-            default:
-                console.debug(`${funcName}() is not a library function`)
-        }
-    }
-
     typeCheck(funcName: string, args: any[]) {
         switch (funcName) {
 
@@ -278,7 +232,6 @@ export class Evaluator {
     }
 
     callPrintFunction(args: any[]): void {
-        this.argsLengthCheck('print', args);
         console.log(args[0]);
     }
 

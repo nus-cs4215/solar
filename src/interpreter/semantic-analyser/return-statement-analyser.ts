@@ -2,7 +2,7 @@
 export class ReturnStatementAnalyser {
 
     // entry point. ast is the syntax tree of the entire program.
-    analyse(ast: any): any {
+    analyse(ast: any): void {
         for (const c of ast.body) {
             this.analyseComponent(c)
         }
