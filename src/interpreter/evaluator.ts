@@ -207,7 +207,7 @@ export class Evaluator {
         const argsComponent = component.arguments;
         const args = argsComponent.map(c => this.evalComponent(c, scope));
 
-        if (functionName === 'print')                   return this.callPrintFunction(args);
+        if (functionName === 'print')                   console.log(args[0]);
         else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
         else if (this.inArrayLibrary(functionName))     throw 'array library not implemented yet';
@@ -229,10 +229,6 @@ export class Evaluator {
                 throw errorMsg;
             }
         }
-    }
-
-    callPrintFunction(args: any[]): void {
-        console.log(args[0]);
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {

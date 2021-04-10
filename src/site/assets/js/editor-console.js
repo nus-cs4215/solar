@@ -4,6 +4,8 @@ let console = (function (oldConsole) {
             let outputArgMessage;
 
             switch (this.getType(arg)) {
+                case "error":
+                    break;
                 case "undefined":
                     break;
                 case "string":
@@ -23,6 +25,7 @@ let console = (function (oldConsole) {
             return outputArgMessage;
         },
         getType: function (arg) {
+            if (arg instanceof Error) return "error";
             if (typeof arg === "string") return "string";
             if (typeof arg === "boolean") return "boolean";
             if (typeof arg === "function") return "function";

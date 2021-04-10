@@ -20,7 +20,7 @@ const userProgram = `
 
 let x = 1
 x = x +1
-print(x)
+print(x+1)
 `;
 
 interpret(userProgram);
