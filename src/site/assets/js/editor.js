@@ -54,13 +54,13 @@ executeCodeBtn.addEventListener('click', () => {
     editorLib.clearConsoleScreen();
 
     // Get input from the code editor
-    const userCode = codeEditor.getValue();
+    const userProgram = codeEditor.getValue();
 
-    // Run the user code
+    // Run user program
     try {
-        interpret(userCode);
+        interpret(userProgram);
     } catch (err) {
-        console.error(err);
+        console.warn('User program has error')
     }
 
     // Print to the console
