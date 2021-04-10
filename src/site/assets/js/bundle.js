@@ -9,9 +9,11 @@ var math_library_1 = require("./standard-library/math-library");
 var string_library_1 = require("./standard-library/string-library");
 var array_library_1 = require("./standard-library/array-library");
 var table_library_1 = require("./standard-library/table-library");
+var tail_call_1 = require("./instructions/tail-call");
 var Evaluator = /** @class */ (function () {
-    function Evaluator() {
+    function Evaluator(tailCallOptimization) {
         this.globalScope = new scope_1.Scope(null);
+        this.tailCallOptimization = tailCallOptimization;
     }
     // entry point. ast is the syntax tree of the entire program.
     Evaluator.prototype.evaluate = function (ast) {
@@ -55,8 +57,12 @@ var Evaluator = /** @class */ (function () {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
             case 'ReturnStatement':
-                var returnValue = this.evalComponent(component.arguments[0], scope);
-                return new return_1.Return(returnValue);
+                if (this.tailCallOptimization) {
+                    return this.evalReturnStatementTCO(component, scope);
+                }
+                else {
+                    return this.evalReturnStatement(component, scope);
+                }
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
             default:
@@ -64,6 +70,23 @@ var Evaluator = /** @class */ (function () {
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
+    };
+    Evaluator.prototype.evalReturnStatementTCO = function (component, scope) {
+        var _this = this;
+        var returnValueComponent = component.arguments[0];
+        if (returnValueComponent.type === 'CallExpression') {
+            var argsComponent = returnValueComponent.arguments;
+            var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
+            return new tail_call_1.TailCall(args);
+        }
+        else {
+            var returnValue = this.evalComponent(component.arguments[0], scope);
+            return new return_1.Return(returnValue);
+        }
+    };
+    Evaluator.prototype.evalReturnStatement = function (component, scope) {
+        var returnValue = this.evalComponent(component.arguments[0], scope);
+        return new return_1.Return(returnValue);
     };
     Evaluator.prototype.evalFunctionDeclaration = function (component, scope) {
         if (scope !== this.globalScope) {
@@ -150,7 +173,7 @@ var Evaluator = /** @class */ (function () {
                 for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
                     var c = _c[_b];
                     var evaluatedC = this.evalComponent(c, clauseScope);
-                    if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                    if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_call_1.TailCall) {
                         return evaluatedC;
                     }
                 }
@@ -165,7 +188,7 @@ var Evaluator = /** @class */ (function () {
             for (var _i = 0, _a = elseClause.body; _i < _a.length; _i++) {
                 var c = _a[_i];
                 var evaluatedC = this.evalComponent(c, elseClauseScope);
-                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_call_1.TailCall) {
                     return evaluatedC;
                 }
             }
@@ -205,7 +228,30 @@ var Evaluator = /** @class */ (function () {
             return tableLibray.callLibraryFunction(funcName, args);
         }
         else {
-            return this.callSelfDefinedFunction(funcName, args);
+            if (this.tailCallOptimization) {
+                return this.callSelfDefinedFunctionTCO(funcName, args);
+            }
+            else {
+                return this.callSelfDefinedFunction(funcName, args);
+            }
+        }
+    };
+    Evaluator.prototype.callSelfDefinedFunctionTCO = function (funcName, args) {
+        var functionScope = new scope_1.Scope(null);
+        var params = this.globalScope.symbolTable[funcName].params;
+        functionScope.storeArguments(params, args);
+        var funcBody = this.globalScope.symbolTable[funcName].body;
+        for (var i = 0; i < funcBody.length; i++) {
+            var c = funcBody[i];
+            var evaluatedC = this.evalComponent(c, functionScope);
+            if (evaluatedC instanceof return_1.Return) {
+                return evaluatedC.returnValue;
+            }
+            if (evaluatedC instanceof tail_call_1.TailCall) {
+                var newArgs = evaluatedC.args;
+                functionScope.storeArguments(params, newArgs);
+                i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
+            }
         }
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
@@ -463,7 +509,7 @@ var Evaluator = /** @class */ (function () {
 }());
 exports.Evaluator = Evaluator;
 
-},{"./instructions/break":2,"./instructions/return":3,"./scope":6,"./standard-library/array-library":10,"./standard-library/math-library":11,"./standard-library/string-library":12,"./standard-library/table-library":13}],2:[function(require,module,exports){
+},{"./instructions/break":2,"./instructions/return":3,"./instructions/tail-call":4,"./scope":7,"./standard-library/array-library":11,"./standard-library/math-library":12,"./standard-library/string-library":13,"./standard-library/table-library":14}],2:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Break = void 0;
@@ -489,23 +535,35 @@ exports.Return = Return;
 },{}],4:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
+exports.TailCall = void 0;
+var TailCall = /** @class */ (function () {
+    function TailCall(args) {
+        this.args = args;
+    }
+    return TailCall;
+}());
+exports.TailCall = TailCall;
+
+},{}],5:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
 var parser_1 = require("./parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator");
 // To run this file - npm start
-function interpret(program) {
+function interpret(program, tco) {
     var p = new parser_1.Parser();
     var ast = p.parseIntoAst(program);
     var s = new semantic_analyser_1.SemanticAnalyser();
     s.analyse(ast);
-    var e = new evaluator_1.Evaluator();
+    var e = new evaluator_1.Evaluator(tco);
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nlet a = {z= 11, b = 2, a=1}\na = tbl_put(a, 'a', 3)\nprint(a)\n";
-interpret(userProgram);
+var userProgram = "\n\nfunction fact(n, res)\n    if n == 0 then \n        return res\n    else\n        return fact(n-1, res * n)\n    end\nend\n\nprint(fact(99, 1))\n\n";
+interpret(userProgram, false);
 
-},{"./evaluator":1,"./parser":5,"./semantic-analyser/semantic-analyser":9}],5:[function(require,module,exports){
+},{"./evaluator":1,"./parser":6,"./semantic-analyser/semantic-analyser":10}],6:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Parser = void 0;
@@ -530,7 +588,7 @@ var Parser = /** @class */ (function () {
 }());
 exports.Parser = Parser;
 
-},{"luaparse":14}],6:[function(require,module,exports){
+},{"luaparse":15}],7:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Scope = void 0;
@@ -585,7 +643,7 @@ var Scope = /** @class */ (function () {
 }());
 exports.Scope = Scope;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ArgsLengthAnalyser = void 0;
@@ -668,7 +726,7 @@ var ArgsLengthAnalyser = /** @class */ (function () {
 }());
 exports.ArgsLengthAnalyser = ArgsLengthAnalyser;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ReturnStatementAnalyser = void 0;
@@ -732,7 +790,7 @@ var ReturnStatementAnalyser = /** @class */ (function () {
 }());
 exports.ReturnStatementAnalyser = ReturnStatementAnalyser;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.SemanticAnalyser = void 0;
@@ -751,7 +809,7 @@ var SemanticAnalyser = /** @class */ (function () {
 }());
 exports.SemanticAnalyser = SemanticAnalyser;
 
-},{"./args-length-analyser":7,"./return-statement-analyser":8}],10:[function(require,module,exports){
+},{"./args-length-analyser":8,"./return-statement-analyser":9}],11:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ArrayLibrary = void 0;
@@ -795,7 +853,7 @@ var ArrayLibrary = /** @class */ (function () {
 }());
 exports.ArrayLibrary = ArrayLibrary;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.MathLibrary = void 0;
@@ -847,7 +905,7 @@ var MathLibrary = /** @class */ (function () {
 }());
 exports.MathLibrary = MathLibrary;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.StringLibrary = void 0;
@@ -878,7 +936,7 @@ var StringLibrary = /** @class */ (function () {
 }());
 exports.StringLibrary = StringLibrary;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.TableLibrary = void 0;
@@ -917,7 +975,7 @@ var TableLibrary = /** @class */ (function () {
 }());
 exports.TableLibrary = TableLibrary;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 
@@ -3591,4 +3649,4 @@ exports.TableLibrary = TableLibrary;
 /* vim: set sw=2 ts=2 et tw=79 : */
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[4]);
+},{}]},{},[5]);

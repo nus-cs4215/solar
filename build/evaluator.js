@@ -8,9 +8,11 @@ var math_library_1 = require("./standard-library/math-library");
 var string_library_1 = require("./standard-library/string-library");
 var array_library_1 = require("./standard-library/array-library");
 var table_library_1 = require("./standard-library/table-library");
+var tail_call_1 = require("./instructions/tail-call");
 var Evaluator = /** @class */ (function () {
-    function Evaluator() {
+    function Evaluator(tailCallOptimization) {
         this.globalScope = new scope_1.Scope(null);
+        this.tailCallOptimization = tailCallOptimization;
     }
     // entry point. ast is the syntax tree of the entire program.
     Evaluator.prototype.evaluate = function (ast) {
@@ -54,8 +56,12 @@ var Evaluator = /** @class */ (function () {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
             case 'ReturnStatement':
-                var returnValue = this.evalComponent(component.arguments[0], scope);
-                return new return_1.Return(returnValue);
+                if (this.tailCallOptimization) {
+                    return this.evalReturnStatementTCO(component, scope);
+                }
+                else {
+                    return this.evalReturnStatement(component, scope);
+                }
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
             default:
@@ -63,6 +69,23 @@ var Evaluator = /** @class */ (function () {
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
+    };
+    Evaluator.prototype.evalReturnStatementTCO = function (component, scope) {
+        var _this = this;
+        var returnValueComponent = component.arguments[0];
+        if (returnValueComponent.type === 'CallExpression') {
+            var argsComponent = returnValueComponent.arguments;
+            var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
+            return new tail_call_1.TailCall(args);
+        }
+        else {
+            var returnValue = this.evalComponent(component.arguments[0], scope);
+            return new return_1.Return(returnValue);
+        }
+    };
+    Evaluator.prototype.evalReturnStatement = function (component, scope) {
+        var returnValue = this.evalComponent(component.arguments[0], scope);
+        return new return_1.Return(returnValue);
     };
     Evaluator.prototype.evalFunctionDeclaration = function (component, scope) {
         if (scope !== this.globalScope) {
@@ -149,7 +172,7 @@ var Evaluator = /** @class */ (function () {
                 for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
                     var c = _c[_b];
                     var evaluatedC = this.evalComponent(c, clauseScope);
-                    if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                    if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_call_1.TailCall) {
                         return evaluatedC;
                     }
                 }
@@ -164,7 +187,7 @@ var Evaluator = /** @class */ (function () {
             for (var _i = 0, _a = elseClause.body; _i < _a.length; _i++) {
                 var c = _a[_i];
                 var evaluatedC = this.evalComponent(c, elseClauseScope);
-                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return) {
+                if (evaluatedC instanceof break_1.Break || evaluatedC instanceof return_1.Return || evaluatedC instanceof tail_call_1.TailCall) {
                     return evaluatedC;
                 }
             }
@@ -204,7 +227,30 @@ var Evaluator = /** @class */ (function () {
             return tableLibray.callLibraryFunction(funcName, args);
         }
         else {
-            return this.callSelfDefinedFunction(funcName, args);
+            if (this.tailCallOptimization) {
+                return this.callSelfDefinedFunctionTCO(funcName, args);
+            }
+            else {
+                return this.callSelfDefinedFunction(funcName, args);
+            }
+        }
+    };
+    Evaluator.prototype.callSelfDefinedFunctionTCO = function (funcName, args) {
+        var functionScope = new scope_1.Scope(null);
+        var params = this.globalScope.symbolTable[funcName].params;
+        functionScope.storeArguments(params, args);
+        var funcBody = this.globalScope.symbolTable[funcName].body;
+        for (var i = 0; i < funcBody.length; i++) {
+            var c = funcBody[i];
+            var evaluatedC = this.evalComponent(c, functionScope);
+            if (evaluatedC instanceof return_1.Return) {
+                return evaluatedC.returnValue;
+            }
+            if (evaluatedC instanceof tail_call_1.TailCall) {
+                var newArgs = evaluatedC.args;
+                functionScope.storeArguments(params, newArgs);
+                i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
+            }
         }
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
