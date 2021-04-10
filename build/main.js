@@ -13,5 +13,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nmath_abs(1,2)\n";
+var userProgram = "\n\nlet x = 1\nx = x +1\nprint(x)\n";
 interpret(userProgram);

@@ -576,7 +576,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nmath_abs(1,2)\n";
+var userProgram = "\n\nlet x = 1\nx = x +1\nprint(x)\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"./parser":5,"./semantic-analyser/semantic-analyser":9}],5:[function(require,module,exports){
@@ -706,6 +706,9 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     console.log(errorMsg);
                     throw errorMsg;
                 }
+                else {
+                    return;
+                }
             case 'str_split':
             case 'arr_push':
             case 'arr_get':
@@ -716,6 +719,9 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     var errorMsg = "Syntax Error: " + funcName + "() takes 2 parameters";
                     console.log(errorMsg);
                     throw errorMsg;
+                }
+                else {
+                    return;
                 }
             case 'str_substring':
             case 'arr_set':

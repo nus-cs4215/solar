@@ -44,6 +44,9 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     console.log(errorMsg);
                     throw errorMsg;
                 }
+                else {
+                    return;
+                }
             case 'str_split':
             case 'arr_push':
             case 'arr_get':
@@ -54,6 +57,9 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     var errorMsg = "Syntax Error: " + funcName + "() takes 2 parameters";
                     console.log(errorMsg);
                     throw errorMsg;
+                }
+                else {
+                    return;
                 }
             case 'str_substring':
             case 'arr_set':
