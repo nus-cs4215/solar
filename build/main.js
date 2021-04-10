@@ -14,5 +14,5 @@ function interpret(program, tco) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\n-- tail recursive fibonacci\n\nfunction fib(n, a, b)\n    if n == 0 then\n        return a\n    end\n    if n == 1 then\n        return b\n    end\n    return fib(n-1, b, a+b)\nend\n\nprint(fib(2000,0,1))\n\n";
+var userProgram = "\n\nfunction hitZero(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero(n-1)\n    end\nend\n\nlet res = hitZero(1100)\nprint(res)\n\n";
 interpret(userProgram, true);
