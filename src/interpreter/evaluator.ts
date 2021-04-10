@@ -5,6 +5,7 @@ import { MathLibrary } from './standard-library/math-library';
 import { StringLibrary } from './standard-library/string-library';
 import { ArrayLibrary } from './standard-library/array-library';
 import { TableLibrary } from './standard-library/table-library';
+import { TailCall } from './instructions/tail-call';
 
 export class Evaluator {
 
@@ -66,11 +67,16 @@ export class Evaluator {
             case 'CallExpression':
                 return this.evalCallExpression(component, scope);
 
-            case 'ReturnStatement': {
-                console.log(component.arguments[0].type);
-                const returnValue = this.evalComponent(component.arguments[0], scope);
-                return new Return(returnValue);
-            }
+            case 'ReturnStatement':
+                const returnValueComponent = component.arguments[0];
+                if (returnValueComponent.type === 'CallExpression') {
+                    const argsComponent = returnValueComponent.arguments;
+                    const args = argsComponent.map(c => this.evalComponent(c, scope));
+                    return new TailCall(args);
+                } else {
+                    const returnValue = this.evalComponent(component.arguments[0], scope);
+                    return new Return(returnValue);
+                }
                 
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
