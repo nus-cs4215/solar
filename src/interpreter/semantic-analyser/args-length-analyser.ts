@@ -66,7 +66,7 @@ export class ArgsLengthAnalyser {
                 }
 
             default:
-                console.debug(`ArgsLengthAnalyser: ${funcName}() is not a library function`)
+                console.debug(`ArgsLengthAnalyser: ${funcName}() is not a library function, no need to analyse`)
         }
     }
 }
