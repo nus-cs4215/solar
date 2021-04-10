@@ -26,7 +26,7 @@ function hitZero_tailrec(n)
     end
 end
 
-let res = hitZero_tailrec(1100)
+let res = hitZero_tailrec(5000)
 print(res)
 
 `;

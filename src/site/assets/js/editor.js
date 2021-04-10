@@ -59,8 +59,10 @@ executeCodeBtn.addEventListener('click', () => {
     // Run user program
     try {
         interpret(userProgram);
-    } catch (err) {
-        console.warn('User program has error')
+    } catch (e) {
+        if (typeof e !== 'string') {
+            console.log(e.message);
+        }
     }
 
     // Print to the console
