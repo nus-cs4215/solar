@@ -244,11 +244,18 @@ export class Evaluator {
         functionScope.storeArguments(params, args);
         const funcBody = this.globalScope.symbolTable[funcName].body;
 
-        for (const c of funcBody) {
+        for (let i = 0; i < funcBody.length; i++) {
+            const c = funcBody[i];
             const evaluatedC = this.evalComponent(c, functionScope);
             
             if (evaluatedC instanceof Return) {
                 return evaluatedC.returnValue;
+            }
+
+            if (evaluatedC instanceof TailCall) {
+                const newArgs = evaluatedC.args;
+                functionScope.storeArguments(params, newArgs);
+                i = -1;
             }
         }
     }
