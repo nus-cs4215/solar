@@ -32,7 +32,7 @@ var ArrayLibrary = /** @class */ (function () {
                 return arr;
             }
             default:
-                var errorMsg = 'Syntax Error: No such function in String Library';
+                var errorMsg = 'Syntax Error: No such function in Array Library';
                 console.log(errorMsg);
                 throw errorMsg;
         }

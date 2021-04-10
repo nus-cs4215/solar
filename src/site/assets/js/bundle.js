@@ -502,7 +502,7 @@ function interpret(program) {
     e.evaluate(ast);
 }
 window.interpret = interpret;
-var userProgram = "\n\nlet a = {7,2,4}\na = arr_pop(a)\na = arr_sort(a)\na = arr_set(a, 1, 3)\nprint(a)\n";
+var userProgram = "\n\nlet a = {z= 11, b = 2, a=1}\na = tbl_put(a, 'a', 3)\nprint(a)\n";
 interpret(userProgram);
 
 },{"./evaluator":1,"./parser":5,"./semantic-analyser/semantic-analyser":9}],5:[function(require,module,exports){
@@ -514,7 +514,7 @@ var Parser = /** @class */ (function () {
     function Parser() {
     }
     Parser.prototype.parseIntoAst = function (program) {
-        var prog = program.replace(/let/g, 'local');
+        var prog = program.replace(/let/g, 'local').replace(/!=/, '~=');
         var defaultAST = parser.parse(prog, { luaVersion: '5.3' });
         var ast = this.modifyDefaultAST(defaultAST);
         return ast;
@@ -786,7 +786,7 @@ var ArrayLibrary = /** @class */ (function () {
                 return arr;
             }
             default:
-                var errorMsg = 'Syntax Error: No such function in String Library';
+                var errorMsg = 'Syntax Error: No such function in Array Library';
                 console.log(errorMsg);
                 throw errorMsg;
         }
@@ -887,6 +887,31 @@ var TableLibrary = /** @class */ (function () {
     }
     TableLibrary.prototype.callLibraryFunction = function (funcName, args) {
         // TODO: run time type check
+        var tbl = args[0];
+        switch (funcName) {
+            case 'tbl_len':
+                return Object.keys(tbl).length;
+            case 'tbl_contains':
+                return args[1] in tbl;
+            case 'tbl_remove': {
+                var k = args[1];
+                delete tbl[k];
+                return tbl;
+            }
+            case 'tbl_get': {
+                var k = args[1];
+                return tbl[k];
+            }
+            case 'tbl_put': {
+                var k = args[1];
+                tbl[k] = args[2];
+                return tbl;
+            }
+            default:
+                var errorMsg = 'Syntax Error: No such function in Table Library';
+                console.log(errorMsg);
+                throw errorMsg;
+        }
     };
     return TableLibrary;
 }());

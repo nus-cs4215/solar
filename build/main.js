@@ -13,5 +13,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nlet a = {7,2,4}\na = arr_pop(a)\na = arr_sort(a)\na = arr_set(a, 1, 3)\nprint(a)\n";
+var userProgram = "\n\nlet a = {z= 11, b = 2, a=1}\na = tbl_put(a, 'a', 3)\nprint(a)\n";
 interpret(userProgram);

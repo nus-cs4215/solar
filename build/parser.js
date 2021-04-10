@@ -6,7 +6,7 @@ var Parser = /** @class */ (function () {
     function Parser() {
     }
     Parser.prototype.parseIntoAst = function (program) {
-        var prog = program.replace(/let/g, 'local');
+        var prog = program.replace(/let/g, 'local').replace(/!=/, '~=');
         var defaultAST = parser.parse(prog, { luaVersion: '5.3' });
         var ast = this.modifyDefaultAST(defaultAST);
         return ast;
