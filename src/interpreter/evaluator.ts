@@ -1,6 +1,7 @@
 import { Scope } from './scope';
 import { Break } from './instructions/break';
 import { Return } from './instructions/return';
+import { MathLibrary } from './standard-library/math-library';
 
 export class Evaluator {
 
@@ -203,16 +204,23 @@ export class Evaluator {
     }
 
     evalCallExpression(component: any, scope: Scope): any {
-        const functionName = component.base.name;
+        const funcName = component.base.name;
         const argsComponent = component.arguments;
         const args = argsComponent.map(c => this.evalComponent(c, scope));
 
-        if (functionName === 'print')                   console.log(args[0]);
-        else if (this.inMathLibrary(functionName))      return this.callMathLibrary(functionName, args);
+        if (funcName === 'print') {
+            console.log(args[0]);
+        } else if (this.inMathLibrary(funcName)) {
+            const mathLibrary = new MathLibrary();
+            return mathLibrary.callLibraryFunction(funcName, args);
+        } 
+
+        /*
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
         else if (this.inArrayLibrary(functionName))     throw 'array library not implemented yet';
         else if (this.inTableLibrary(functionName))     throw 'table library not implemented yet';
         else                                            return this.callSelfDefinedFunction(functionName, args);
+        */
     }
 
     typeCheck(funcName: string, args: any[]) {
@@ -281,52 +289,6 @@ export class Evaluator {
             || funcName === 'tbl_remove'//2
             || funcName === 'tbl_get'//2
             || funcName === 'tbl_put';//3
-    }
-
-    callMathLibrary(funcName: string, args: any[]): number {
-        // run time type check
-        this.typeCheckMathLibrary(funcName, args);
-
-        if (funcName === 'math_max') {
-            let max = args[0];
-            for (const arg of args) {
-                if (arg > max) {
-                    max = arg;
-                }
-            }
-            return max;
-        }
-
-        if (funcName === 'math_min') {
-            let min = args[0];
-            for (const arg of args) {
-                if (arg < min) {
-                    min = arg;
-                }
-            }
-            return min;
-        }
-        
-        const arg = args[0];
-
-        switch (funcName) {
-            case 'math_abs':
-                return Math.abs(arg);
-
-            case 'math_ceil':
-                return Math.ceil(arg);
-
-            case 'math_floor':
-                return Math.floor(arg);
-
-            case 'math_sqrt':
-                return Math.sqrt(arg);
-
-            default:
-                const errorMessage = 'Syntax Error: No such math library function';
-                console.log(errorMessage);
-                throw errorMessage;
-        }
     }
 
     reverseString(str: string): string {

@@ -20,7 +20,7 @@ const userProgram = `
 
 let x = 1
 x = x +1
-print(x+1)
+print(math_max(1,x))
 `;
 
 interpret(userProgram);
