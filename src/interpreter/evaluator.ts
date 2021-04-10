@@ -3,6 +3,8 @@ import { Break } from './instructions/break';
 import { Return } from './instructions/return';
 import { MathLibrary } from './standard-library/math-library';
 import { StringLibrary } from './standard-library/string-library';
+import { ArrayLibrary } from './standard-library/array-library';
+import { TableLibrary } from './standard-library/table-library';
 
 export class Evaluator {
 
@@ -217,14 +219,15 @@ export class Evaluator {
         } else if (this.inStringLibrary(funcName)) {
             const stringLibrary = new StringLibrary();
             return stringLibrary.callLibraryFunction(funcName, args);
+        } else if (this.inArrayLibrary(funcName)) {
+            const arrayLibrary = new ArrayLibrary();
+            return arrayLibrary.callLibraryFunction(funcName, args);
+        } else if (this.inTableLibrary(funcName)) {
+            const tableLibray = new TableLibrary();
+            return tableLibray.callLibraryFunction(funcName, args);
+        } else {
+            return this.callSelfDefinedFunction(funcName, args);
         }
-
-        /*
-        else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
-        else if (this.inArrayLibrary(functionName))     throw 'array library not implemented yet';
-        else if (this.inTableLibrary(functionName))     throw 'table library not implemented yet';
-        else                                            return this.callSelfDefinedFunction(functionName, args);
-        */
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
