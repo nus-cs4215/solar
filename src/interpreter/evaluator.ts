@@ -102,24 +102,6 @@ export class Evaluator {
         }
     }
 
-    /*
-    evalReturnStatementTailRec(component: any, scope: Scope) {
-        const returnValueComponent = component.arguments[0];
-        if (returnValueComponent.type === 'CallExpression') {
-            const argsComponent = returnValueComponent.arguments;
-            const args = argsComponent.map(c => this.evalComponent(c, scope));
-            return new TailRecursion(args);
-        } else {
-            const returnValue = this.evalComponent(component.arguments[0], scope);
-            return new Return(returnValue);
-        }
-    }
-
-    evalReturnStatement(component: any, scope: Scope) {
-        const returnValue = this.evalComponent(component.arguments[0], scope);
-        return new Return(returnValue);
-    }
-    */
     evalFunctionDeclaration(component: any, scope: Scope): any {
         if (scope !== this.globalScope) {
             const errorMsg = 'Syntax Error: Functions can only be declared in the global scope';
@@ -321,28 +303,28 @@ export class Evaluator {
     }
 
     inStringLibrary(funcName: string): boolean {
-        return funcName === 'str_len'//1
-            || funcName === 'str_reverse'//1
-            || funcName === 'str_split'//2
-            || funcName === 'str_substring';//3
+        return funcName === 'str_len'
+            || funcName === 'str_reverse'
+            || funcName === 'str_split'
+            || funcName === 'str_substring';
     }
 
     inArrayLibrary(funcName: string): boolean {
-        return funcName === 'arr_len'//1
-            || funcName === 'arr_reverse'//1
-            || funcName === 'arr_sort'//1
-            || funcName === 'arr_pop'//1
-            || funcName === 'arr_push'//2
-            || funcName === 'arr_get'//2
-            || funcName === 'arr_set';//3
+        return funcName === 'arr_len'
+            || funcName === 'arr_reverse'
+            || funcName === 'arr_sort'
+            || funcName === 'arr_pop'
+            || funcName === 'arr_push'
+            || funcName === 'arr_get'
+            || funcName === 'arr_set';
     }
 
     inTableLibrary(funcName: string): boolean {
-        return funcName === 'tbl_len'//1
-            || funcName === 'tbl_contains'//2
-            || funcName === 'tbl_remove'//2
-            || funcName === 'tbl_get'//2
-            || funcName === 'tbl_put';//3
+        return funcName === 'tbl_len'
+            || funcName === 'tbl_contains'
+            || funcName === 'tbl_remove'
+            || funcName === 'tbl_get'
+            || funcName === 'tbl_put';
     }
 
     evalWhileLoop(component: any, scope: any): any {
