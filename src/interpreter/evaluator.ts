@@ -1,7 +1,7 @@
 import { Scope } from './scope';
 import { Break } from './instructions/break';
 import { Return } from './instructions/return';
-import { TailCall } from './instructions/tail-call';
+import { TailRecursion } from './instructions/tail-recursion';
 import { MathLibrary } from './standard-library/math-library';
 import { StringLibrary } from './standard-library/string-library';
 import { ArrayLibrary } from './standard-library/array-library';
@@ -10,12 +10,6 @@ import { TableLibrary } from './standard-library/table-library';
 export class Evaluator {
 
     globalScope = new Scope(null);
-
-    tailCallOptimization: boolean;
-
-    constructor(tailCallOptimization: boolean) {
-        this.tailCallOptimization = tailCallOptimization;
-    }
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
@@ -74,11 +68,7 @@ export class Evaluator {
                 return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                if (this.tailCallOptimization) {
-                    return this.evalReturnStatementTCO(component, scope);
-                } else {
                     return this.evalReturnStatement(component, scope);
-                }
 
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
@@ -90,12 +80,35 @@ export class Evaluator {
         }
     }
 
-    evalReturnStatementTCO(component: any, scope: Scope) {
+    isTailRecursion(returnValueComponent: any): boolean {
+        if (returnValueComponent.type !== 'CallExpression') {
+            return false;
+        } else {
+            const funcName = returnValueComponent.base.name;
+            return funcName.endsWith('_tailrec');
+        }
+    }
+
+    evalReturnStatement(component: any, scope: Scope): any {
+        const returnValueComponent = component.arguments[0];
+
+        if (this.isTailRecursion(returnValueComponent)) {
+            const argsComponent = returnValueComponent.arguments;
+            const args = argsComponent.map(c => this.evalComponent(c, scope));
+            return new TailRecursion(args);
+        } else {
+            const returnValue = this.evalComponent(component.arguments[0], scope);
+            return new Return(returnValue);
+        }
+    }
+
+    /*
+    evalReturnStatementTailRec(component: any, scope: Scope) {
         const returnValueComponent = component.arguments[0];
         if (returnValueComponent.type === 'CallExpression') {
             const argsComponent = returnValueComponent.arguments;
             const args = argsComponent.map(c => this.evalComponent(c, scope));
-            return new TailCall(args);
+            return new TailRecursion(args);
         } else {
             const returnValue = this.evalComponent(component.arguments[0], scope);
             return new Return(returnValue);
@@ -106,7 +119,7 @@ export class Evaluator {
         const returnValue = this.evalComponent(component.arguments[0], scope);
         return new Return(returnValue);
     }
-
+    */
     evalFunctionDeclaration(component: any, scope: Scope): any {
         if (scope !== this.globalScope) {
             const errorMsg = 'Syntax Error: Functions can only be declared in the global scope';
@@ -198,7 +211,7 @@ export class Evaluator {
                 for (const c of clause.body) {
                     const evaluatedC = this.evalComponent(c, clauseScope);
 
-                    if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailCall) {
+                    if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                         return evaluatedC;
                     }
                 }
@@ -216,7 +229,7 @@ export class Evaluator {
             for (const c of elseClause.body) {
                 const evaluatedC = this.evalComponent(c, elseClauseScope);
                 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailCall) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -253,15 +266,15 @@ export class Evaluator {
             const tableLibray = new TableLibrary();
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
-            if (this.tailCallOptimization) {
-                return this.callSelfDefinedFunctionTCO(funcName, args);
+            if (funcName.endsWith('_tailrec')) {
+                return this.callSelfDefinedFunctionTailRec(funcName, args);
             } else {
                 return this.callSelfDefinedFunction(funcName, args);
             }
         }
     }
 
-    callSelfDefinedFunctionTCO(funcName: string, args: any[]): any {
+    callSelfDefinedFunctionTailRec(funcName: string, args: any[]): any {
         const functionScope = new Scope(null);
         const params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);
@@ -275,7 +288,7 @@ export class Evaluator {
                 return evaluatedC.returnValue;
             }
 
-            if (evaluatedC instanceof TailCall) {
+            if (evaluatedC instanceof TailRecursion) {
                 const newArgs = evaluatedC.args;
                 functionScope.storeArguments(params, newArgs);
                 i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
