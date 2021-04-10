@@ -36,7 +36,7 @@ export class ArrayLibrary {
             }
 
             default:
-                const errorMsg = 'Syntax Error: No such function in String Library';
+                const errorMsg = 'Syntax Error: No such function in Array Library';
                 console.log(errorMsg);
                 throw errorMsg;
         }
