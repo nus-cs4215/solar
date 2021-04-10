@@ -42,6 +42,8 @@ export class ArgsLengthAnalyser {
                     const errorMsg = `Syntax Error: ${funcName}() takes 1 parameter`;
                     console.log(errorMsg);
                     throw errorMsg;
+                } else {
+                    return;
                 }
             
             case 'str_split':
@@ -54,6 +56,8 @@ export class ArgsLengthAnalyser {
                     const errorMsg = `Syntax Error: ${funcName}() takes 2 parameters`;
                     console.log(errorMsg);
                     throw errorMsg;
+                } else {
+                    return;
                 }
 
             case 'str_substring':
