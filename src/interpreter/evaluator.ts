@@ -9,6 +9,7 @@ import { TailCall } from './instructions/tail-call';
 
 export class Evaluator {
 
+    tailCallOptimization = false;
     globalScope = new Scope(null);
 
     // entry point. ast is the syntax tree of the entire program.
@@ -68,16 +69,12 @@ export class Evaluator {
                 return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                const returnValueComponent = component.arguments[0];
-                if (returnValueComponent.type === 'CallExpression') {
-                    const argsComponent = returnValueComponent.arguments;
-                    const args = argsComponent.map(c => this.evalComponent(c, scope));
-                    return new TailCall(args);
+                if (this.tailCallOptimization) {
+                    return this.evalReturnStatementTCO(component, scope);
                 } else {
-                    const returnValue = this.evalComponent(component.arguments[0], scope);
-                    return new Return(returnValue);
+                    return this.evalReturnStatement(component, scope);
                 }
-                
+
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
 
@@ -86,6 +83,23 @@ export class Evaluator {
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
+    }
+
+    evalReturnStatementTCO(component: any, scope: Scope) {
+        const returnValueComponent = component.arguments[0];
+        if (returnValueComponent.type === 'CallExpression') {
+            const argsComponent = returnValueComponent.arguments;
+            const args = argsComponent.map(c => this.evalComponent(c, scope));
+            return new TailCall(args);
+        } else {
+            const returnValue = this.evalComponent(component.arguments[0], scope);
+            return new Return(returnValue);
+        }
+    }
+
+    evalReturnStatement(component: any, scope: Scope) {
+        const returnValue = this.evalComponent(component.arguments[0], scope);
+        return new Return(returnValue);
     }
 
     evalFunctionDeclaration(component: any, scope: Scope): any {
@@ -234,7 +248,11 @@ export class Evaluator {
             const tableLibray = new TableLibrary();
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
-            return this.callSelfDefinedFunctionTCO(funcName, args);
+            if (this.tailCallOptimization) {
+                return this.callSelfDefinedFunctionTCO(funcName, args);
+            } else {
+                return this.callSelfDefinedFunction(funcName, args);
+            }
         }
     }
 

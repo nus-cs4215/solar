@@ -26,7 +26,7 @@ function fact(n, res)
     end
 end
 
-print(fact(5, 1))
+print(fact(99, 1))
 
 `;
 
