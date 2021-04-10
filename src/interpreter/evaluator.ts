@@ -232,14 +232,11 @@ export class Evaluator {
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
         const functionScope = new Scope(null);
-        
         const params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);
-        
         const funcBody = this.globalScope.symbolTable[funcName].body;
 
         for (const c of funcBody) {
-
             const evaluatedC = this.evalComponent(c, functionScope);
             
             if (evaluatedC instanceof Return) {

@@ -18,11 +18,9 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let a = {7,2,4}
-a = arr_pop(a)
-a = arr_sort(a)
-a = arr_set(a, 1, 3)
-print(5 != 2)
+let a = {z= 11, b = 2, a=1}
+a = tbl_put(a, 'a', 3)
+print(a)
 `;
 
 interpret(userProgram);

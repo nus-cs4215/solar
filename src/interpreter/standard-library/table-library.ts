@@ -6,7 +6,7 @@ export class TableLibrary {
         const tbl = args[0];
         switch (funcName) {
             case 'tbl_len':
-                return tbl.length;
+                return Object.keys(tbl).length;
 
             case 'tbl_contains':
                 return args[1] in tbl;
