@@ -2,6 +2,7 @@ import { Scope } from './scope';
 import { Break } from './instructions/break';
 import { Return } from './instructions/return';
 import { MathLibrary } from './standard-library/math-library';
+import { StringLibrary } from './standard-library/string-library';
 
 export class Evaluator {
 
@@ -213,7 +214,10 @@ export class Evaluator {
         } else if (this.inMathLibrary(funcName)) {
             const mathLibrary = new MathLibrary();
             return mathLibrary.callLibraryFunction(funcName, args);
-        } 
+        } else if (this.inStringLibrary(funcName)) {
+            const stringLibrary = new StringLibrary();
+            return stringLibrary.callLibraryFunction(funcName, args);
+        }
 
         /*
         else if (this.inStringLibrary(functionName))    return this.callStringLibrary(functionName, args);
@@ -221,22 +225,6 @@ export class Evaluator {
         else if (this.inTableLibrary(functionName))     throw 'table library not implemented yet';
         else                                            return this.callSelfDefinedFunction(functionName, args);
         */
-    }
-
-    typeCheck(funcName: string, args: any[]) {
-        switch (funcName) {
-
-        }
-    }
-
-    typeCheckMathLibrary(funcName: string, args: any[]): void {
-        for (const arg of args) {
-            if (typeof arg !== 'number') {
-                const errorMsg = `Type Error: ${funcName} - ${arg} is not a number`;
-                console.log(errorMsg);
-                throw errorMsg;
-            }
-        }
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
@@ -289,44 +277,6 @@ export class Evaluator {
             || funcName === 'tbl_remove'//2
             || funcName === 'tbl_get'//2
             || funcName === 'tbl_put';//3
-    }
-
-    reverseString(str: string): string {
-        return str.split('').reverse().join('');
-    }
-
-    callStringLibrary(funcName: string, args: any[]): number  | string | string[] {
-        if (typeof args[0] !== 'string') {
-            throw 'String lib function - first arg must be of type string';
-        }
-
-        switch (funcName) {
-
-            case 'str_len':
-                return args[0].length;
-
-            case 'str_reverse':
-                return this.reverseString(args[0]);
-
-            case 'str_split':
-                if (typeof args[1] === 'string'){
-                    return args[0].split(args[1]);
-                } else {
-                    throw 'Split function - second arg must be of type string';
-                }
-            
-            case 'str_substring':
-                if (typeof args[1] === 'number' && typeof args[2] === 'number') {
-                    return args[0].substring(args[1], args[2]);
-                } else {
-                    throw 'Substring function - second and third arg must be of type number';
-                }
-
-            default:
-                const errorMsg = 'Syntax Error: No such string library function';
-                console.log(errorMsg);
-                throw errorMsg;
-        }
     }
 
     evalWhileLoop(component: any, scope: any): any {

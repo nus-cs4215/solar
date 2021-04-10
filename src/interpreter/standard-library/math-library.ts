@@ -23,7 +23,7 @@ export class MathLibrary {
                 return this.min(args);
             
             default:
-                const errorMessage = 'Syntax Error: No such math library function';
+                const errorMessage = 'Syntax Error: No such function in Math Library';
                 console.log(errorMessage);
                 throw errorMessage;
         }
