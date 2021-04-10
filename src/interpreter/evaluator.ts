@@ -99,7 +99,7 @@ export class Evaluator {
         const value = this.evalComponent(component.init[0], scope);
 
         if (symbol in scope.symbolTable) {
-            const errorMsg = `${symbol} was already declared`;
+            const errorMsg = `Syntax Error: ${symbol} has already been declared`;
             console.log(errorMsg);
             throw errorMsg;
         } else {
