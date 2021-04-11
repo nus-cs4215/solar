@@ -33,6 +33,7 @@
       <section id="main" class="wrapper">
         <div class="inner">
           <h1 class="major">Syntax Cheatsheet for Solar</h1>
+          <p>Note that indentation does not matter for our language.</p>
           <!-- Comments -->
           <section>
             <h2>Comments</h2>
@@ -81,6 +82,13 @@ elseif condition then
   print("maybe")
 else
   print("no")
+end
+
+-- Nested Conditionals
+if condition then
+  if condition then
+    -- ... 
+  end
 end</code>
 						</pre>
           </section>
@@ -107,7 +115,9 @@ function myFunctionWithArgs(a, b)
   -- ...
 end
 
--- Note that function arguments are passed by value</code>
+-- Note that function arguments are passed by value
+-- Functions can only be declared in the global scope
+-- Function body cannot access global variables</code>
 						</pre>
           </section>
 
@@ -138,6 +148,7 @@ end
 -- Logic (and/or)
 true and false --> false
 true or false  --> true
+not true       --> false
 
 -- String concat
 "left" + "right"</code>
