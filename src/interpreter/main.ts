@@ -18,15 +18,15 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-function hitZero_tailrec(n)
+function hitZero(n)
     if n == 0 then
         return 'We have hit zero!!'
     else
-        return hitZero_tailrec(n-1)
+        return hitZero(n-1)
     end
 end
 
-let res = hitZero_tailrec(5000)
+let res = hitZero(10000)
 print(res)
 
 `;

@@ -10,6 +10,7 @@ import { TableLibrary } from './standard-library/table-library';
 export class Evaluator {
 
     globalScope = new Scope(null);
+    callerName: string;
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
@@ -84,8 +85,8 @@ export class Evaluator {
         if (returnValueComponent.type !== 'CallExpression') {
             return false;
         } else {
-            const funcName = returnValueComponent.base.name;
-            return funcName.endsWith('_tailrec');
+            const calleeName = returnValueComponent.base.name;
+            return this.callerName === calleeName;
         }
     }
 
@@ -248,11 +249,7 @@ export class Evaluator {
             const tableLibray = new TableLibrary();
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
-            if (funcName.endsWith('_tailrec')) {
-                return this.callSelfDefinedFunctionTailRec(funcName, args);
-            } else {
-                return this.callSelfDefinedFunction(funcName, args);
-            }
+            return this.callSelfDefinedFunctionTailRec(funcName, args);
         }
     }
 
@@ -263,6 +260,7 @@ export class Evaluator {
             throw errorMsg;
         }
 
+        this.callerName = funcName;
         const functionScope = new Scope(null);
         const params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);
