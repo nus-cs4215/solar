@@ -10,6 +10,7 @@ import { TableLibrary } from './standard-library/table-library';
 export class Evaluator {
 
     globalScope = new Scope(null);
+    callerName: string;     // To identify tail recursion, we check callerName === calleeName
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
@@ -68,7 +69,7 @@ export class Evaluator {
                 return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                    return this.evalReturnStatement(component, scope);
+                return this.evalReturnStatement(component, scope);
 
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
@@ -84,8 +85,8 @@ export class Evaluator {
         if (returnValueComponent.type !== 'CallExpression') {
             return false;
         } else {
-            const funcName = returnValueComponent.base.name;
-            return funcName.endsWith('_tailrec');
+            const calleeName = returnValueComponent.base.name;
+            return this.callerName === calleeName;
         }
     }
 
@@ -248,11 +249,7 @@ export class Evaluator {
             const tableLibray = new TableLibrary();
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
-            if (funcName.endsWith('_tailrec')) {
-                return this.callSelfDefinedFunctionTailRec(funcName, args);
-            } else {
-                return this.callSelfDefinedFunction(funcName, args);
-            }
+            return this.callSelfDefinedFunctionTailRec(funcName, args);
         }
     }
 
@@ -263,6 +260,7 @@ export class Evaluator {
             throw errorMsg;
         }
 
+        this.callerName = funcName;
         const functionScope = new Scope(null);
         const params = this.globalScope.symbolTable[funcName].params;
         functionScope.storeArguments(params, args);
@@ -350,7 +348,7 @@ export class Evaluator {
                 const evaluatedC = this.evalComponent(c, whileLoopScope);
                 condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -397,7 +395,7 @@ export class Evaluator {
             for (const c of component.body) {
                 const evaluatedC = this.evalComponent(c, forLoopScope);
                 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -424,7 +422,7 @@ export class Evaluator {
             for (const c of component.body) {
                 const evaluatedC = this.evalComponent(c, forLoopScope);
 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -445,7 +443,7 @@ export class Evaluator {
             for (const c of component.body) {
                 const evaluatedC = this.evalComponent(c, forLoopScope);
 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
