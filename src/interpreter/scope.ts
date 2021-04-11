@@ -17,7 +17,7 @@ export class Scope {
             return this.symbolTable[symbol];
         } else {
             if (this.parent === null) {
-                const errorMsg = `Syntax Error: ${symbol} not defined`;
+                const errorMsg = `Name Error: ${symbol} is not defined`;
                 console.log(errorMsg);
                 throw errorMsg;
             } else {
@@ -31,7 +31,7 @@ export class Scope {
             this.symbolTable[symbol] = value;
         } else {
             if (this.parent === null) {
-                const errorMsg = `Syntax Error: ${symbol} not defined`;
+                const errorMsg = `Name Error: ${symbol} is not defined`;
                 console.log(errorMsg);
                 throw errorMsg;
             } else {
