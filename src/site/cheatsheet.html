@@ -61,16 +61,10 @@ x = 2</code>
 							<code>while condition do
 end
 
-for i = 1,5 do
-end 
-
 for i = start, finish, delta do
 end 
 
-repeat
-until condition
-
--- breaking out of a Loops
+-- breaking out of a loop
 while x do
   if condition then break end
 end</code>
@@ -95,7 +89,7 @@ end</code>
           <section>
             <h2>Tables/Arrays</h2>
             <pre>
-							<code>t = {}
+							<code>let table = {}
 t = { a = 1, b = 2 }
 array = { "a", "b", "c", "d" }</code>
 						</pre>
@@ -111,7 +105,9 @@ end
 
 function myFunctionWithArgs(a, b)
   -- ...
-end</code>
+end
+
+-- Note that function arguments are passed by value</code>
 						</pre>
           </section>
 
@@ -119,9 +115,9 @@ end</code>
           <section>
             <h2>Invoking Functions</h2>
             <pre>
-							<code>print()
-print("Hi")</code>
-						</pre>
+							<code>print("Hi")</code>
+						</pre
+            >
           </section>
 
           <!-- Operators -->
@@ -129,13 +125,11 @@ print("Hi")</code>
             <h2>Operators</h2>
             <pre>
 							<code>-- Relational (binary)
--- __eq  __lt  __gt  __le  __ge
-   ==    <     >     <=    >=
-~=   -- Not equal, just like !=
+   ==    <     >     <=    >=    !=
 
 -- Arithmetic (binary)
--- __add  __sub  __muv  __div  __mod  __pow
-   +      -      *      /      %      ^
+-- __add  __sub  __muv  __div  __mod  __pow  __floordiv
+   +      -      *      /      %      ^      //
 
 -- Arithmetic (unary)
 -- __unm (unary minus)
