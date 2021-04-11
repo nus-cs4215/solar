@@ -249,11 +249,11 @@ export class Evaluator {
             const tableLibray = new TableLibrary();
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
-            return this.callSelfDefinedFunctionTailRec(funcName, args);
+            return this.callSelfDefinedFunction(funcName, args);
         }
     }
 
-    callSelfDefinedFunctionTailRec(funcName: string, args: any[]): any {
+    callSelfDefinedFunction(funcName: string, args: any[]): any {
         if (!(funcName in this.globalScope.symbolTable)) {
             const errorMsg = `Name Error: ${funcName} is not defined`;
             console.log(errorMsg);
@@ -278,27 +278,6 @@ export class Evaluator {
                 const newArgs = evaluatedC.args;
                 functionScope.storeArguments(params, newArgs);
                 i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
-            }
-        }
-    }
-
-    callSelfDefinedFunction(funcName: string, args: any[]): any {
-        if (!(funcName in this.globalScope.symbolTable)) {
-            const errorMsg = `Name Error: ${funcName} is not defined`;
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
-        const functionScope = new Scope(null);
-        const params = this.globalScope.symbolTable[funcName].params;
-        functionScope.storeArguments(params, args);
-        const funcBody = this.globalScope.symbolTable[funcName].body;
-
-        for (const c of funcBody) {
-            const evaluatedC = this.evalComponent(c, functionScope);
-            
-            if (evaluatedC instanceof Return) {
-                return evaluatedC.returnValue;
             }
         }
     }
