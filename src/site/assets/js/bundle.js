@@ -237,7 +237,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.callSelfDefinedFunctionTailRec = function (funcName, args) {
         if (!(funcName in this.globalScope.symbolTable)) {
-            var errorMsg = "Syntax Error: " + funcName + " is not defined";
+            var errorMsg = "Name Error: " + funcName + " is not defined";
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -260,7 +260,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
         if (!(funcName in this.globalScope.symbolTable)) {
-            var errorMsg = "Syntax Error: " + funcName + " is not defined";
+            var errorMsg = "Name Error: " + funcName + " is not defined";
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -616,7 +616,7 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                var errorMsg = "Name Error: " + symbol + " is not defined";
                 console.log(errorMsg);
                 throw errorMsg;
             }
@@ -631,7 +631,7 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                var errorMsg = "Name Error: " + symbol + " is not defined";
                 console.log(errorMsg);
                 throw errorMsg;
             }

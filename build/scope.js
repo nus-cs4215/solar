@@ -16,7 +16,7 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                var errorMsg = "Name Error: " + symbol + " is not defined";
                 console.log(errorMsg);
                 throw errorMsg;
             }
@@ -31,7 +31,7 @@ var Scope = /** @class */ (function () {
         }
         else {
             if (this.parent === null) {
-                var errorMsg = "Syntax Error: " + symbol + " not defined";
+                var errorMsg = "Name Error: " + symbol + " is not defined";
                 console.log(errorMsg);
                 throw errorMsg;
             }
