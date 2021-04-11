@@ -13,5 +13,5 @@ function interpret(program) {
     e.evaluate(ast);
 }
 // user program
-var userProgram = "\n\nfunction hitZero_tailrec(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero_tailrec(n-1)\n    end\nend\n\nlet res = hitZero_tailrec(5000)\nprint(res)\n\n";
+var userProgram = "\n\nfunction hitZero(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero(n-1)\n    end\nend\n\nlet res = hitZero(10000)\nprint(res)\n\n";
 interpret(userProgram);
