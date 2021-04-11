@@ -10,7 +10,7 @@ import { TableLibrary } from './standard-library/table-library';
 export class Evaluator {
 
     globalScope = new Scope(null);
-    callerName: string;     // To identify tail recursion, we check callerName === calleeName
+    callerName: string;     // This is used to identify tail recursion, where we check callerName === calleeName
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
@@ -26,8 +26,7 @@ export class Evaluator {
 
         switch (component.type) {
             case 'Identifier':
-                const symbol = component.name;
-                return scope.lookup(symbol);
+                return this.evalSymbol(component, scope);
 
             case 'LetStatement':
                 return this.evalDeclaration(component, scope);
@@ -81,41 +80,24 @@ export class Evaluator {
         }
     }
 
-    isTailRecursion(returnValueComponent: any): boolean {
-        if (returnValueComponent.type !== 'CallExpression') {
-            return false;
+    isLiteral(component: any): boolean {
+        return component.type === 'StringLiteral' 
+            || component.type === 'NumericLiteral'
+            || component.type === 'BooleanLiteral';
+    }
+
+    evalLiteral(component: any): string | number | boolean | null {
+        if (component.type === 'StringLiteral') {
+            const strLiteral = component.raw.slice(1, -1);  // remove the outermost quotes
+            return strLiteral;
         } else {
-            const calleeName = returnValueComponent.base.name;
-            return this.callerName === calleeName;
+            return component.value;
         }
     }
 
-    evalReturnStatement(component: any, scope: Scope): any {
-        const returnValueComponent = component.arguments[0];
-
-        if (this.isTailRecursion(returnValueComponent)) {
-            const argsComponent = returnValueComponent.arguments;
-            const args = argsComponent.map(c => this.evalComponent(c, scope));
-            return new TailRecursion(args);
-        } else {
-            const returnValue = this.evalComponent(component.arguments[0], scope);
-            return new Return(returnValue);
-        }
-    }
-
-    evalFunctionDeclaration(component: any, scope: Scope): any {
-        if (scope !== this.globalScope) {
-            const errorMsg = 'Syntax Error: Functions can only be declared in the global scope';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
-        const funcSymbol = component.identifier.name;
-        const funcParams = component.parameters.map(p => p.name);
-        const funcBody = component.body;
-        const value = { params: funcParams, body: funcBody };
-
-        scope.symbolTable[funcSymbol] = value;
+    evalSymbol(component: any, scope: Scope): any {
+        const symbol = component.name;
+        return scope.lookup(symbol);
     }
 
     evalDeclaration(component: any, scope: Scope): void {
@@ -137,313 +119,6 @@ export class Evaluator {
         scope.assign(symbol, value);
     }
 
-    isArray(component: any): boolean {
-        for (const field of component.fields) {
-            if (field.type === 'TableKeyString') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    isTable(component: any): boolean {
-        for (const field of component.fields) {
-            if (field.type === 'TableValue') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    evalContainer(component: any, scope: Scope): any {
-        if (this.isArray(component)) {
-            const arr = component.fields.map(field => this.evalComponent(field.value, scope));
-            return arr;
-        } else if (this.isTable(component)) {
-            let tbl = {}
-
-            for (const field of component.fields) {
-                const k = field.key.name;
-                const v = this.evalComponent(field.value, scope);
-                tbl[k] = v;
-            }
-            return tbl;
-        } else {
-            const errorMsg = 'Type Error: Container is neither an array nor table';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-    }
-
-    hasElseClause(component: any): boolean {
-        const lastClause = component.clauses[component.clauses.length - 1];
-        return lastClause.type === 'ElseClause';
-    }
-
-    evalNonElseClauses(component: any, scope: Scope): any {
-        for (const clause of component.clauses) {
-            if (clause.type === 'ElseClause') return false;
-            
-            // we only evaluate the non-else clauses, and short circuit if necessary
-            const condition = this.evalComponent(clause.condition, scope);
-            
-            if (condition === true) {
-                
-                const clauseScope = new Scope(scope);
-                
-                for (const c of clause.body) {
-                    const evaluatedC = this.evalComponent(c, clauseScope);
-
-                    if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
-                        return evaluatedC;
-                    }
-                }
-                return;
-            }
-        }
-    }
-
-    evalElseClause(component: any, scope: Scope): any {
-        if (this.hasElseClause(component)) {
-
-            const elseClause = component.clauses[component.clauses.length - 1];     // last clause
-            const elseClauseScope = new Scope(scope);
-
-            for (const c of elseClause.body) {
-                const evaluatedC = this.evalComponent(c, elseClauseScope);
-                
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
-                    return evaluatedC;
-                }
-            }
-        }
-    }
-
-    evalIfStatement(component: any, scope: Scope): any {
-        const res = this.evalNonElseClauses(component, scope);
-
-        if (res === false) {
-            return this.evalElseClause(component, scope);
-        } else {
-            return res;
-        }
-    }
-
-    evalCallExpression(component: any, scope: Scope): any {
-        const funcName = component.base.name;
-        const argsComponent = component.arguments;
-        const args = argsComponent.map(c => this.evalComponent(c, scope));
-
-        if (funcName === 'print') {
-            console.log(args[0]);
-        } else if (this.inMathLibrary(funcName)) {
-            const mathLibrary = new MathLibrary();
-            return mathLibrary.callLibraryFunction(funcName, args);
-        } else if (this.inStringLibrary(funcName)) {
-            const stringLibrary = new StringLibrary();
-            return stringLibrary.callLibraryFunction(funcName, args);
-        } else if (this.inArrayLibrary(funcName)) {
-            const arrayLibrary = new ArrayLibrary();
-            return arrayLibrary.callLibraryFunction(funcName, args);
-        } else if (this.inTableLibrary(funcName)) {
-            const tableLibray = new TableLibrary();
-            return tableLibray.callLibraryFunction(funcName, args);
-        } else {
-            return this.callSelfDefinedFunction(funcName, args);
-        }
-    }
-
-    callSelfDefinedFunction(funcName: string, args: any[]): any {
-        if (!(funcName in this.globalScope.symbolTable)) {
-            const errorMsg = `Name Error: ${funcName} is not defined`;
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
-        this.callerName = funcName;
-        const functionScope = new Scope(null);
-        const params = this.globalScope.symbolTable[funcName].params;
-        functionScope.storeArguments(params, args);
-        const funcBody = this.globalScope.symbolTable[funcName].body;
-
-        for (let i = 0; i < funcBody.length; i++) {
-            const c = funcBody[i];
-            const evaluatedC = this.evalComponent(c, functionScope);
-            
-            if (evaluatedC instanceof Return) {
-                return evaluatedC.returnValue;
-            }
-
-            if (evaluatedC instanceof TailRecursion) {
-                const newArgs = evaluatedC.args;
-                functionScope.storeArguments(params, newArgs);
-                i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
-            }
-        }
-    }
-
-    inMathLibrary(funcName: string): boolean {
-        return funcName === 'math_abs'
-            || funcName === 'math_ceil'
-            || funcName === 'math_floor'
-            || funcName === 'math_sqrt'
-            || funcName === 'math_max'
-            || funcName === 'math_min';
-    }
-
-    inStringLibrary(funcName: string): boolean {
-        return funcName === 'str_len'
-            || funcName === 'str_reverse'
-            || funcName === 'str_split'
-            || funcName === 'str_substring';
-    }
-
-    inArrayLibrary(funcName: string): boolean {
-        return funcName === 'arr_len'
-            || funcName === 'arr_reverse'
-            || funcName === 'arr_sort'
-            || funcName === 'arr_pop'
-            || funcName === 'arr_push'
-            || funcName === 'arr_get'
-            || funcName === 'arr_set';
-    }
-
-    inTableLibrary(funcName: string): boolean {
-        return funcName === 'tbl_len'
-            || funcName === 'tbl_contains'
-            || funcName === 'tbl_remove'
-            || funcName === 'tbl_get'
-            || funcName === 'tbl_put';
-    }
-
-    evalWhileLoop(component: any, scope: any): any {
-        const whileLoopScope = new Scope(scope);
-
-        let condition = this.evalComponent(component.condition, scope);
-
-        while (condition === true) {
-
-            for (const c of component.body) {
-                const evaluatedC = this.evalComponent(c, whileLoopScope);
-                condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
-
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
-                    return evaluatedC;
-                }
-            }
-        }
-    }
-
-    evalGenericForLoop(component: any, scope: Scope): void {
-        if (component.iterators.length !== 1) {
-            const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
-        if (component.iterators[0].type !== 'Identifier') {
-            const errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-        
-        const container = this.evalComponent(component.iterators[0], scope);
-        
-        if (Array.isArray(container)) {
-            return this.evalGenericForLoopThroughArray(component, scope);
-        } else {
-            return this.evalGenericForLoopThroughTable(component, scope)
-        }
-    }
-
-    evalGenericForLoopThroughArray(component: any, scope: Scope): any {
-        if (component.variables.length !== 1) {
-            const errorMsg = 'Syntax Error: There should only be 1 loop variable'
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
-        const forLoopScope = new Scope(scope);
-
-        const itemSymbol = component.variables[0].name;
-        const container = this.evalComponent(component.iterators[0], scope);
-
-        for (const item of container) {
-            forLoopScope.symbolTable[itemSymbol] = item;
-
-            for (const c of component.body) {
-                const evaluatedC = this.evalComponent(c, forLoopScope);
-                
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
-                    return evaluatedC;
-                }
-            }
-        }
-    }
-
-    evalGenericForLoopThroughTable(component: any, scope: Scope): any {
-        if (component.variables.length !== 2) {
-            const errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
-        const forLoopScope = new Scope(scope);
-
-        const keySymbol = component.variables[0].name;
-        const valueSymbol = component.variables[1].name;
-        const container = this.evalComponent(component.iterators[0], scope);
-
-        for (const [key, value] of Object.entries(container)) {
-            forLoopScope.symbolTable[keySymbol] = key;
-            forLoopScope.symbolTable[valueSymbol] = value;
-
-            for (const c of component.body) {
-                const evaluatedC = this.evalComponent(c, forLoopScope);
-
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
-                    return evaluatedC;
-                }
-            }
-        }
-    }
-
-    evalNumericForLoop(component: any, scope: Scope): any {
-        const forLoopScope = new Scope(scope);
-        
-        const loopControlVariable = component.variable.name;
-        const start = this.evalComponent(component.start, scope);
-        const end = this.evalComponent(component.end, scope);
-        const step = this.evalComponent(component.step, scope);
-
-        for (let i = start; i < end; i += step) {
-            forLoopScope.symbolTable[loopControlVariable] = i; 
-
-            for (const c of component.body) {
-                const evaluatedC = this.evalComponent(c, forLoopScope);
-
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
-                    return evaluatedC;
-                }
-            }
-        }
-    }
-
-    isLiteral(component: any): boolean {
-        return component.type === 'StringLiteral' 
-            || component.type === 'NumericLiteral'
-            || component.type === 'BooleanLiteral';
-    }
-
-    evalLiteral(component: any): string | number | boolean | null {
-        if (component.type === 'StringLiteral') {
-            const strLiteral = component.raw.slice(1, -1);  // remove the outermost quotes
-            return strLiteral;
-        } else {
-            return component.value;
-        }
-    }
-
     evalUnaryExpression(component: any, scope: any): number | boolean {
         const argument = this.evalComponent(component.argument, scope);
 
@@ -453,21 +128,6 @@ export class Evaluator {
             return -argument;
         } else {
             const errorMsg = 'Type Error: No such unary operation';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-    }
-
-    evalLogicalExpression(component: any, scope: any): boolean {
-        const left = this.evalComponent(component.left, scope);
-        const right = this.evalComponent(component.right, scope);
-
-        if (component.operator === 'and' && typeof left === 'boolean' && typeof right === 'boolean') {
-            return left && right;
-        } else if (component.operator === 'or' && typeof left === 'boolean' && typeof right === 'boolean') {
-            return left || right;
-        } else {
-            const errorMsg = 'Type Error: No such logical operation';
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -526,5 +186,341 @@ export class Evaluator {
             throw errorMsg;
         }
     }
-    
+
+    evalLogicalExpression(component: any, scope: any): boolean {
+        const left = this.evalComponent(component.left, scope);
+        const right = this.evalComponent(component.right, scope);
+
+        if (component.operator === 'and' && typeof left === 'boolean' && typeof right === 'boolean') {
+            return left && right;
+        } else if (component.operator === 'or' && typeof left === 'boolean' && typeof right === 'boolean') {
+            return left || right;
+        } else {
+            const errorMsg = 'Type Error: No such logical operation';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+    }
+
+    evalIfStatement(component: any, scope: Scope): any {
+        const res = this.evalNonElseClauses(component, scope);
+
+        if (res === false) {
+            return this.evalElseClause(component, scope);
+        } else {
+            return res;
+        }
+    } 
+
+    evalNonElseClauses(component: any, scope: Scope): any {
+        for (const clause of component.clauses) {
+            if (clause.type === 'ElseClause') return false;
+            
+            // we only evaluate the non-else clauses, and short circuit if necessary
+            const condition = this.evalComponent(clause.condition, scope);
+            
+            if (condition === true) {
+                const clauseScope = new Scope(scope);
+                
+                for (const c of clause.body) {
+                    const evaluatedC = this.evalComponent(c, clauseScope);
+
+                    if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
+                        return evaluatedC;
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    hasElseClause(component: any): boolean {
+        const lastClause = component.clauses[component.clauses.length - 1];
+        return lastClause.type === 'ElseClause';
+    }
+
+    evalElseClause(component: any, scope: Scope): any {
+        if (this.hasElseClause(component)) {
+            const elseClause = component.clauses[component.clauses.length - 1];     // last clause
+            const elseClauseScope = new Scope(scope);
+
+            for (const c of elseClause.body) {
+                const evaluatedC = this.evalComponent(c, elseClauseScope);
+                
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
+                    return evaluatedC;
+                }
+            }
+        }
+    }
+
+    evalWhileLoop(component: any, scope: any): any {
+        const whileLoopScope = new Scope(scope);
+        let condition = this.evalComponent(component.condition, scope);
+
+        while (condition === true) {
+            for (const c of component.body) {
+                const evaluatedC = this.evalComponent(c, whileLoopScope);
+                condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
+
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
+                    return evaluatedC;
+                }
+            }
+        }
+    }
+
+    evalNumericForLoop(component: any, scope: Scope): any {
+        const forLoopScope = new Scope(scope);
+        
+        const loopControlVariable = component.variable.name;
+        const start = this.evalComponent(component.start, scope);
+        const end = this.evalComponent(component.end, scope);
+        const step = this.evalComponent(component.step, scope);
+
+        for (let i = start; i < end; i += step) {
+            forLoopScope.symbolTable[loopControlVariable] = i; 
+
+            for (const c of component.body) {
+                const evaluatedC = this.evalComponent(c, forLoopScope);
+
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
+                    return evaluatedC;
+                }
+            }
+        }
+    }
+
+    evalGenericForLoop(component: any, scope: Scope): void {
+        if (component.iterators.length !== 1) {
+            const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+
+        if (component.iterators[0].type !== 'Identifier') {
+            const errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+        
+        const container = this.evalComponent(component.iterators[0], scope);
+        
+        if (Array.isArray(container)) {
+            return this.evalGenericForLoopThroughArray(component, scope);
+        } else {
+            return this.evalGenericForLoopThroughTable(component, scope)
+        }
+    }
+
+    evalGenericForLoopThroughArray(component: any, scope: Scope): any {
+        if (component.variables.length !== 1) {
+            const errorMsg = 'Syntax Error: There should only be 1 loop variable'
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+
+        const forLoopScope = new Scope(scope);
+        const itemSymbol = component.variables[0].name;
+        const container = this.evalComponent(component.iterators[0], scope);
+
+        for (const item of container) {
+            forLoopScope.symbolTable[itemSymbol] = item;
+
+            for (const c of component.body) {
+                const evaluatedC = this.evalComponent(c, forLoopScope);
+                
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
+                    return evaluatedC;
+                }
+            }
+        }
+    }
+
+    evalGenericForLoopThroughTable(component: any, scope: Scope): any {
+        if (component.variables.length !== 2) {
+            const errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+
+        const forLoopScope = new Scope(scope);
+        const keySymbol = component.variables[0].name;
+        const valueSymbol = component.variables[1].name;
+        const container = this.evalComponent(component.iterators[0], scope);
+
+        for (const [key, value] of Object.entries(container)) {
+            forLoopScope.symbolTable[keySymbol] = key;
+            forLoopScope.symbolTable[valueSymbol] = value;
+
+            for (const c of component.body) {
+                const evaluatedC = this.evalComponent(c, forLoopScope);
+
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
+                    return evaluatedC;
+                }
+            }
+        }
+    }
+
+    evalFunctionDeclaration(component: any, scope: Scope): any {
+        if (scope !== this.globalScope) {
+            const errorMsg = 'Syntax Error: Functions can only be declared in the global scope';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+
+        const funcSymbol = component.identifier.name;
+        const funcParams = component.parameters.map(p => p.name);
+        const funcBody = component.body;
+        const value = { params: funcParams, body: funcBody };
+        scope.symbolTable[funcSymbol] = value;
+    }
+
+    evalCallExpression(component: any, scope: Scope): any {
+        const funcName = component.base.name;
+        const argsComponent = component.arguments;
+        const args = argsComponent.map(c => this.evalComponent(c, scope));
+
+        if (funcName === 'print') {
+            console.log(args[0]);
+        } else if (this.inMathLibrary(funcName)) {
+            const mathLibrary = new MathLibrary();
+            return mathLibrary.callLibraryFunction(funcName, args);
+        } else if (this.inStringLibrary(funcName)) {
+            const stringLibrary = new StringLibrary();
+            return stringLibrary.callLibraryFunction(funcName, args);
+        } else if (this.inArrayLibrary(funcName)) {
+            const arrayLibrary = new ArrayLibrary();
+            return arrayLibrary.callLibraryFunction(funcName, args);
+        } else if (this.inTableLibrary(funcName)) {
+            const tableLibray = new TableLibrary();
+            return tableLibray.callLibraryFunction(funcName, args);
+        } else {
+            return this.callSelfDefinedFunction(funcName, args);
+        }
+    }
+
+    inMathLibrary(funcName: string): boolean {
+        return funcName === 'math_abs'
+            || funcName === 'math_ceil'
+            || funcName === 'math_floor'
+            || funcName === 'math_sqrt'
+            || funcName === 'math_max'
+            || funcName === 'math_min';
+    }
+
+    inStringLibrary(funcName: string): boolean {
+        return funcName === 'str_len'
+            || funcName === 'str_reverse'
+            || funcName === 'str_split'
+            || funcName === 'str_substring';
+    }
+
+    inArrayLibrary(funcName: string): boolean {
+        return funcName === 'arr_len'
+            || funcName === 'arr_reverse'
+            || funcName === 'arr_sort'
+            || funcName === 'arr_pop'
+            || funcName === 'arr_push'
+            || funcName === 'arr_get'
+            || funcName === 'arr_set';
+    }
+
+    inTableLibrary(funcName: string): boolean {
+        return funcName === 'tbl_len'
+            || funcName === 'tbl_contains'
+            || funcName === 'tbl_remove'
+            || funcName === 'tbl_get'
+            || funcName === 'tbl_put';
+    }
+
+    callSelfDefinedFunction(funcName: string, args: any[]): any {
+        if (!(funcName in this.globalScope.symbolTable)) {
+            const errorMsg = `Name Error: ${funcName} is not defined`;
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+
+        this.callerName = funcName;
+        const functionScope = new Scope(null);
+        const params = this.globalScope.symbolTable[funcName].params;
+        functionScope.storeArguments(params, args);
+        const funcBody = this.globalScope.symbolTable[funcName].body;
+
+        for (let i = 0; i < funcBody.length; i++) {
+            const c = funcBody[i];
+            const evaluatedC = this.evalComponent(c, functionScope);
+            
+            if (evaluatedC instanceof Return) {
+                return evaluatedC.returnValue;
+            }
+
+            if (evaluatedC instanceof TailRecursion) {
+                const newArgs = evaluatedC.args;
+                functionScope.storeArguments(params, newArgs);
+                i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
+            }
+        }
+    }
+
+    evalReturnStatement(component: any, scope: Scope): any {
+        const returnValueComponent = component.arguments[0];
+
+        if (this.isTailRecursion(returnValueComponent)) {
+            const argsComponent = returnValueComponent.arguments;
+            const args = argsComponent.map(c => this.evalComponent(c, scope));
+            return new TailRecursion(args);
+        } else {
+            const returnValue = this.evalComponent(component.arguments[0], scope);
+            return new Return(returnValue);
+        }
+    }
+
+    isTailRecursion(returnValueComponent: any): boolean {
+        if (returnValueComponent.type !== 'CallExpression') {
+            return false;
+        } else {
+            const calleeName = returnValueComponent.base.name;
+            return this.callerName === calleeName;
+        }
+    }
+
+    evalContainer(component: any, scope: Scope): any {
+        if (this.isArray(component)) {
+            const arr = component.fields.map(field => this.evalComponent(field.value, scope));
+            return arr;
+        } else if (this.isTable(component)) {
+            let tbl = {}
+
+            for (const field of component.fields) {
+                const k = field.key.name;
+                const v = this.evalComponent(field.value, scope);
+                tbl[k] = v;
+            }
+            return tbl;
+        } else {
+            const errorMsg = 'Type Error: Container is neither an array nor table';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+    }
+
+    isArray(component: any): boolean {
+        for (const field of component.fields) {
+            if (field.type === 'TableKeyString') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    isTable(component: any): boolean {
+        for (const field of component.fields) {
+            if (field.type === 'TableValue') {
+                return false;
+            }
+        }
+        return true;
+    }
 }

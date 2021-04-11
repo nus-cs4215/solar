@@ -54,5 +54,4 @@ export class Scope {
             this.symbolTable[symbol] = value;
         }
     }
-
 }
