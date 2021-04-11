@@ -350,7 +350,7 @@ export class Evaluator {
                 const evaluatedC = this.evalComponent(c, whileLoopScope);
                 condition = this.evalComponent(component.condition, scope); // while loop body might modify while loop condition
 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -397,7 +397,7 @@ export class Evaluator {
             for (const c of component.body) {
                 const evaluatedC = this.evalComponent(c, forLoopScope);
                 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -424,7 +424,7 @@ export class Evaluator {
             for (const c of component.body) {
                 const evaluatedC = this.evalComponent(c, forLoopScope);
 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
@@ -445,7 +445,7 @@ export class Evaluator {
             for (const c of component.body) {
                 const evaluatedC = this.evalComponent(c, forLoopScope);
 
-                if (evaluatedC instanceof Break || evaluatedC instanceof Return) {
+                if (evaluatedC instanceof Break || evaluatedC instanceof Return || evaluatedC instanceof TailRecursion) {
                     return evaluatedC;
                 }
             }
