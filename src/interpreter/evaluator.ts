@@ -68,7 +68,7 @@ export class Evaluator {
                 return this.evalCallExpression(component, scope);
 
             case 'ReturnStatement':
-                    return this.evalReturnStatement(component, scope);
+                return this.evalReturnStatement(component, scope);
 
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
