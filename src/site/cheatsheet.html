@@ -152,15 +152,34 @@ str_substring(s, start, end)</code>
               <code>-- [T] -> number 
 arr_len(a)
 
-[T] -> [T]
+-- [T] -> [T]
 arr_reverse(a)
 arr_sort(a)
 array_pop(a)
 array_push(a, elem)
 arr_set(a, index, elem)
 
-[T] -> T 
+-- [T] -> T 
 arr_get(a, index)</code>
+            </pre>
+          </section>
+
+          <!-- API: Tables -->
+          <section>
+            <h2>API: Tables</h2>
+            <pre>
+              <code>-- {T} -> number
+tbl_len(t)
+
+-- {T} -> boolean
+tbl_contains(t, key)
+
+-- {T} -> {T} 
+tbl_remove(t, key)
+tbl_put(t, key, val)
+
+-- {T} -> {T} 
+tbl_get(t, key)</code>
             </pre>
           </section>
         </div>
