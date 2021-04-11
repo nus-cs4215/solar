@@ -10,7 +10,7 @@ import { TableLibrary } from './standard-library/table-library';
 export class Evaluator {
 
     globalScope = new Scope(null);
-    callerName: string;
+    callerName: string;     // To identify tail recursion, we check callerName === calleeName
 
     // entry point. ast is the syntax tree of the entire program.
     evaluate(ast: any): void {
