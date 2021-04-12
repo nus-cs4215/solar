@@ -15,6 +15,9 @@ export class ArgsLengthAnalyser {
             
             case 'CallExpression':
                 return this.analyseCallExpression(component);
+
+            default:
+                console.warn(`ArgsLengthAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     }
 

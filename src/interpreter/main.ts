@@ -7,7 +7,7 @@ import { Evaluator } from './evaluator';
 function interpret(program: string): any {
     const p = new Parser();
     const ast = p.parseIntoAst(program);
-    console.log(ast.body[0])
+
     const s = new SemanticAnalyser();
     s.analyse(ast);
 
@@ -18,7 +18,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let x
+print('hi')
 
 `;
 
