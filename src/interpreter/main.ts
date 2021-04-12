@@ -4,7 +4,7 @@ import { Evaluator } from './evaluator';
 
 // To run this file - npm start
 
-function interpret(program: string): any {
+export function interpret(program: string): any {
     const p = new Parser();
     const ast = p.parseIntoAst(program);
 
@@ -18,8 +18,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-print('hi')
-
+let x = 1
 `;
 
 interpret(userProgram);

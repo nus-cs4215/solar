@@ -17,7 +17,7 @@ export class ArgsLengthAnalyser {
                 return this.analyseCallExpression(component);
 
             default:
-                console.warn(`ArgsLengthAnalyser: This component is a ${component.type}, no need to analyse.`);
+                //console.warn(`ArgsLengthAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     }
 
@@ -75,7 +75,7 @@ export class ArgsLengthAnalyser {
                 }
 
             default:
-                console.warn(`ArgsLengthAnalyser: ${funcName}() is not a library function, no need to analyse`)
+                //console.warn(`ArgsLengthAnalyser: ${funcName}() is not a library function, no need to analyse`)
         }
     }
 }
