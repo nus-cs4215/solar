@@ -21,4 +21,4 @@ const userProgram = `
 let x = 1
 `;
 
-interpret(userProgram);
+interpret(userProgram);     // comment this out when running jest
