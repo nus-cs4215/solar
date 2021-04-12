@@ -28,7 +28,7 @@ var Evaluator = /** @class */ (function () {
             case 'Identifier':
                 return this.evalSymbol(component, scope);
             case 'LetStatement':
-                return this.evalDeclaration(component, scope);
+                return this.evalVariableDeclaration(component, scope);
             case 'AssignmentStatement':
                 return this.evalAssignment(component, scope);
             case 'UnaryExpression':
@@ -81,7 +81,7 @@ var Evaluator = /** @class */ (function () {
         var symbol = component.name;
         return scope.lookup(symbol);
     };
-    Evaluator.prototype.evalDeclaration = function (component, scope) {
+    Evaluator.prototype.evalVariableDeclaration = function (component, scope) {
         var symbol = component.variables[0].name;
         var value = this.evalComponent(component.init[0], scope);
         if (symbol in scope.symbolTable) {

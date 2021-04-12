@@ -1,5 +1,6 @@
 "use strict";
 exports.__esModule = true;
+exports.interpret = void 0;
 var parser_1 = require("./parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator");
@@ -12,6 +13,7 @@ function interpret(program) {
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
+exports.interpret = interpret;
 // user program
-var userProgram = "\n\nfunction hitZero(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero(n-1)\n    end\nend\n\nlet res = hitZero(10000)\nprint(res)\n\n";
-interpret(userProgram);
+var userProgram = "\n\nlet x = 1\n";
+interpret(userProgram); // comment this out when running jest

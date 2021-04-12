@@ -27,7 +27,7 @@ var ReturnStatementAnalyser = /** @class */ (function () {
                 console.log(errorMsg);
                 throw errorMsg;
             default:
-                console.warn("ReturnStatementAnalyser: This component is a " + component.type + ", no need to analyse.");
+            //console.warn(`ReturnStatementAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     ReturnStatementAnalyser.prototype.analyseIfStatement = function (component) {

@@ -29,7 +29,7 @@ var Evaluator = /** @class */ (function () {
             case 'Identifier':
                 return this.evalSymbol(component, scope);
             case 'LetStatement':
-                return this.evalDeclaration(component, scope);
+                return this.evalVariableDeclaration(component, scope);
             case 'AssignmentStatement':
                 return this.evalAssignment(component, scope);
             case 'UnaryExpression':
@@ -82,7 +82,7 @@ var Evaluator = /** @class */ (function () {
         var symbol = component.name;
         return scope.lookup(symbol);
     };
-    Evaluator.prototype.evalDeclaration = function (component, scope) {
+    Evaluator.prototype.evalVariableDeclaration = function (component, scope) {
         var symbol = component.variables[0].name;
         var value = this.evalComponent(component.init[0], scope);
         if (symbol in scope.symbolTable) {
@@ -499,7 +499,7 @@ var Evaluator = /** @class */ (function () {
 }());
 exports.Evaluator = Evaluator;
 
-},{"./instructions/break":2,"./instructions/return":3,"./instructions/tail-recursion":4,"./scope":7,"./standard-library/array-library":11,"./standard-library/math-library":12,"./standard-library/string-library":13,"./standard-library/table-library":14}],2:[function(require,module,exports){
+},{"./instructions/break":2,"./instructions/return":3,"./instructions/tail-recursion":4,"./scope":7,"./standard-library/array-library":12,"./standard-library/math-library":13,"./standard-library/string-library":14,"./standard-library/table-library":15}],2:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Break = void 0;
@@ -537,6 +537,7 @@ exports.TailRecursion = TailRecursion;
 },{}],5:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
+exports.interpret = void 0;
 var parser_1 = require("./parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator");
@@ -549,9 +550,10 @@ function interpret(program) {
     var e = new evaluator_1.Evaluator();
     e.evaluate(ast);
 }
+exports.interpret = interpret;
 window.interpret = interpret;
-var userProgram = "\n\nfunction hitZero(n)\n    if n == 0 then\n        return 'We have hit zero!!'\n    else\n        return hitZero(n-1)\n    end\nend\n\nlet res = hitZero(10000)\nprint(res)\n\n";
-interpret(userProgram);
+var userProgram = "\n\nlet x = 1\n";
+interpret(userProgram); // comment this out when running jest
 
 },{"./evaluator":1,"./parser":6,"./semantic-analyser/semantic-analyser":10}],6:[function(require,module,exports){
 "use strict";
@@ -578,7 +580,7 @@ var Parser = /** @class */ (function () {
 }());
 exports.Parser = Parser;
 
-},{"luaparse":15}],7:[function(require,module,exports){
+},{"luaparse":16}],7:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Scope = void 0;
@@ -660,6 +662,8 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                 return this.analyseCallExpression(component.expression);
             case 'CallExpression':
                 return this.analyseCallExpression(component);
+            default:
+            //console.warn(`ArgsLengthAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     ArgsLengthAnalyser.prototype.analyseCallExpression = function (component) {
@@ -715,7 +719,7 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     return;
                 }
             default:
-                console.warn("ArgsLengthAnalyser: " + funcName + "() is not a library function, no need to analyse");
+            //console.warn(`ArgsLengthAnalyser: ${funcName}() is not a library function, no need to analyse`)
         }
     };
     return ArgsLengthAnalyser;
@@ -752,7 +756,7 @@ var ReturnStatementAnalyser = /** @class */ (function () {
                 console.log(errorMsg);
                 throw errorMsg;
             default:
-                console.warn("ReturnStatementAnalyser: This component is a " + component.type + ", no need to analyse.");
+            //console.warn(`ReturnStatementAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     ReturnStatementAnalyser.prototype.analyseIfStatement = function (component) {
@@ -790,14 +794,17 @@ exports.ReturnStatementAnalyser = ReturnStatementAnalyser;
 "use strict";
 exports.__esModule = true;
 exports.SemanticAnalyser = void 0;
+var variable_declaration_analyser_1 = require("./variable-declaration-analyser");
 var return_statement_analyser_1 = require("./return-statement-analyser");
 var args_length_analyser_1 = require("./args-length-analyser");
 var SemanticAnalyser = /** @class */ (function () {
     function SemanticAnalyser() {
+        this.variableDeclarationAnalyser = new variable_declaration_analyser_1.VariableDeclarationAnalyser();
         this.returnStatementAnalyser = new return_statement_analyser_1.ReturnStatementAnalyser();
         this.argsLengthAnalyser = new args_length_analyser_1.ArgsLengthAnalyser();
     }
     SemanticAnalyser.prototype.analyse = function (ast) {
+        this.variableDeclarationAnalyser.analyse(ast);
         this.returnStatementAnalyser.analyse(ast);
         this.argsLengthAnalyser.analyse(ast);
     };
@@ -805,7 +812,40 @@ var SemanticAnalyser = /** @class */ (function () {
 }());
 exports.SemanticAnalyser = SemanticAnalyser;
 
-},{"./args-length-analyser":8,"./return-statement-analyser":9}],11:[function(require,module,exports){
+},{"./args-length-analyser":8,"./return-statement-analyser":9,"./variable-declaration-analyser":11}],11:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.VariableDeclarationAnalyser = void 0;
+var VariableDeclarationAnalyser = /** @class */ (function () {
+    function VariableDeclarationAnalyser() {
+    }
+    // entry point. ast is the syntax tree of the entire program.
+    VariableDeclarationAnalyser.prototype.analyse = function (ast) {
+        for (var _i = 0, _a = ast.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
+    };
+    VariableDeclarationAnalyser.prototype.analyseComponent = function (component) {
+        switch (component.type) {
+            case 'LetStatement':
+                return this.analyseVariableDeclaration(component);
+            default:
+            //console.warn(`Variable Declaration Analyser: This component is a ${component.type}, no need to analyse.`);
+        }
+    };
+    VariableDeclarationAnalyser.prototype.analyseVariableDeclaration = function (component) {
+        if (component.variables.length !== 1 || component.init.length !== 1) {
+            var errorMsg = 'Syntax Error: Variable declaration should have 1 symbol on the left and 1 value on the right. Eg. let x = 1';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+    };
+    return VariableDeclarationAnalyser;
+}());
+exports.VariableDeclarationAnalyser = VariableDeclarationAnalyser;
+
+},{}],12:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ArrayLibrary = void 0;
@@ -849,7 +889,7 @@ var ArrayLibrary = /** @class */ (function () {
 }());
 exports.ArrayLibrary = ArrayLibrary;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.MathLibrary = void 0;
@@ -901,7 +941,7 @@ var MathLibrary = /** @class */ (function () {
 }());
 exports.MathLibrary = MathLibrary;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.StringLibrary = void 0;
@@ -932,7 +972,7 @@ var StringLibrary = /** @class */ (function () {
 }());
 exports.StringLibrary = StringLibrary;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.TableLibrary = void 0;
@@ -971,7 +1011,7 @@ var TableLibrary = /** @class */ (function () {
 }());
 exports.TableLibrary = TableLibrary;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 

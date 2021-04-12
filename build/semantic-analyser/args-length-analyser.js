@@ -18,6 +18,8 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                 return this.analyseCallExpression(component.expression);
             case 'CallExpression':
                 return this.analyseCallExpression(component);
+            default:
+            //console.warn(`ArgsLengthAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     ArgsLengthAnalyser.prototype.analyseCallExpression = function (component) {
@@ -73,7 +75,7 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                     return;
                 }
             default:
-                console.warn("ArgsLengthAnalyser: " + funcName + "() is not a library function, no need to analyse");
+            //console.warn(`ArgsLengthAnalyser: ${funcName}() is not a library function, no need to analyse`)
         }
     };
     return ArgsLengthAnalyser;
