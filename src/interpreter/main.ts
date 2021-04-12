@@ -7,7 +7,7 @@ import { Evaluator } from './evaluator';
 function interpret(program: string): any {
     const p = new Parser();
     const ast = p.parseIntoAst(program);
-
+    console.log(ast.body[0])
     const s = new SemanticAnalyser();
     s.analyse(ast);
 
@@ -18,16 +18,7 @@ function interpret(program: string): any {
 // user program
 const userProgram = `
 
-function hitZero(n)
-    if n == 0 then
-        return 'We have hit zero!!'
-    else
-        return hitZero(n-1)
-    end
-end
-
-let res = hitZero(10000)
-print(res)
+let x
 
 `;
 

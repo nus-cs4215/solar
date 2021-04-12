@@ -29,7 +29,7 @@ export class Evaluator {
                 return this.evalSymbol(component, scope);
 
             case 'LetStatement':
-                return this.evalDeclaration(component, scope);
+                return this.evalVariableDeclaration(component, scope);
     
             case 'AssignmentStatement': 
                 return this.evalAssignment(component, scope); 
@@ -100,7 +100,7 @@ export class Evaluator {
         return scope.lookup(symbol);
     }
 
-    evalDeclaration(component: any, scope: Scope): void {
+    evalVariableDeclaration(component: any, scope: Scope): void {
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
 
