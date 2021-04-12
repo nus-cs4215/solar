@@ -13,7 +13,7 @@ export class VariableDeclarationAnalyser {
                 return this.analyseVariableDeclaration(component);
             
             default:
-                console.warn(`Variable Declaration Analyser: This component is a ${component.type}, no need to analyse.`);
+                //console.warn(`Variable Declaration Analyser: This component is a ${component.type}, no need to analyse.`);
         }
     }
 
