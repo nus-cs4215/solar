@@ -2274,7 +2274,7 @@ body.is-preload .wrapper.fade > .inner {
 /* Interpreter */
 :root {
   --editor-bg: #eee;
-  --editor-border: #3f87a6;
+  --editor-border: #5e42a6;
 }
 
 * {
