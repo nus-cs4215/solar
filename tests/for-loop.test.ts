@@ -1,7 +1,7 @@
 import { interpret } from '../src/interpreter/main';
 import { getLog } from 'console-testing-library';
 
-test('print loop variable i inside a for loop', () => {
+test('numeric for loop', () => {
 
     const prog = `
     
