@@ -12,11 +12,15 @@ export class Scope {
         this.parent = parent;
     }
 
+    isGlobalScope(): boolean {
+        return this.parent === null;
+    }
+
     lookup(symbol: string): any {
         if (symbol in this.symbolTable) {
             return this.symbolTable[symbol];
         } else {
-            if (this.parent === null) {
+            if (this.isGlobalScope()) {
                 const errorMsg = `Name Error: ${symbol} is not defined`;
                 console.log(errorMsg);
                 throw errorMsg;
@@ -30,7 +34,7 @@ export class Scope {
         if (symbol in this.symbolTable) {
             this.symbolTable[symbol] = value;
         } else {
-            if (this.parent === null) {
+            if (this.isGlobalScope()) {
                 const errorMsg = `Name Error: ${symbol} is not defined`;
                 console.log(errorMsg);
                 throw errorMsg;
