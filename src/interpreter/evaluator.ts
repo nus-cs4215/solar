@@ -480,7 +480,6 @@ export class Evaluator {
             return arr;
         } else if (this.isTable(component)) {
             let tbl = {}
-
             for (const field of component.fields) {
                 const k = field.key.name;
                 const v = this.evalComponent(field.value, scope);
