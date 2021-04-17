@@ -12,6 +12,16 @@ export class Scope {
         this.parent = parent;
     }
 
+    declare(symbol: string, value: any): void {
+        if (symbol in this.symbolTable) {
+            const errorMsg = `Syntax Error: ${symbol} has already been declared`;
+            console.log(errorMsg);
+            throw errorMsg;
+        } else {
+            this.symbolTable[symbol] = value;
+        }
+    }
+
     lookup(symbol: string): any {
         if (symbol in this.symbolTable) {
             return this.symbolTable[symbol];
