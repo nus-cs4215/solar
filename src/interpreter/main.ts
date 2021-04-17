@@ -17,8 +17,7 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-
-print('hi')
+math_min()
 `;
 
 interpret(userProgram);

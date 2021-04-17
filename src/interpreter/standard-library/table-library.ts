@@ -27,11 +27,6 @@ export class TableLibrary {
                 tbl[k] = args[2];
                 return tbl;
             }
-
-            default:
-                const errorMsg = 'Syntax Error: No such function in Table Library';
-                console.log(errorMsg);
-                throw errorMsg;
         }
     }
 }

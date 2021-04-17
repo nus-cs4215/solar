@@ -70,6 +70,16 @@ export class ArgsLengthAnalyser {
                 } else {
                     return;
                 }
+            
+            case 'math_max':
+            case 'math_min':
+                if (argsLen < 2) {
+                    const errorMsg = `Syntax Error: ${funcName}() takes 2 or more parameters`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                } else  {
+                    return;
+                }
         }
     }
 }

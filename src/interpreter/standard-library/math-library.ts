@@ -21,11 +21,6 @@ export class MathLibrary {
             
             case 'math_min':
                 return this.min(args);
-            
-            default:
-                const errorMessage = 'Syntax Error: No such function in Math Library';
-                console.log(errorMessage);
-                throw errorMessage;
         }
     }
 

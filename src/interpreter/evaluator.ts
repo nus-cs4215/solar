@@ -19,7 +19,7 @@ export class Evaluator {
         }
     }
     
-    evalComponent(component: any, scope: any): any {
+    evalComponent(component: any, scope: Scope): any {
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
         }
@@ -85,7 +85,7 @@ export class Evaluator {
             || component.type === 'BooleanLiteral';
     }
 
-    evalLiteral(component: any): string | number | boolean | null {
+    evalLiteral(component: any): string | number | boolean {
         if (component.type === 'StringLiteral') {
             const strLiteral = component.raw.slice(1, -1);  // remove the outermost quotes
             return strLiteral;
@@ -111,7 +111,7 @@ export class Evaluator {
         scope.assign(symbol, value);
     }
 
-    evalUnaryExpression(component: any, scope: any): number | boolean {
+    evalUnaryExpression(component: any, scope: Scope): number | boolean {
         const argument = this.evalComponent(component.argument, scope);
 
         if (component.operator === 'not' && typeof argument === 'boolean') {
@@ -142,35 +142,35 @@ export class Evaluator {
             return left * right;
         } else if (component.operator === '/' && bothSidesAreNumbers) {
             return left / right;
-        } else if (component.operator === '+' && bothSidesAreNumbers) {
-            return left + right;
         } else if (component.operator === '-' && bothSidesAreNumbers) {
             return left - right;
+        } else if (component.operator === '+' && bothSidesAreNumbers) {
+            return left + right;
         } else if (component.operator === '+' && bothSidesAreStrings) {
             return left + right;    // string concat
-        } else if (component.operator === '==' && bothSidesAreStrings) {
-            return left === right;
         } else if (component.operator === '==' && bothSidesAreNumbers) {
             return left === right;
-        } else if (component.operator === '~=' && bothSidesAreStrings) {
-            return left !== right;
+        } else if (component.operator === '==' && bothSidesAreStrings) {
+            return left === right;
         } else if (component.operator === '~=' && bothSidesAreNumbers) {
             return left !== right;
-        } else if (component.operator === '>' && bothSidesAreStrings) {
-            return left > right;
+        } else if (component.operator === '~=' && bothSidesAreStrings) {
+            return left !== right;
         } else if (component.operator === '>' && bothSidesAreNumbers) {
             return left > right;
-        } else if (component.operator === '>=' && bothSidesAreStrings) {
-            return left >= right;
+        } else if (component.operator === '>' && bothSidesAreStrings) {
+            return left > right;
         } else if (component.operator === '>=' && bothSidesAreNumbers) {
             return left >= right;
-        } else if (component.operator === '<' && bothSidesAreStrings) {
-            return left < right;
+        } else if (component.operator === '>=' && bothSidesAreStrings) {
+            return left >= right;
         } else if (component.operator === '<' && bothSidesAreNumbers) {
             return left < right;
-        } else if (component.operator === '<=' && bothSidesAreStrings) {
-            return left <= right;
+        } else if (component.operator === '<' && bothSidesAreStrings) {
+            return left < right;
         } else if (component.operator === '<=' && bothSidesAreNumbers) {
+            return left <= right;
+        } else if (component.operator === '<=' && bothSidesAreStrings) {
             return left <= right;
         } else {
             const errorMsg = 'Type Error: No such binary operation';
@@ -179,7 +179,7 @@ export class Evaluator {
         }
     }
 
-    evalLogicalExpression(component: any, scope: any): boolean {
+    evalLogicalExpression(component: any, scope: Scope): boolean {
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
 
@@ -246,7 +246,7 @@ export class Evaluator {
         }
     }
 
-    evalWhileLoop(component: any, scope: any): any {
+    evalWhileLoop(component: any, scope: Scope): any {
         const whileLoopScope = new Scope(scope);
         let condition = this.evalComponent(component.condition, scope);
 
@@ -264,7 +264,6 @@ export class Evaluator {
 
     evalNumericForLoop(component: any, scope: Scope): any {
         const forLoopScope = new Scope(scope);
-        
         const loopControlVariable = component.variable.name;
         const start = this.evalComponent(component.start, scope);
         const end = this.evalComponent(component.end, scope);
@@ -283,7 +282,7 @@ export class Evaluator {
         }
     }
 
-    evalGenericForLoop(component: any, scope: Scope): void {
+    evalGenericForLoop(component: any, scope: Scope): any {
         if (component.iterators.length !== 1) {
             const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
             console.log(errorMsg);
@@ -480,7 +479,6 @@ export class Evaluator {
             return arr;
         } else if (this.isTable(component)) {
             let tbl = {}
-
             for (const field of component.fields) {
                 const k = field.key.name;
                 const v = this.evalComponent(field.value, scope);
