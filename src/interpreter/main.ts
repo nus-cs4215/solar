@@ -18,7 +18,7 @@ export function interpret(program: string): any {
 // user program
 const userProgram = `
 
-let x = 1
+print('hi')
 `;
 
-interpret(userProgram);     // comment this out when running jest
+interpret(userProgram);
