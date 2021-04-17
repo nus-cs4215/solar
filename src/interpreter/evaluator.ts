@@ -436,21 +436,17 @@ export class Evaluator {
     }
 
     callSelfDefinedFunction(funcName: string, args: any[]): any {
-        if (!(funcName in this.globalScope.symbolTable)) {
-            const errorMsg = `Name Error: ${funcName} is not defined`;
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
+        const func = this.globalScope.lookup(funcName);
+        const funcBody = func.body;
+        const params = func.params;
+        
         this.callerName = funcName;
-        const functionScope = new Scope(null);
-        const params = this.globalScope.symbolTable[funcName].params;
-        functionScope.storeArguments(params, args);
-        const funcBody = this.globalScope.symbolTable[funcName].body;
+        const funcScope = new Scope(null);
+        funcScope.storeArguments(params, args);
 
         for (let i = 0; i < funcBody.length; i++) {
             const c = funcBody[i];
-            const evaluatedC = this.evalComponent(c, functionScope);
+            const evaluatedC = this.evalComponent(c, funcScope);
             
             if (evaluatedC instanceof Return) {
                 return evaluatedC.returnValue;
@@ -458,7 +454,7 @@ export class Evaluator {
 
             if (evaluatedC instanceof TailRecursion) {
                 const newArgs = evaluatedC.args;
-                functionScope.storeArguments(params, newArgs);
+                funcScope.storeArguments(params, newArgs);
                 i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
             }
         }
