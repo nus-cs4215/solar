@@ -15,8 +15,6 @@ var VariableDeclarationAnalyser = /** @class */ (function () {
         switch (component.type) {
             case 'LetStatement':
                 return this.analyseVariableDeclaration(component);
-            default:
-            //console.warn(`Variable Declaration Analyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     VariableDeclarationAnalyser.prototype.analyseVariableDeclaration = function (component) {

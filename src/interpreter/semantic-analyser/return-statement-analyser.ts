@@ -26,9 +26,6 @@ export class ReturnStatementAnalyser {
                 const errorMsg = 'Syntax Error: return cannot be used outside a function';
                 console.log(errorMsg);
                 throw errorMsg;
-
-            default:
-                //console.warn(`ReturnStatementAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     }
 

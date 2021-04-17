@@ -10,6 +10,16 @@ var Scope = /** @class */ (function () {
         this.symbolTable = {};
         this.parent = parent;
     }
+    Scope.prototype.declare = function (symbol, value) {
+        if (symbol in this.symbolTable) {
+            var errorMsg = "Syntax Error: " + symbol + " has already been declared";
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+        else {
+            this.symbolTable[symbol] = value;
+        }
+    };
     Scope.prototype.lookup = function (symbol) {
         if (symbol in this.symbolTable) {
             return this.symbolTable[symbol];

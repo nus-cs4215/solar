@@ -59,7 +59,6 @@ var Evaluator = /** @class */ (function () {
             case 'ContainerConstructorExpression':
                 return this.evalContainer(component, scope);
             default:
-                console.warn('This syntax tree component is unrecognised');
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
@@ -85,14 +84,7 @@ var Evaluator = /** @class */ (function () {
     Evaluator.prototype.evalVariableDeclaration = function (component, scope) {
         var symbol = component.variables[0].name;
         var value = this.evalComponent(component.init[0], scope);
-        if (symbol in scope.symbolTable) {
-            var errorMsg = "Syntax Error: " + symbol + " has already been declared";
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-        else {
-            scope.symbolTable[symbol] = value;
-        }
+        scope.declare(symbol, value);
     };
     Evaluator.prototype.evalAssignment = function (component, scope) {
         var symbol = component.variables[0].name;
@@ -348,8 +340,8 @@ var Evaluator = /** @class */ (function () {
         var funcSymbol = component.identifier.name;
         var funcParams = component.parameters.map(function (p) { return p.name; });
         var funcBody = component.body;
-        var value = { params: funcParams, body: funcBody };
-        scope.symbolTable[funcSymbol] = value;
+        var funcValue = { params: funcParams, body: funcBody };
+        scope.declare(funcSymbol, funcValue);
     };
     Evaluator.prototype.evalCallExpression = function (component, scope) {
         var _this = this;
@@ -410,25 +402,21 @@ var Evaluator = /** @class */ (function () {
             || funcName === 'tbl_put';
     };
     Evaluator.prototype.callSelfDefinedFunction = function (funcName, args) {
-        if (!(funcName in this.globalScope.symbolTable)) {
-            var errorMsg = "Name Error: " + funcName + " is not defined";
-            console.log(errorMsg);
-            throw errorMsg;
-        }
+        var func = this.globalScope.lookup(funcName);
+        var funcBody = func.body;
+        var params = func.params;
         this.callerName = funcName;
-        var functionScope = new scope_1.Scope(null);
-        var params = this.globalScope.symbolTable[funcName].params;
-        functionScope.storeArguments(params, args);
-        var funcBody = this.globalScope.symbolTable[funcName].body;
+        var funcScope = new scope_1.Scope(null);
+        funcScope.storeArguments(params, args);
         for (var i = 0; i < funcBody.length; i++) {
             var c = funcBody[i];
-            var evaluatedC = this.evalComponent(c, functionScope);
+            var evaluatedC = this.evalComponent(c, funcScope);
             if (evaluatedC instanceof return_1.Return) {
                 return evaluatedC.returnValue;
             }
             if (evaluatedC instanceof tail_recursion_1.TailRecursion) {
                 var newArgs = evaluatedC.args;
-                functionScope.storeArguments(params, newArgs);
+                funcScope.storeArguments(params, newArgs);
                 i = -1; // restarts the loop. i++ would kick in immediately after this line, so this would effectively mean i = 0
             }
         }
@@ -593,6 +581,16 @@ var Scope = /** @class */ (function () {
         this.symbolTable = {};
         this.parent = parent;
     }
+    Scope.prototype.declare = function (symbol, value) {
+        if (symbol in this.symbolTable) {
+            var errorMsg = "Syntax Error: " + symbol + " has already been declared";
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+        else {
+            this.symbolTable[symbol] = value;
+        }
+    };
     Scope.prototype.lookup = function (symbol) {
         if (symbol in this.symbolTable) {
             return this.symbolTable[symbol];
@@ -662,8 +660,6 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                 return this.analyseCallExpression(component.expression);
             case 'CallExpression':
                 return this.analyseCallExpression(component);
-            default:
-            //console.warn(`ArgsLengthAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     ArgsLengthAnalyser.prototype.analyseCallExpression = function (component) {
@@ -718,8 +714,6 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                 else {
                     return;
                 }
-            default:
-            //console.warn(`ArgsLengthAnalyser: ${funcName}() is not a library function, no need to analyse`)
         }
     };
     return ArgsLengthAnalyser;
@@ -755,8 +749,6 @@ var ReturnStatementAnalyser = /** @class */ (function () {
                 var errorMsg = 'Syntax Error: return cannot be used outside a function';
                 console.log(errorMsg);
                 throw errorMsg;
-            default:
-            //console.warn(`ReturnStatementAnalyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     ReturnStatementAnalyser.prototype.analyseIfStatement = function (component) {
@@ -830,8 +822,6 @@ var VariableDeclarationAnalyser = /** @class */ (function () {
         switch (component.type) {
             case 'LetStatement':
                 return this.analyseVariableDeclaration(component);
-            default:
-            //console.warn(`Variable Declaration Analyser: This component is a ${component.type}, no need to analyse.`);
         }
     };
     VariableDeclarationAnalyser.prototype.analyseVariableDeclaration = function (component) {
