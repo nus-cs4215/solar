@@ -34,11 +34,6 @@ export class ArrayLibrary {
                 arr[idx] = args[2];
                 return arr;
             }
-
-            default:
-                const errorMsg = 'Syntax Error: No such function in Array Library';
-                console.log(errorMsg);
-                throw errorMsg;
         }
     }
 }

@@ -15,11 +15,6 @@ export class StringLibrary {
             
             case 'str_substring':
                 return args[0].substring(args[1], args[2]);
-
-            default:
-                const errorMsg = 'Syntax Error: No such function in String Library';
-                console.log(errorMsg);
-                throw errorMsg;
         }
     }
 
