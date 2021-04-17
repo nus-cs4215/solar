@@ -1,26 +1,6 @@
 import { interpret } from '../src/interpreter/main';
 import { getLog } from 'console-testing-library';
 
-test('2 print statements', () => {
-
-    const prog = `
-    print('hello world') print('hi')
-    `;
-    interpret(prog);
-    expect(getLog().log).toBe('hello world\nhi');
-}
-);
-
-test('print(true)', () => {
-
-    const prog = `
-    print(true)
-    `;
-    interpret(prog);
-    expect(getLog().log).toBe('true');
-}
-);
-
 test('print loop variable i inside a for loop', () => {
 
     const prog = `
