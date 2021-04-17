@@ -85,7 +85,7 @@ export class Evaluator {
             || component.type === 'BooleanLiteral';
     }
 
-    evalLiteral(component: any): string | number | boolean | null {
+    evalLiteral(component: any): string | number | boolean {
         if (component.type === 'StringLiteral') {
             const strLiteral = component.raw.slice(1, -1);  // remove the outermost quotes
             return strLiteral;
@@ -142,35 +142,35 @@ export class Evaluator {
             return left * right;
         } else if (component.operator === '/' && bothSidesAreNumbers) {
             return left / right;
-        } else if (component.operator === '+' && bothSidesAreNumbers) {
-            return left + right;
         } else if (component.operator === '-' && bothSidesAreNumbers) {
             return left - right;
+        } else if (component.operator === '+' && bothSidesAreNumbers) {
+            return left + right;
         } else if (component.operator === '+' && bothSidesAreStrings) {
             return left + right;    // string concat
-        } else if (component.operator === '==' && bothSidesAreStrings) {
-            return left === right;
         } else if (component.operator === '==' && bothSidesAreNumbers) {
             return left === right;
-        } else if (component.operator === '~=' && bothSidesAreStrings) {
-            return left !== right;
+        } else if (component.operator === '==' && bothSidesAreStrings) {
+            return left === right;
         } else if (component.operator === '~=' && bothSidesAreNumbers) {
             return left !== right;
-        } else if (component.operator === '>' && bothSidesAreStrings) {
-            return left > right;
+        } else if (component.operator === '~=' && bothSidesAreStrings) {
+            return left !== right;
         } else if (component.operator === '>' && bothSidesAreNumbers) {
             return left > right;
-        } else if (component.operator === '>=' && bothSidesAreStrings) {
-            return left >= right;
+        } else if (component.operator === '>' && bothSidesAreStrings) {
+            return left > right;
         } else if (component.operator === '>=' && bothSidesAreNumbers) {
             return left >= right;
-        } else if (component.operator === '<' && bothSidesAreStrings) {
-            return left < right;
+        } else if (component.operator === '>=' && bothSidesAreStrings) {
+            return left >= right;
         } else if (component.operator === '<' && bothSidesAreNumbers) {
             return left < right;
-        } else if (component.operator === '<=' && bothSidesAreStrings) {
-            return left <= right;
+        } else if (component.operator === '<' && bothSidesAreStrings) {
+            return left < right;
         } else if (component.operator === '<=' && bothSidesAreNumbers) {
+            return left <= right;
+        } else if (component.operator === '<=' && bothSidesAreStrings) {
             return left <= right;
         } else {
             const errorMsg = 'Type Error: No such binary operation';
@@ -264,7 +264,6 @@ export class Evaluator {
 
     evalNumericForLoop(component: any, scope: Scope): any {
         const forLoopScope = new Scope(scope);
-        
         const loopControlVariable = component.variable.name;
         const start = this.evalComponent(component.start, scope);
         const end = this.evalComponent(component.end, scope);
@@ -283,7 +282,7 @@ export class Evaluator {
         }
     }
 
-    evalGenericForLoop(component: any, scope: Scope): void {
+    evalGenericForLoop(component: any, scope: Scope): any {
         if (component.iterators.length !== 1) {
             const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
             console.log(errorMsg);
