@@ -19,7 +19,7 @@ export class Evaluator {
         }
     }
     
-    evalComponent(component: any, scope: any): any {
+    evalComponent(component: any, scope: Scope): any {
         if (this.isLiteral(component)) {
             return this.evalLiteral(component);
         }
@@ -111,7 +111,7 @@ export class Evaluator {
         scope.assign(symbol, value);
     }
 
-    evalUnaryExpression(component: any, scope: any): number | boolean {
+    evalUnaryExpression(component: any, scope: Scope): number | boolean {
         const argument = this.evalComponent(component.argument, scope);
 
         if (component.operator === 'not' && typeof argument === 'boolean') {
@@ -179,7 +179,7 @@ export class Evaluator {
         }
     }
 
-    evalLogicalExpression(component: any, scope: any): boolean {
+    evalLogicalExpression(component: any, scope: Scope): boolean {
         const left = this.evalComponent(component.left, scope);
         const right = this.evalComponent(component.right, scope);
 
@@ -246,7 +246,7 @@ export class Evaluator {
         }
     }
 
-    evalWhileLoop(component: any, scope: any): any {
+    evalWhileLoop(component: any, scope: Scope): any {
         const whileLoopScope = new Scope(scope);
         let condition = this.evalComponent(component.condition, scope);
 
