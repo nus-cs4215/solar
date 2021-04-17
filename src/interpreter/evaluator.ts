@@ -103,14 +103,7 @@ export class Evaluator {
     evalVariableDeclaration(component: any, scope: Scope): void {
         const symbol = component.variables[0].name;
         const value = this.evalComponent(component.init[0], scope);
-
-        if (symbol in scope.symbolTable) {
-            const errorMsg = `Syntax Error: ${symbol} has already been declared`;
-            console.log(errorMsg);
-            throw errorMsg;
-        } else {
-            scope.symbolTable[symbol] = value;
-        }
+        scope.declare(symbol, value);
     }
 
     evalAssignment(component: any, scope: Scope): void {
@@ -373,8 +366,8 @@ export class Evaluator {
         const funcSymbol = component.identifier.name;
         const funcParams = component.parameters.map(p => p.name);
         const funcBody = component.body;
-        const value = { params: funcParams, body: funcBody };
-        scope.symbolTable[funcSymbol] = value;
+        const funcValue = { params: funcParams, body: funcBody };
+        scope.declare(funcSymbol, funcValue);
     }
 
     evalCallExpression(component: any, scope: Scope): any {
