@@ -17,7 +17,8 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-print(math_max(1,'s'))
+let s = str_substring('hello', 1,true)
+print(s)
 `;
 
 interpret(userProgram);

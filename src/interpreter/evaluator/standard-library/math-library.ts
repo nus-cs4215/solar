@@ -49,12 +49,12 @@ export class MathLibrary {
             case 'math_ceil':
             case 'math_floor':
             case 'math_sqrt':
-                if (typeof args[0] !== 'number') {
+                if (typeof args[0] === 'number') {
+                    return;
+                } else {
                     const errorMsg = `Type Error: Args types should be as follows - ${funcName}(number)`;
                     console.log(errorMsg);
-                    throw errorMsg;
-                } else {
-                    return;
+                    throw errorMsg;                
                 }
 
             case 'math_max':            
