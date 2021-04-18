@@ -65,7 +65,10 @@ end
 for i = start, end, step do
 end 
 
-for x in array do
+for x in arr do
+end
+
+for k, v in tbl do
 end
 
 -- breaking out of a loop
@@ -80,11 +83,11 @@ end</code>
             <h2>Conditionals</h2>
             <pre>
 							<code>if condition then
-  print("yes")
+  print('yes')
 elseif condition then
-  print("maybe")
+  print('maybe')
 else
-  print("no")
+  print('no')
 end
 
 -- Nested Conditionals
@@ -100,9 +103,8 @@ end</code>
           <section>
             <h2>Tables/Arrays</h2>
             <pre>
-							<code>let table = {}
-t = { a = 1, b = 2 }
-array = { "a", "b", "c", "d" }</code>
+							<code>let tbl = { x = 2, y = 1 }
+let arr = { 'a', 'b', 'c', 'e' }</code>
 						</pre>
           </section>
 
@@ -128,7 +130,7 @@ end
           <section>
             <h2>Invoking Functions</h2>
             <pre>
-							<code>print("Hi")</code>
+							<code>print('Hello World!')</code>
 						</pre
             >
           </section>
@@ -154,7 +156,7 @@ true or false  --> true
 not true       --> false
 
 -- String Concatenation
-"left" + "right"</code>
+'left' + 'right'</code>
 						</pre>
           </section>
 
