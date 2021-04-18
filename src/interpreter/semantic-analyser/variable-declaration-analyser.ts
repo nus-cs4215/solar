@@ -9,8 +9,29 @@ export class VariableDeclarationAnalyser {
 
     analyseComponent(component: any): void {
         switch(component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component);
+            
+            case 'WhileStatement':
+            case 'ForNumericStatement':
+            case 'ForGenericStatement':
+            case 'FunctionDeclaration':
+                return this.analyseBlock(component);
+
             case 'LetStatement':
                 return this.analyseVariableDeclaration(component);
+        }
+    }
+
+    analyseIfStatement(component: any): void {
+        for (const clause of component.clauses) {
+            this.analyseBlock(clause);
+        }
+    }
+
+    analyseBlock(component: any): void {
+        for (const c of component.body) {
+            this.analyseComponent(c);
         }
     }
 

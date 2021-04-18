@@ -17,11 +17,10 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-let b = 1!=2
-let a = 1!=1
-print(b)
-print(a)
-print(b or a)
+let f = {a=1,b=3}
+for k,v in f do
+    print(v)
+end
 `;
 
 interpret(userProgram);

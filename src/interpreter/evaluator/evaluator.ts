@@ -283,30 +283,34 @@ export class Evaluator {
     }
 
     evalGenericForLoop(component: any, scope: Scope): any {
-        if (component.iterators.length !== 1) {
-            const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
+        const expr = this.evalComponent(component.iterators[0], scope);
 
-        if (component.iterators[0].type !== 'Identifier') {
-            const errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
+        if (this.exprIsArray(expr)) {
+            return this.evalGenericForLoopThroughArray(component, scope);
+        } else if (this.exprIsTable(expr)) {
+            return this.evalGenericForLoopThroughTable(component, scope);
+        } else {
+            const errorMsg = `Type Error: ${component.iterators[0].name} is neither an array nor table`;
             console.log(errorMsg);
             throw errorMsg;
         }
-        
-        const container = this.evalComponent(component.iterators[0], scope);
-        
-        if (Array.isArray(container)) {
-            return this.evalGenericForLoopThroughArray(component, scope);
-        } else {
-            return this.evalGenericForLoopThroughTable(component, scope)
-        }
+    }
+
+    exprIsArray(expr: any): boolean {
+        return Array.isArray(expr);
+    }
+
+    exprIsTable(expr: any): boolean {
+        return (expr instanceof Object) && !this.exprIsFunc(expr)
+    }
+
+    exprIsFunc(expr: any): boolean {
+        return expr.isFunc === true;
     }
 
     evalGenericForLoopThroughArray(component: any, scope: Scope): any {
         if (component.variables.length !== 1) {
-            const errorMsg = 'Syntax Error: There should only be 1 loop variable'
+            const errorMsg = 'Syntax Error: Generic For Loop through array takes 1 loop variable'
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -330,7 +334,7 @@ export class Evaluator {
 
     evalGenericForLoopThroughTable(component: any, scope: Scope): any {
         if (component.variables.length !== 2) {
-            const errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
+            const errorMsg = 'Syntax Error: Generic For Loop through table takes 2 loop variables';
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -364,7 +368,7 @@ export class Evaluator {
         const funcSymbol = component.identifier.name;
         const funcParams = component.parameters.map(p => p.name);
         const funcBody = component.body;
-        const funcValue = { params: funcParams, body: funcBody };
+        const funcValue = { params: funcParams, body: funcBody, isFunc: true };
         scope.declare(funcSymbol, funcValue);
     }
 
@@ -474,10 +478,10 @@ export class Evaluator {
     }
 
     evalContainer(component: any, scope: Scope): any {
-        if (this.isArray(component)) {
+        if (this.componentIsArray(component)) {
             const arr = component.fields.map(field => this.evalComponent(field.value, scope));
             return arr;
-        } else if (this.isTable(component)) {
+        } else if (this.componentIsTable(component)) {
             let tbl = {}
             for (const field of component.fields) {
                 const k = field.key.name;
@@ -492,7 +496,7 @@ export class Evaluator {
         }
     }
 
-    isArray(component: any): boolean {
+    componentIsArray(component: any): boolean {
         for (const field of component.fields) {
             if (field.type === 'TableKeyString') {
                 return false;
@@ -501,7 +505,7 @@ export class Evaluator {
         return true;
     }
 
-    isTable(component: any): boolean {
+    componentIsTable(component: any): boolean {
         for (const field of component.fields) {
             if (field.type === 'TableValue') {
                 return false;

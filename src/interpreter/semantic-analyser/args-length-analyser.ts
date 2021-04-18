@@ -9,7 +9,19 @@ export class ArgsLengthAnalyser {
     }
 
     analyseComponent(component: any): void {
-        switch(component.type) {
+        switch (component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component);
+            
+            case 'WhileStatement':
+            case 'ForNumericStatement':
+            case 'ForGenericStatement':
+            case 'FunctionDeclaration':
+                return this.analyseBlock(component);
+
+            case 'LetStatement':
+                return this.analyseVariableDeclaration(component);
+
             case 'CallStatement':
                 return this.analyseCallExpression(component.expression);
             
@@ -18,10 +30,33 @@ export class ArgsLengthAnalyser {
         }
     }
 
+    analyseIfStatement(component: any): void {
+        for (const clause of component.clauses) {
+            this.analyseBlock(clause);
+        }
+    }
+
+    analyseBlock(component: any): void {
+        for (const c of component.body) {
+            this.analyseComponent(c);
+        }
+    }
+
+    analyseVariableDeclaration(component: any): void {
+        this.analyseComponent(component.init[0]);
+    }
+
     analyseCallExpression(component: any): void {
         const funcName = component.base.name;
         const argsLength = component.arguments.length;
         this.argsLengthCheck(funcName, argsLength);
+        this.analyseArgs(component);
+    }
+
+    analyseArgs(component: any): void {
+        for (const c of component.arguments) {
+            this.analyseComponent(c);
+        }
     }
 
     argsLengthCheck(funcName: string, argsLen: number): void {
