@@ -17,11 +17,9 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-let b = 1!=2
-let a = 1!=1
-print(b)
-print(a)
-print(b or a)
+if 1 == 1 then
+    return 5
+end
 `;
 
 interpret(userProgram);
