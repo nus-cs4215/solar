@@ -39,7 +39,7 @@
             <h2>Comments</h2>
             <pre>
 							<code>-- single line comment
--- Note that there is no support for multi-line comments currently</code>
+-- There is no special construct for writing multi-line comments</code>
 						</pre>
           </section>
 
@@ -62,7 +62,7 @@ x = 2</code>
 							<code>while condition do
 end
 
-for i = start, finish, delta do
+for i = start, end, step do
 end 
 
 for x in array do
@@ -141,11 +141,11 @@ end
    ==    <     >     <=    >=    !=
 
 -- Arithmetic (binary)
--- __add  __sub  __muv  __div  __mod  __pow  __floordiv
-   +      -      *      /      %      ^      //
+-- add  sub  mult  div  mod  pow  floordiv
+    +    -    *     /    %    ^     //
 
 -- Arithmetic (unary)
--- __unm (unary minus)
+-- negative
    -
 
 -- Logic (and/or)
@@ -153,7 +153,7 @@ true and false --> false
 true or false  --> true
 not true       --> false
 
--- String concat
+-- String Concatenation
 "left" + "right"</code>
 						</pre>
           </section>
@@ -168,9 +168,9 @@ math_ceil(x)
 math_floor(x)
 math_sqrt(x)
 
--- number, ..., number -> number
-math_max(x1, ..., xn)
-math_min(x1, ..., xn)</code>
+-- number, ... , number -> number
+math_max(x1, ... , xn)
+math_min(x1, ... , xn)</code>
             </pre>
           </section>
 
@@ -181,15 +181,15 @@ math_min(x1, ..., xn)</code>
               <code>-- string -> number
 str_len(s)
 
--- string -> String
+-- string -> string
 str_reverse(s)
 
--- string -> [string] 
+-- string, string -> [string] 
 str_split(s, delimiter)
 str_split('hi, there', ',')
 -- {'hi', ' there'}
 
--- string -> string
+-- string, number, number -> string
 -- end is exclusive
 str_substring(s, start, end)</code>
             </pre>
@@ -199,18 +199,24 @@ str_substring(s, start, end)</code>
           <section>
             <h2>API: Arrays</h2>
             <pre>
-              <code>-- [T] -> number 
+              <code>T denotes the type for any arbitrary element in the array
+
+-- [T] -> number 
 arr_len(a)
 
 -- [T] -> [T]
 arr_reverse(a)
 arr_sort(a)
 array_pop(a)
-array_push(a, elem)
-arr_set(a, index, elem)
 
--- [T] -> T 
-arr_get(a, index)</code>
+-- [T], T -> [T]
+array_push(a, elem)
+
+-- [T], number -> T 
+arr_get(a, index)
+
+-- [T], number, T -> [T]
+arr_set(a, index, elem)</code>
             </pre>
           </section>
 
@@ -218,18 +224,22 @@ arr_get(a, index)</code>
           <section>
             <h2>API: Tables</h2>
             <pre>
-              <code>-- {T} -> number
+              <code>T denotes the type for any arbitrary value in the table. All keys are string type.
+
+-- {T} -> number
 tbl_len(t)
 
--- {T} -> boolean
+-- {T}, string -> boolean
 tbl_contains(t, key)
 
--- {T} -> {T} 
+-- {T}, string -> {T}
 tbl_remove(t, key)
-tbl_put(t, key, val)
 
--- {T} -> {T} 
-tbl_get(t, key)</code>
+-- {T}, string -> T
+tbl_get(t, key)
+
+-- {T}, string, T -> {T}
+tbl_put(t, key, val)</code>
             </pre>
           </section>
         </div>
