@@ -378,7 +378,7 @@ export class Evaluator {
         const args = argsComponent.map(c => this.evalComponent(c, scope));
 
         if (funcName === 'print') {
-            console.log(args[0]);
+            this.printToConsole(args[0]);
         } else if (this.inMathLibrary(funcName)) {
             const mathLibrary = new MathLibrary();
             return mathLibrary.callLibraryFunction(funcName, args);
@@ -393,6 +393,14 @@ export class Evaluator {
             return tableLibray.callLibraryFunction(funcName, args);
         } else {
             return this.callSelfDefinedFunction(funcName, args);
+        }
+    }
+
+    printToConsole(arg: any): void {
+        if (arg.isFunc === true) {
+            console.log('<function>');
+        } else {
+            console.log(arg);
         }
     }
 

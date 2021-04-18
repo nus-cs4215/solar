@@ -17,8 +17,13 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-let s = str_substring('hello', 1,true)
-print(s)
+
+let f = 1
+function a()
+    return 5
+end
+print(a)
+
 `;
 
 interpret(userProgram);
