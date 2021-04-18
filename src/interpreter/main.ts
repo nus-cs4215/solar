@@ -17,9 +17,7 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-function f()
-return 5
-end
+let f = {a=1,b=3}
 for k,v in f do
     print(v)
 end

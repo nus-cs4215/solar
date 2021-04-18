@@ -283,14 +283,29 @@ export class Evaluator {
     }
 
     evalGenericForLoop(component: any, scope: Scope): any {
-        const container = this.evalComponent(component.iterators[0], scope);
-        // if (typeof container === 'string' || typeof container === 'number' || typeof container === 'boolean')
-        
-        if (Array.isArray(container)) {
+        const expr = this.evalComponent(component.iterators[0], scope);
+
+        if (this.exprIsArray(expr)) {
             return this.evalGenericForLoopThroughArray(component, scope);
+        } else if (this.exprIsTable(expr)) {
+            return this.evalGenericForLoopThroughTable(component, scope);
         } else {
-            return this.evalGenericForLoopThroughTable(component, scope)
+            const errorMsg = `Type Error: ${component.iterators[0].name} is neither an array nor table`;
+            console.log(errorMsg);
+            throw errorMsg;
         }
+    }
+
+    exprIsArray(expr: any): boolean {
+        return Array.isArray(expr);
+    }
+
+    exprIsTable(expr: any): boolean {
+        return (expr instanceof Object) && !this.exprIsFunc(expr)
+    }
+
+    exprIsFunc(expr: any): boolean {
+        return expr.isFunc === true;
     }
 
     evalGenericForLoopThroughArray(component: any, scope: Scope): any {
@@ -353,7 +368,7 @@ export class Evaluator {
         const funcSymbol = component.identifier.name;
         const funcParams = component.parameters.map(p => p.name);
         const funcBody = component.body;
-        const funcValue = { params: funcParams, body: funcBody };
+        const funcValue = { params: funcParams, body: funcBody, isFunc: true };
         scope.declare(funcSymbol, funcValue);
     }
 
@@ -463,10 +478,10 @@ export class Evaluator {
     }
 
     evalContainer(component: any, scope: Scope): any {
-        if (this.isArray(component)) {
+        if (this.componentIsArray(component)) {
             const arr = component.fields.map(field => this.evalComponent(field.value, scope));
             return arr;
-        } else if (this.isTable(component)) {
+        } else if (this.componentIsTable(component)) {
             let tbl = {}
             for (const field of component.fields) {
                 const k = field.key.name;
@@ -481,7 +496,7 @@ export class Evaluator {
         }
     }
 
-    isArray(component: any): boolean {
+    componentIsArray(component: any): boolean {
         for (const field of component.fields) {
             if (field.type === 'TableKeyString') {
                 return false;
@@ -490,7 +505,7 @@ export class Evaluator {
         return true;
     }
 
-    isTable(component: any): boolean {
+    componentIsTable(component: any): boolean {
         for (const field of component.fields) {
             if (field.type === 'TableValue') {
                 return false;
