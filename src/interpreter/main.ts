@@ -17,10 +17,7 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-let f = {a=1,b=3}
-for k,v in f do
-    print(v)
-end
+print(math_max(1,'s'))
 `;
 
 interpret(userProgram);

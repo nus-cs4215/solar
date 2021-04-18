@@ -1,8 +1,6 @@
 export class MathLibrary {
 
     callLibraryFunction(funcName: string, args: number[]): number {
-        // TODO: run time type check
-
         switch (funcName) {
             case 'math_abs':
                 return Math.abs(args[0]);
@@ -26,21 +24,21 @@ export class MathLibrary {
 
     max(args: number[]): number {
         let max = args[0];
-            for (const arg of args) {
-                if (arg > max) {
-                    max = arg;
-                }
+        for (const arg of args) {
+            if (arg > max) {
+                max = arg;
             }
+        }
         return max;
     }
 
     min(args: number[]): number {
         let min = args[0];
-            for (const arg of args) {
-                if (arg < min) {
-                    min = arg;
-                }
+        for (const arg of args) {
+            if (arg < min) {
+                min = arg;
             }
+        }
         return min;
     }
 }

@@ -1,8 +1,6 @@
 export class TableLibrary {
 
-    callLibraryFunction(funcName: string, args: any[]): any {
-        // TODO: run time type check
-        
+    callLibraryFunction(funcName: string, args: any[]): any {        
         const tbl = args[0];
         switch (funcName) {
             case 'tbl_len':
