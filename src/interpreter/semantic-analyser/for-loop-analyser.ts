@@ -56,6 +56,7 @@ export class ForLoopAnalyser {
             const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
             console.log(errorMsg);
             throw errorMsg;
-        }       
+        }
+        this.analyseBlock(component);
     }
 }

@@ -19,8 +19,10 @@ export function interpret(program: string): any {
 const userProgram = `
 let arr= {1,2,7}
 
-for x in arr do
-    print(x)
+for i = 0,3,1 do
+    for y = 0,3,1 do
+        print(i)
+    end
 end
 `;
 
