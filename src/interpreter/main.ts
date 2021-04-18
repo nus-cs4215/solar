@@ -17,7 +17,11 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-math_min(1,math_max(2,3))
+function f()
+    for i = 1, 10, 1 do
+        let x
+    end
+end
 `;
 
 interpret(userProgram);
