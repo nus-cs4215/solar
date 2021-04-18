@@ -282,19 +282,7 @@ export class Evaluator {
         }
     }
 
-    evalGenericForLoop(component: any, scope: Scope): any {
-        if (component.iterators.length !== 1) {
-            const errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-
-        if (component.iterators[0].type !== 'Identifier') {
-            const errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-        
+    evalGenericForLoop(component: any, scope: Scope): any {        
         const container = this.evalComponent(component.iterators[0], scope);
         
         if (Array.isArray(container)) {

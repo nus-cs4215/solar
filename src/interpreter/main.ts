@@ -17,10 +17,10 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-function f()
-    for i = 1, 10, 1 do
-        let x
-    end
+let arr= {1,2,7}
+
+for x in arr do
+    print(x)
 end
 `;
 
