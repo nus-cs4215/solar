@@ -15,5 +15,5 @@ function interpret(program) {
 }
 exports.interpret = interpret;
 // user program
-var userProgram = "\nprint(math_max(1,'s'))\n";
+var userProgram = "\n\nlet f = 1\nfunction a()\n    return 5\nend\nprint(a)\n\n";
 interpret(userProgram);

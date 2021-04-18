@@ -286,7 +286,7 @@ var Evaluator = /** @class */ (function () {
         return Array.isArray(expr);
     };
     Evaluator.prototype.exprIsTable = function (expr) {
-        return (expr instanceof Object) && !this.exprIsFunc(expr);
+        return (expr instanceof Object) && !this.exprIsArray(expr) && !this.exprIsFunc(expr);
     };
     Evaluator.prototype.exprIsFunc = function (expr) {
         return expr.isFunc === true;
@@ -353,7 +353,7 @@ var Evaluator = /** @class */ (function () {
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
         if (funcName === 'print') {
-            console.log(args[0]);
+            this.printToConsole(args[0]);
         }
         else if (this.inMathLibrary(funcName)) {
             var mathLibrary = new math_library_1.MathLibrary();
@@ -373,6 +373,14 @@ var Evaluator = /** @class */ (function () {
         }
         else {
             return this.callSelfDefinedFunction(funcName, args);
+        }
+    };
+    Evaluator.prototype.printToConsole = function (arg) {
+        if (arg.isFunc === true) {
+            console.log('<function>');
+        }
+        else {
+            console.log(arg);
         }
     };
     Evaluator.prototype.inMathLibrary = function (funcName) {
@@ -605,6 +613,7 @@ var ArrayLibrary = /** @class */ (function () {
     function ArrayLibrary() {
     }
     ArrayLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        this.typeCheckArgs(funcName, args);
         var arr = args[0];
         switch (funcName) {
             case 'arr_len':
@@ -632,6 +641,55 @@ var ArrayLibrary = /** @class */ (function () {
             }
         }
     };
+    ArrayLibrary.prototype.typeCheckArgs = function (funcName, args) {
+        switch (funcName) {
+            case 'arr_len':
+            case 'arr_reverse':
+            case 'arr_sort':
+            case 'arr_pop':
+                if (this.exprIsArray(args[0])) {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "([T])";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'arr_push':
+                if (this.exprIsArray(args[0]) && !this.exprIsFunc(args[1])) {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "([T], T)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'arr_get':
+                if (this.exprIsArray(args[0]) && typeof args[1] === 'number') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "([T], number)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'arr_set':
+                if (this.exprIsArray(args[0]) && typeof args[1] === 'number' && !this.exprIsFunc(args[2])) {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "([T], number, T)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+        }
+    };
+    ArrayLibrary.prototype.exprIsArray = function (expr) {
+        return Array.isArray(expr);
+    };
+    ArrayLibrary.prototype.exprIsFunc = function (expr) {
+        return expr.isFunc === true;
+    };
     return ArrayLibrary;
 }());
 exports.ArrayLibrary = ArrayLibrary;
@@ -644,6 +702,7 @@ var MathLibrary = /** @class */ (function () {
     function MathLibrary() {
     }
     MathLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        this.typeCheckArgs(funcName, args);
         switch (funcName) {
             case 'math_abs':
                 return Math.abs(args[0]);
@@ -679,6 +738,33 @@ var MathLibrary = /** @class */ (function () {
         }
         return min;
     };
+    MathLibrary.prototype.typeCheckArgs = function (funcName, args) {
+        switch (funcName) {
+            case 'math_abs':
+            case 'math_ceil':
+            case 'math_floor':
+            case 'math_sqrt':
+                if (typeof args[0] === 'number') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(number)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'math_max':
+            case 'math_min':
+                for (var _i = 0, args_3 = args; _i < args_3.length; _i++) {
+                    var arg = args_3[_i];
+                    if (typeof arg !== 'number') {
+                        var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(number, ... , number)";
+                        console.log(errorMsg);
+                        throw errorMsg;
+                    }
+                }
+                return;
+        }
+    };
     return MathLibrary;
 }());
 exports.MathLibrary = MathLibrary;
@@ -691,6 +777,7 @@ var StringLibrary = /** @class */ (function () {
     function StringLibrary() {
     }
     StringLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        this.typeCheckArgs(funcName, args);
         switch (funcName) {
             case 'str_len':
                 return args[0].length;
@@ -705,6 +792,38 @@ var StringLibrary = /** @class */ (function () {
     StringLibrary.prototype.reverseString = function (str) {
         return str.split('').reverse().join('');
     };
+    StringLibrary.prototype.typeCheckArgs = function (funcName, args) {
+        switch (funcName) {
+            case 'str_len':
+            case 'str_reverse':
+                if (typeof args[0] === 'string') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(string)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'str_split':
+                if (typeof args[0] === 'string' && typeof args[1] === 'string') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(string, string)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'str_substring':
+                if (typeof args[0] === 'string' && typeof args[1] === 'number' && typeof args[2] === 'number') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(string, number, number)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+        }
+    };
     return StringLibrary;
 }());
 exports.StringLibrary = StringLibrary;
@@ -717,6 +836,7 @@ var TableLibrary = /** @class */ (function () {
     function TableLibrary() {
     }
     TableLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        this.typeCheckArgs(funcName, args);
         var tbl = args[0];
         switch (funcName) {
             case 'tbl_len':
@@ -738,6 +858,48 @@ var TableLibrary = /** @class */ (function () {
                 return tbl;
             }
         }
+    };
+    TableLibrary.prototype.typeCheckArgs = function (funcName, args) {
+        switch (funcName) {
+            case 'tbl_len':
+                if (this.exprIsTable(args[0])) {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "({T})";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'tbl_contains':
+            case 'tbl_remove':
+            case 'tbl_get':
+                if (this.exprIsTable(args[0]) && typeof args[1] === 'string') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "({T}, string)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'tbl_put':
+                if (this.exprIsTable(args[0]) && typeof args[1] === 'string' && !this.exprIsFunc(args[2])) {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "({T}, string, T)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+        }
+    };
+    TableLibrary.prototype.exprIsTable = function (expr) {
+        return (expr instanceof Object) && !this.exprIsArray(expr) && !this.exprIsFunc(expr);
+    };
+    TableLibrary.prototype.exprIsArray = function (expr) {
+        return Array.isArray(expr);
+    };
+    TableLibrary.prototype.exprIsFunc = function (expr) {
+        return expr.isFunc === true;
     };
     return TableLibrary;
 }());
@@ -761,7 +923,7 @@ function interpret(program) {
 }
 exports.interpret = interpret;
 window.interpret = interpret;
-var userProgram = "\nprint(math_max(1,'s'))\n";
+var userProgram = "\n\nlet f = 1\nfunction a()\n    return 5\nend\nprint(a)\n\n";
 interpret(userProgram);
 
 },{"./evaluator/evaluator":1,"./parser":11,"./semantic-analyser/semantic-analyser":15}],11:[function(require,module,exports){

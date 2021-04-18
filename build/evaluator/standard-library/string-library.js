@@ -5,6 +5,7 @@ var StringLibrary = /** @class */ (function () {
     function StringLibrary() {
     }
     StringLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        this.typeCheckArgs(funcName, args);
         switch (funcName) {
             case 'str_len':
                 return args[0].length;
@@ -18,6 +19,38 @@ var StringLibrary = /** @class */ (function () {
     };
     StringLibrary.prototype.reverseString = function (str) {
         return str.split('').reverse().join('');
+    };
+    StringLibrary.prototype.typeCheckArgs = function (funcName, args) {
+        switch (funcName) {
+            case 'str_len':
+            case 'str_reverse':
+                if (typeof args[0] === 'string') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(string)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'str_split':
+                if (typeof args[0] === 'string' && typeof args[1] === 'string') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(string, string)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+            case 'str_substring':
+                if (typeof args[0] === 'string' && typeof args[1] === 'number' && typeof args[2] === 'number') {
+                    return;
+                }
+                else {
+                    var errorMsg = "Type Error: Args types should be as follows - " + funcName + "(string, number, number)";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+        }
     };
     return StringLibrary;
 }());

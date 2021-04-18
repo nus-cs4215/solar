@@ -285,7 +285,7 @@ var Evaluator = /** @class */ (function () {
         return Array.isArray(expr);
     };
     Evaluator.prototype.exprIsTable = function (expr) {
-        return (expr instanceof Object) && !this.exprIsFunc(expr);
+        return (expr instanceof Object) && !this.exprIsArray(expr) && !this.exprIsFunc(expr);
     };
     Evaluator.prototype.exprIsFunc = function (expr) {
         return expr.isFunc === true;
@@ -352,7 +352,7 @@ var Evaluator = /** @class */ (function () {
         var argsComponent = component.arguments;
         var args = argsComponent.map(function (c) { return _this.evalComponent(c, scope); });
         if (funcName === 'print') {
-            console.log(args[0]);
+            this.printToConsole(args[0]);
         }
         else if (this.inMathLibrary(funcName)) {
             var mathLibrary = new math_library_1.MathLibrary();
@@ -372,6 +372,14 @@ var Evaluator = /** @class */ (function () {
         }
         else {
             return this.callSelfDefinedFunction(funcName, args);
+        }
+    };
+    Evaluator.prototype.printToConsole = function (arg) {
+        if (arg.isFunc === true) {
+            console.log('<function>');
+        }
+        else {
+            console.log(arg);
         }
     };
     Evaluator.prototype.inMathLibrary = function (funcName) {
