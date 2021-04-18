@@ -1,6 +1,6 @@
 import { Parser } from './parser';
 import { SemanticAnalyser } from './semantic-analyser/semantic-analyser';
-import { Evaluator } from './evaluator';
+import { Evaluator } from './evaluator/evaluator';
 
 // To run this file - npm start
 
@@ -17,7 +17,11 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-math_min()
+let b = 1!=2
+let a = 1!=1
+print(b)
+print(a)
+print(b or a)
 `;
 
 interpret(userProgram);
