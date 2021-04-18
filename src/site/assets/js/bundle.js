@@ -125,49 +125,49 @@ var Evaluator = /** @class */ (function () {
         else if (component.operator === '/' && bothSidesAreNumbers) {
             return left / right;
         }
-        else if (component.operator === '+' && bothSidesAreNumbers) {
-            return left + right;
-        }
         else if (component.operator === '-' && bothSidesAreNumbers) {
             return left - right;
+        }
+        else if (component.operator === '+' && bothSidesAreNumbers) {
+            return left + right;
         }
         else if (component.operator === '+' && bothSidesAreStrings) {
             return left + right; // string concat
         }
-        else if (component.operator === '==' && bothSidesAreStrings) {
-            return left === right;
-        }
         else if (component.operator === '==' && bothSidesAreNumbers) {
             return left === right;
         }
-        else if (component.operator === '~=' && bothSidesAreStrings) {
-            return left !== right;
+        else if (component.operator === '==' && bothSidesAreStrings) {
+            return left === right;
         }
         else if (component.operator === '~=' && bothSidesAreNumbers) {
             return left !== right;
         }
-        else if (component.operator === '>' && bothSidesAreStrings) {
-            return left > right;
+        else if (component.operator === '~=' && bothSidesAreStrings) {
+            return left !== right;
         }
         else if (component.operator === '>' && bothSidesAreNumbers) {
             return left > right;
         }
-        else if (component.operator === '>=' && bothSidesAreStrings) {
-            return left >= right;
+        else if (component.operator === '>' && bothSidesAreStrings) {
+            return left > right;
         }
         else if (component.operator === '>=' && bothSidesAreNumbers) {
             return left >= right;
         }
-        else if (component.operator === '<' && bothSidesAreStrings) {
-            return left < right;
+        else if (component.operator === '>=' && bothSidesAreStrings) {
+            return left >= right;
         }
         else if (component.operator === '<' && bothSidesAreNumbers) {
             return left < right;
         }
-        else if (component.operator === '<=' && bothSidesAreStrings) {
-            return left <= right;
+        else if (component.operator === '<' && bothSidesAreStrings) {
+            return left < right;
         }
         else if (component.operator === '<=' && bothSidesAreNumbers) {
+            return left <= right;
+        }
+        else if (component.operator === '<=' && bothSidesAreStrings) {
             return left <= right;
         }
         else {
@@ -487,7 +487,7 @@ var Evaluator = /** @class */ (function () {
 }());
 exports.Evaluator = Evaluator;
 
-},{"./instructions/break":2,"./instructions/return":3,"./instructions/tail-recursion":4,"./scope":7,"./standard-library/array-library":12,"./standard-library/math-library":13,"./standard-library/string-library":14,"./standard-library/table-library":15}],2:[function(require,module,exports){
+},{"./instructions/break":2,"./instructions/return":3,"./instructions/tail-recursion":4,"./scope":5,"./standard-library/array-library":6,"./standard-library/math-library":7,"./standard-library/string-library":8,"./standard-library/table-library":9}],2:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Break = void 0;
@@ -523,52 +523,6 @@ var TailRecursion = /** @class */ (function () {
 exports.TailRecursion = TailRecursion;
 
 },{}],5:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-exports.interpret = void 0;
-var parser_1 = require("./parser");
-var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
-var evaluator_1 = require("./evaluator");
-// To run this file - npm start
-function interpret(program) {
-    var p = new parser_1.Parser();
-    var ast = p.parseIntoAst(program);
-    var s = new semantic_analyser_1.SemanticAnalyser();
-    s.analyse(ast);
-    var e = new evaluator_1.Evaluator();
-    e.evaluate(ast);
-}
-exports.interpret = interpret;
-window.interpret = interpret;
-var userProgram = "\n\nlet x = 1\n";
-interpret(userProgram); // comment this out when running jest
-
-},{"./evaluator":1,"./parser":6,"./semantic-analyser/semantic-analyser":10}],6:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-exports.Parser = void 0;
-var parser = require('luaparse');
-var Parser = /** @class */ (function () {
-    function Parser() {
-    }
-    Parser.prototype.parseIntoAst = function (program) {
-        var prog = program.replace(/let/g, 'local').replace(/!=/, '~=');
-        var defaultAST = parser.parse(prog, { luaVersion: '5.3' });
-        var ast = this.modifyDefaultAST(defaultAST);
-        return ast;
-    };
-    Parser.prototype.modifyDefaultAST = function (defaultAST) {
-        var defaultASTstring = JSON.stringify(defaultAST);
-        var modifiedASTstring = defaultASTstring.replace(/LocalStatement/g, 'LetStatement')
-            .replace(/TableConstructorExpression/g, 'ContainerConstructorExpression');
-        var modifiedAST = JSON.parse(modifiedASTstring);
-        return modifiedAST;
-    };
-    return Parser;
-}());
-exports.Parser = Parser;
-
-},{"luaparse":16}],7:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Scope = void 0;
@@ -639,7 +593,203 @@ var Scope = /** @class */ (function () {
 }());
 exports.Scope = Scope;
 
+},{}],6:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.ArrayLibrary = void 0;
+var ArrayLibrary = /** @class */ (function () {
+    function ArrayLibrary() {
+    }
+    ArrayLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+        var arr = args[0];
+        switch (funcName) {
+            case 'arr_len':
+                return arr.length;
+            case 'arr_reverse':
+                arr.reverse();
+                return arr;
+            case 'arr_sort':
+                arr.sort();
+                return arr;
+            case 'arr_pop':
+                arr.pop();
+                return arr;
+            case 'arr_push':
+                arr.push(args[1]);
+                return arr;
+            case 'arr_get': {
+                var idx = args[1];
+                return arr[idx];
+            }
+            case 'arr_set': {
+                var idx = args[1];
+                arr[idx] = args[2];
+                return arr;
+            }
+        }
+    };
+    return ArrayLibrary;
+}());
+exports.ArrayLibrary = ArrayLibrary;
+
+},{}],7:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.MathLibrary = void 0;
+var MathLibrary = /** @class */ (function () {
+    function MathLibrary() {
+    }
+    MathLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+        switch (funcName) {
+            case 'math_abs':
+                return Math.abs(args[0]);
+            case 'math_ceil':
+                return Math.ceil(args[0]);
+            case 'math_floor':
+                return Math.floor(args[0]);
+            case 'math_sqrt':
+                return Math.sqrt(args[0]);
+            case 'math_max':
+                return this.max(args);
+            case 'math_min':
+                return this.min(args);
+        }
+    };
+    MathLibrary.prototype.max = function (args) {
+        var max = args[0];
+        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
+            var arg = args_1[_i];
+            if (arg > max) {
+                max = arg;
+            }
+        }
+        return max;
+    };
+    MathLibrary.prototype.min = function (args) {
+        var min = args[0];
+        for (var _i = 0, args_2 = args; _i < args_2.length; _i++) {
+            var arg = args_2[_i];
+            if (arg < min) {
+                min = arg;
+            }
+        }
+        return min;
+    };
+    return MathLibrary;
+}());
+exports.MathLibrary = MathLibrary;
+
 },{}],8:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.StringLibrary = void 0;
+var StringLibrary = /** @class */ (function () {
+    function StringLibrary() {
+    }
+    StringLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+        switch (funcName) {
+            case 'str_len':
+                return args[0].length;
+            case 'str_reverse':
+                return this.reverseString(args[0]);
+            case 'str_split':
+                return args[0].split(args[1]);
+            case 'str_substring':
+                return args[0].substring(args[1], args[2]);
+        }
+    };
+    StringLibrary.prototype.reverseString = function (str) {
+        return str.split('').reverse().join('');
+    };
+    return StringLibrary;
+}());
+exports.StringLibrary = StringLibrary;
+
+},{}],9:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.TableLibrary = void 0;
+var TableLibrary = /** @class */ (function () {
+    function TableLibrary() {
+    }
+    TableLibrary.prototype.callLibraryFunction = function (funcName, args) {
+        // TODO: run time type check
+        var tbl = args[0];
+        switch (funcName) {
+            case 'tbl_len':
+                return Object.keys(tbl).length;
+            case 'tbl_contains':
+                return args[1] in tbl;
+            case 'tbl_remove': {
+                var k = args[1];
+                delete tbl[k];
+                return tbl;
+            }
+            case 'tbl_get': {
+                var k = args[1];
+                return tbl[k];
+            }
+            case 'tbl_put': {
+                var k = args[1];
+                tbl[k] = args[2];
+                return tbl;
+            }
+        }
+    };
+    return TableLibrary;
+}());
+exports.TableLibrary = TableLibrary;
+
+},{}],10:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.interpret = void 0;
+var parser_1 = require("./parser");
+var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
+var evaluator_1 = require("./evaluator/evaluator");
+// To run this file - npm start
+function interpret(program) {
+    var p = new parser_1.Parser();
+    var ast = p.parseIntoAst(program);
+    var s = new semantic_analyser_1.SemanticAnalyser();
+    s.analyse(ast);
+    var e = new evaluator_1.Evaluator();
+    e.evaluate(ast);
+}
+exports.interpret = interpret;
+window.interpret = interpret;
+var userProgram = "\nlet b = 1!=2\nlet a = 1!=1\nprint(b)\nprint(a)\nprint(b or a)\n";
+interpret(userProgram);
+
+},{"./evaluator/evaluator":1,"./parser":11,"./semantic-analyser/semantic-analyser":14}],11:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.Parser = void 0;
+var parser = require('luaparse');
+var Parser = /** @class */ (function () {
+    function Parser() {
+    }
+    Parser.prototype.parseIntoAst = function (program) {
+        var prog = program.replace(/let/g, 'local').replace(/!=/g, '~=');
+        var defaultAST = parser.parse(prog, { luaVersion: '5.3' });
+        var ast = this.modifyDefaultAST(defaultAST);
+        return ast;
+    };
+    Parser.prototype.modifyDefaultAST = function (defaultAST) {
+        var defaultASTstring = JSON.stringify(defaultAST);
+        var modifiedASTstring = defaultASTstring.replace(/LocalStatement/g, 'LetStatement')
+            .replace(/TableConstructorExpression/g, 'ContainerConstructorExpression');
+        var modifiedAST = JSON.parse(modifiedASTstring);
+        return modifiedAST;
+    };
+    return Parser;
+}());
+exports.Parser = Parser;
+
+},{"luaparse":16}],12:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ArgsLengthAnalyser = void 0;
@@ -714,13 +864,23 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                 else {
                     return;
                 }
+            case 'math_max':
+            case 'math_min':
+                if (argsLen < 2) {
+                    var errorMsg = "Syntax Error: " + funcName + "() takes 2 or more parameters";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+                else {
+                    return;
+                }
         }
     };
     return ArgsLengthAnalyser;
 }());
 exports.ArgsLengthAnalyser = ArgsLengthAnalyser;
 
-},{}],9:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ReturnStatementAnalyser = void 0;
@@ -782,7 +942,7 @@ var ReturnStatementAnalyser = /** @class */ (function () {
 }());
 exports.ReturnStatementAnalyser = ReturnStatementAnalyser;
 
-},{}],10:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.SemanticAnalyser = void 0;
@@ -804,7 +964,7 @@ var SemanticAnalyser = /** @class */ (function () {
 }());
 exports.SemanticAnalyser = SemanticAnalyser;
 
-},{"./args-length-analyser":8,"./return-statement-analyser":9,"./variable-declaration-analyser":11}],11:[function(require,module,exports){
+},{"./args-length-analyser":12,"./return-statement-analyser":13,"./variable-declaration-analyser":15}],15:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.VariableDeclarationAnalyser = void 0;
@@ -834,172 +994,6 @@ var VariableDeclarationAnalyser = /** @class */ (function () {
     return VariableDeclarationAnalyser;
 }());
 exports.VariableDeclarationAnalyser = VariableDeclarationAnalyser;
-
-},{}],12:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-exports.ArrayLibrary = void 0;
-var ArrayLibrary = /** @class */ (function () {
-    function ArrayLibrary() {
-    }
-    ArrayLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
-        var arr = args[0];
-        switch (funcName) {
-            case 'arr_len':
-                return arr.length;
-            case 'arr_reverse':
-                arr.reverse();
-                return arr;
-            case 'arr_sort':
-                arr.sort();
-                return arr;
-            case 'arr_pop':
-                arr.pop();
-                return arr;
-            case 'arr_push':
-                arr.push(args[1]);
-                return arr;
-            case 'arr_get': {
-                var idx = args[1];
-                return arr[idx];
-            }
-            case 'arr_set': {
-                var idx = args[1];
-                arr[idx] = args[2];
-                return arr;
-            }
-            default:
-                var errorMsg = 'Syntax Error: No such function in Array Library';
-                console.log(errorMsg);
-                throw errorMsg;
-        }
-    };
-    return ArrayLibrary;
-}());
-exports.ArrayLibrary = ArrayLibrary;
-
-},{}],13:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-exports.MathLibrary = void 0;
-var MathLibrary = /** @class */ (function () {
-    function MathLibrary() {
-    }
-    MathLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
-        switch (funcName) {
-            case 'math_abs':
-                return Math.abs(args[0]);
-            case 'math_ceil':
-                return Math.ceil(args[0]);
-            case 'math_floor':
-                return Math.floor(args[0]);
-            case 'math_sqrt':
-                return Math.sqrt(args[0]);
-            case 'math_max':
-                return this.max(args);
-            case 'math_min':
-                return this.min(args);
-            default:
-                var errorMessage = 'Syntax Error: No such function in Math Library';
-                console.log(errorMessage);
-                throw errorMessage;
-        }
-    };
-    MathLibrary.prototype.max = function (args) {
-        var max = args[0];
-        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
-            var arg = args_1[_i];
-            if (arg > max) {
-                max = arg;
-            }
-        }
-        return max;
-    };
-    MathLibrary.prototype.min = function (args) {
-        var min = args[0];
-        for (var _i = 0, args_2 = args; _i < args_2.length; _i++) {
-            var arg = args_2[_i];
-            if (arg < min) {
-                min = arg;
-            }
-        }
-        return min;
-    };
-    return MathLibrary;
-}());
-exports.MathLibrary = MathLibrary;
-
-},{}],14:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-exports.StringLibrary = void 0;
-var StringLibrary = /** @class */ (function () {
-    function StringLibrary() {
-    }
-    StringLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
-        switch (funcName) {
-            case 'str_len':
-                return args[0].length;
-            case 'str_reverse':
-                return this.reverseString(args[0]);
-            case 'str_split':
-                return args[0].split(args[1]);
-            case 'str_substring':
-                return args[0].substring(args[1], args[2]);
-            default:
-                var errorMsg = 'Syntax Error: No such function in String Library';
-                console.log(errorMsg);
-                throw errorMsg;
-        }
-    };
-    StringLibrary.prototype.reverseString = function (str) {
-        return str.split('').reverse().join('');
-    };
-    return StringLibrary;
-}());
-exports.StringLibrary = StringLibrary;
-
-},{}],15:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-exports.TableLibrary = void 0;
-var TableLibrary = /** @class */ (function () {
-    function TableLibrary() {
-    }
-    TableLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
-        var tbl = args[0];
-        switch (funcName) {
-            case 'tbl_len':
-                return Object.keys(tbl).length;
-            case 'tbl_contains':
-                return args[1] in tbl;
-            case 'tbl_remove': {
-                var k = args[1];
-                delete tbl[k];
-                return tbl;
-            }
-            case 'tbl_get': {
-                var k = args[1];
-                return tbl[k];
-            }
-            case 'tbl_put': {
-                var k = args[1];
-                tbl[k] = args[2];
-                return tbl;
-            }
-            default:
-                var errorMsg = 'Syntax Error: No such function in Table Library';
-                console.log(errorMsg);
-                throw errorMsg;
-        }
-    };
-    return TableLibrary;
-}());
-exports.TableLibrary = TableLibrary;
 
 },{}],16:[function(require,module,exports){
 (function (global){(function (){
@@ -3675,4 +3669,4 @@ exports.TableLibrary = TableLibrary;
 /* vim: set sw=2 ts=2 et tw=79 : */
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[5]);
+},{}]},{},[10]);

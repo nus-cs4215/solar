@@ -72,6 +72,16 @@ var ArgsLengthAnalyser = /** @class */ (function () {
                 else {
                     return;
                 }
+            case 'math_max':
+            case 'math_min':
+                if (argsLen < 2) {
+                    var errorMsg = "Syntax Error: " + funcName + "() takes 2 or more parameters";
+                    console.log(errorMsg);
+                    throw errorMsg;
+                }
+                else {
+                    return;
+                }
         }
     };
     return ArgsLengthAnalyser;
