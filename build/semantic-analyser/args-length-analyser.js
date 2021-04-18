@@ -14,16 +14,47 @@ var ArgsLengthAnalyser = /** @class */ (function () {
     };
     ArgsLengthAnalyser.prototype.analyseComponent = function (component) {
         switch (component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component);
+            case 'WhileStatement':
+            case 'ForNumericStatement':
+            case 'ForGenericStatement':
+            case 'FunctionDeclaration':
+                return this.analyseBlock(component);
+            case 'LetStatement':
+                return this.analyseVariableDeclaration(component);
             case 'CallStatement':
                 return this.analyseCallExpression(component.expression);
             case 'CallExpression':
                 return this.analyseCallExpression(component);
         }
     };
+    ArgsLengthAnalyser.prototype.analyseIfStatement = function (component) {
+        for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
+            var clause = _a[_i];
+            this.analyseBlock(clause);
+        }
+    };
+    ArgsLengthAnalyser.prototype.analyseBlock = function (component) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
+    };
+    ArgsLengthAnalyser.prototype.analyseVariableDeclaration = function (component) {
+        this.analyseComponent(component.init[0]);
+    };
     ArgsLengthAnalyser.prototype.analyseCallExpression = function (component) {
         var funcName = component.base.name;
         var argsLength = component.arguments.length;
         this.argsLengthCheck(funcName, argsLength);
+        this.analyseArgs(component);
+    };
+    ArgsLengthAnalyser.prototype.analyseArgs = function (component) {
+        for (var _i = 0, _a = component.arguments; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
     };
     ArgsLengthAnalyser.prototype.argsLengthCheck = function (funcName, argsLen) {
         switch (funcName) {

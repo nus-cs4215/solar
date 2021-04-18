@@ -5,7 +5,6 @@ var MathLibrary = /** @class */ (function () {
     function MathLibrary() {
     }
     MathLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         switch (funcName) {
             case 'math_abs':
                 return Math.abs(args[0]);

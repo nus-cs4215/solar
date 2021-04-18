@@ -269,27 +269,31 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalGenericForLoop = function (component, scope) {
-        if (component.iterators.length !== 1) {
-            var errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-        if (component.iterators[0].type !== 'Identifier') {
-            var errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-        var container = this.evalComponent(component.iterators[0], scope);
-        if (Array.isArray(container)) {
+        var expr = this.evalComponent(component.iterators[0], scope);
+        if (this.exprIsArray(expr)) {
             return this.evalGenericForLoopThroughArray(component, scope);
         }
-        else {
+        else if (this.exprIsTable(expr)) {
             return this.evalGenericForLoopThroughTable(component, scope);
         }
+        else {
+            var errorMsg = "Type Error: " + component.iterators[0].name + " is neither an array nor table";
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+    };
+    Evaluator.prototype.exprIsArray = function (expr) {
+        return Array.isArray(expr);
+    };
+    Evaluator.prototype.exprIsTable = function (expr) {
+        return (expr instanceof Object) && !this.exprIsFunc(expr);
+    };
+    Evaluator.prototype.exprIsFunc = function (expr) {
+        return expr.isFunc === true;
     };
     Evaluator.prototype.evalGenericForLoopThroughArray = function (component, scope) {
         if (component.variables.length !== 1) {
-            var errorMsg = 'Syntax Error: There should only be 1 loop variable';
+            var errorMsg = 'Syntax Error: Generic For Loop through array takes 1 loop variable';
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -310,7 +314,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalGenericForLoopThroughTable = function (component, scope) {
         if (component.variables.length !== 2) {
-            var errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
+            var errorMsg = 'Syntax Error: Generic For Loop through table takes 2 loop variables';
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -340,7 +344,7 @@ var Evaluator = /** @class */ (function () {
         var funcSymbol = component.identifier.name;
         var funcParams = component.parameters.map(function (p) { return p.name; });
         var funcBody = component.body;
-        var funcValue = { params: funcParams, body: funcBody };
+        var funcValue = { params: funcParams, body: funcBody, isFunc: true };
         scope.declare(funcSymbol, funcValue);
     };
     Evaluator.prototype.evalCallExpression = function (component, scope) {
@@ -445,11 +449,11 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalContainer = function (component, scope) {
         var _this = this;
-        if (this.isArray(component)) {
+        if (this.componentIsArray(component)) {
             var arr = component.fields.map(function (field) { return _this.evalComponent(field.value, scope); });
             return arr;
         }
-        else if (this.isTable(component)) {
+        else if (this.componentIsTable(component)) {
             var tbl = {};
             for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
                 var field = _a[_i];
@@ -465,7 +469,7 @@ var Evaluator = /** @class */ (function () {
             throw errorMsg;
         }
     };
-    Evaluator.prototype.isArray = function (component) {
+    Evaluator.prototype.componentIsArray = function (component) {
         for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
             var field = _a[_i];
             if (field.type === 'TableKeyString') {
@@ -474,7 +478,7 @@ var Evaluator = /** @class */ (function () {
         }
         return true;
     };
-    Evaluator.prototype.isTable = function (component) {
+    Evaluator.prototype.componentIsTable = function (component) {
         for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
             var field = _a[_i];
             if (field.type === 'TableValue') {
@@ -601,7 +605,6 @@ var ArrayLibrary = /** @class */ (function () {
     function ArrayLibrary() {
     }
     ArrayLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         var arr = args[0];
         switch (funcName) {
             case 'arr_len':
@@ -641,7 +644,6 @@ var MathLibrary = /** @class */ (function () {
     function MathLibrary() {
     }
     MathLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         switch (funcName) {
             case 'math_abs':
                 return Math.abs(args[0]);
@@ -689,7 +691,6 @@ var StringLibrary = /** @class */ (function () {
     function StringLibrary() {
     }
     StringLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         switch (funcName) {
             case 'str_len':
                 return args[0].length;
@@ -716,7 +717,6 @@ var TableLibrary = /** @class */ (function () {
     function TableLibrary() {
     }
     TableLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         var tbl = args[0];
         switch (funcName) {
             case 'tbl_len':
@@ -761,10 +761,10 @@ function interpret(program) {
 }
 exports.interpret = interpret;
 window.interpret = interpret;
-var userProgram = "\nlet b = 1!=2\nlet a = 1!=1\nprint(b)\nprint(a)\nprint(b or a)\n";
+var userProgram = "\nprint(math_max(1,'s'))\n";
 interpret(userProgram);
 
-},{"./evaluator/evaluator":1,"./parser":11,"./semantic-analyser/semantic-analyser":14}],11:[function(require,module,exports){
+},{"./evaluator/evaluator":1,"./parser":11,"./semantic-analyser/semantic-analyser":15}],11:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Parser = void 0;
@@ -789,7 +789,7 @@ var Parser = /** @class */ (function () {
 }());
 exports.Parser = Parser;
 
-},{"luaparse":16}],12:[function(require,module,exports){
+},{"luaparse":17}],12:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.ArgsLengthAnalyser = void 0;
@@ -806,16 +806,47 @@ var ArgsLengthAnalyser = /** @class */ (function () {
     };
     ArgsLengthAnalyser.prototype.analyseComponent = function (component) {
         switch (component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component);
+            case 'WhileStatement':
+            case 'ForNumericStatement':
+            case 'ForGenericStatement':
+            case 'FunctionDeclaration':
+                return this.analyseBlock(component);
+            case 'LetStatement':
+                return this.analyseVariableDeclaration(component);
             case 'CallStatement':
                 return this.analyseCallExpression(component.expression);
             case 'CallExpression':
                 return this.analyseCallExpression(component);
         }
     };
+    ArgsLengthAnalyser.prototype.analyseIfStatement = function (component) {
+        for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
+            var clause = _a[_i];
+            this.analyseBlock(clause);
+        }
+    };
+    ArgsLengthAnalyser.prototype.analyseBlock = function (component) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
+    };
+    ArgsLengthAnalyser.prototype.analyseVariableDeclaration = function (component) {
+        this.analyseComponent(component.init[0]);
+    };
     ArgsLengthAnalyser.prototype.analyseCallExpression = function (component) {
         var funcName = component.base.name;
         var argsLength = component.arguments.length;
         this.argsLengthCheck(funcName, argsLength);
+        this.analyseArgs(component);
+    };
+    ArgsLengthAnalyser.prototype.analyseArgs = function (component) {
+        for (var _i = 0, _a = component.arguments; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
     };
     ArgsLengthAnalyser.prototype.argsLengthCheck = function (funcName, argsLen) {
         switch (funcName) {
@@ -883,6 +914,70 @@ exports.ArgsLengthAnalyser = ArgsLengthAnalyser;
 },{}],13:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
+exports.ForLoopAnalyser = void 0;
+var ForLoopAnalyser = /** @class */ (function () {
+    function ForLoopAnalyser() {
+    }
+    // entry point. ast is the syntax tree of the entire program.
+    ForLoopAnalyser.prototype.analyse = function (ast) {
+        for (var _i = 0, _a = ast.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
+    };
+    ForLoopAnalyser.prototype.analyseComponent = function (component) {
+        switch (component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component);
+            case 'WhileStatement':
+            case 'FunctionDeclaration':
+                return this.analyseBlock(component);
+            case 'ForNumericStatement':
+                return this.analyseNumericForLoop(component);
+            case 'ForGenericStatement':
+                return this.analyseGenericForLoop(component);
+        }
+    };
+    ForLoopAnalyser.prototype.analyseIfStatement = function (component) {
+        for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
+            var clause = _a[_i];
+            this.analyseBlock(clause);
+        }
+    };
+    ForLoopAnalyser.prototype.analyseBlock = function (component) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
+        }
+    };
+    ForLoopAnalyser.prototype.analyseNumericForLoop = function (component) {
+        if (component.step === null) {
+            var errorMsg = 'Syntax Error: Numeric For Loop requires a step size';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+        this.analyseBlock(component);
+    };
+    ForLoopAnalyser.prototype.analyseGenericForLoop = function (component) {
+        if (component.iterators[0].type !== 'Identifier') {
+            var errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+        if (component.iterators.length !== 1) {
+            var errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+        this.analyseBlock(component);
+    };
+    return ForLoopAnalyser;
+}());
+exports.ForLoopAnalyser = ForLoopAnalyser;
+
+},{}],14:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
 exports.ReturnStatementAnalyser = void 0;
 // Scans an if block or loop block to see if it illegally contains a return statement
 var ReturnStatementAnalyser = /** @class */ (function () {
@@ -900,11 +995,9 @@ var ReturnStatementAnalyser = /** @class */ (function () {
             case 'IfStatement':
                 return this.analyseIfStatement(component);
             case 'WhileStatement':
-                return this.analyseWhileLoop(component);
             case 'ForNumericStatement':
-                return this.analyseNumericForLoop(component);
             case 'ForGenericStatement':
-                return this.analyseGenericForLoop(component);
+                return this.analyseBlock(component);
             case 'ReturnStatement':
                 var errorMsg = 'Syntax Error: return cannot be used outside a function';
                 console.log(errorMsg);
@@ -914,25 +1007,10 @@ var ReturnStatementAnalyser = /** @class */ (function () {
     ReturnStatementAnalyser.prototype.analyseIfStatement = function (component) {
         for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
             var clause = _a[_i];
-            for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
-                var c = _c[_b];
-                this.analyseComponent(c);
-            }
+            this.analyseBlock(clause);
         }
     };
-    ReturnStatementAnalyser.prototype.analyseWhileLoop = function (component) {
-        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
-            var c = _a[_i];
-            this.analyseComponent(c);
-        }
-    };
-    ReturnStatementAnalyser.prototype.analyseNumericForLoop = function (component) {
-        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
-            var c = _a[_i];
-            this.analyseComponent(c);
-        }
-    };
-    ReturnStatementAnalyser.prototype.analyseGenericForLoop = function (component) {
+    ReturnStatementAnalyser.prototype.analyseBlock = function (component) {
         for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
             var c = _a[_i];
             this.analyseComponent(c);
@@ -942,29 +1020,32 @@ var ReturnStatementAnalyser = /** @class */ (function () {
 }());
 exports.ReturnStatementAnalyser = ReturnStatementAnalyser;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.SemanticAnalyser = void 0;
 var variable_declaration_analyser_1 = require("./variable-declaration-analyser");
 var return_statement_analyser_1 = require("./return-statement-analyser");
+var for_loop_analyser_1 = require("./for-loop-analyser");
 var args_length_analyser_1 = require("./args-length-analyser");
 var SemanticAnalyser = /** @class */ (function () {
     function SemanticAnalyser() {
         this.variableDeclarationAnalyser = new variable_declaration_analyser_1.VariableDeclarationAnalyser();
         this.returnStatementAnalyser = new return_statement_analyser_1.ReturnStatementAnalyser();
+        this.forLoopAnalyser = new for_loop_analyser_1.ForLoopAnalyser();
         this.argsLengthAnalyser = new args_length_analyser_1.ArgsLengthAnalyser();
     }
     SemanticAnalyser.prototype.analyse = function (ast) {
         this.variableDeclarationAnalyser.analyse(ast);
         this.returnStatementAnalyser.analyse(ast);
+        this.forLoopAnalyser.analyse(ast);
         this.argsLengthAnalyser.analyse(ast);
     };
     return SemanticAnalyser;
 }());
 exports.SemanticAnalyser = SemanticAnalyser;
 
-},{"./args-length-analyser":12,"./return-statement-analyser":13,"./variable-declaration-analyser":15}],15:[function(require,module,exports){
+},{"./args-length-analyser":12,"./for-loop-analyser":13,"./return-statement-analyser":14,"./variable-declaration-analyser":16}],16:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.VariableDeclarationAnalyser = void 0;
@@ -980,8 +1061,27 @@ var VariableDeclarationAnalyser = /** @class */ (function () {
     };
     VariableDeclarationAnalyser.prototype.analyseComponent = function (component) {
         switch (component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component);
+            case 'WhileStatement':
+            case 'ForNumericStatement':
+            case 'ForGenericStatement':
+            case 'FunctionDeclaration':
+                return this.analyseBlock(component);
             case 'LetStatement':
                 return this.analyseVariableDeclaration(component);
+        }
+    };
+    VariableDeclarationAnalyser.prototype.analyseIfStatement = function (component) {
+        for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
+            var clause = _a[_i];
+            this.analyseBlock(clause);
+        }
+    };
+    VariableDeclarationAnalyser.prototype.analyseBlock = function (component) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
         }
     };
     VariableDeclarationAnalyser.prototype.analyseVariableDeclaration = function (component) {
@@ -995,7 +1095,7 @@ var VariableDeclarationAnalyser = /** @class */ (function () {
 }());
 exports.VariableDeclarationAnalyser = VariableDeclarationAnalyser;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 

@@ -5,7 +5,6 @@ var ArrayLibrary = /** @class */ (function () {
     function ArrayLibrary() {
     }
     ArrayLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         var arr = args[0];
         switch (funcName) {
             case 'arr_len':

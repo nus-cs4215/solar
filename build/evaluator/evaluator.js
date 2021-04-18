@@ -268,27 +268,31 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalGenericForLoop = function (component, scope) {
-        if (component.iterators.length !== 1) {
-            var errorMsg = 'Syntax Error: Generic For Loop can only iterate through 1 container';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-        if (component.iterators[0].type !== 'Identifier') {
-            var errorMsg = 'Syntax Error: Container referenced must be a symbol, not a literal';
-            console.log(errorMsg);
-            throw errorMsg;
-        }
-        var container = this.evalComponent(component.iterators[0], scope);
-        if (Array.isArray(container)) {
+        var expr = this.evalComponent(component.iterators[0], scope);
+        if (this.exprIsArray(expr)) {
             return this.evalGenericForLoopThroughArray(component, scope);
         }
-        else {
+        else if (this.exprIsTable(expr)) {
             return this.evalGenericForLoopThroughTable(component, scope);
         }
+        else {
+            var errorMsg = "Type Error: " + component.iterators[0].name + " is neither an array nor table";
+            console.log(errorMsg);
+            throw errorMsg;
+        }
+    };
+    Evaluator.prototype.exprIsArray = function (expr) {
+        return Array.isArray(expr);
+    };
+    Evaluator.prototype.exprIsTable = function (expr) {
+        return (expr instanceof Object) && !this.exprIsFunc(expr);
+    };
+    Evaluator.prototype.exprIsFunc = function (expr) {
+        return expr.isFunc === true;
     };
     Evaluator.prototype.evalGenericForLoopThroughArray = function (component, scope) {
         if (component.variables.length !== 1) {
-            var errorMsg = 'Syntax Error: There should only be 1 loop variable';
+            var errorMsg = 'Syntax Error: Generic For Loop through array takes 1 loop variable';
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -309,7 +313,7 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalGenericForLoopThroughTable = function (component, scope) {
         if (component.variables.length !== 2) {
-            var errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
+            var errorMsg = 'Syntax Error: Generic For Loop through table takes 2 loop variables';
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -339,7 +343,7 @@ var Evaluator = /** @class */ (function () {
         var funcSymbol = component.identifier.name;
         var funcParams = component.parameters.map(function (p) { return p.name; });
         var funcBody = component.body;
-        var funcValue = { params: funcParams, body: funcBody };
+        var funcValue = { params: funcParams, body: funcBody, isFunc: true };
         scope.declare(funcSymbol, funcValue);
     };
     Evaluator.prototype.evalCallExpression = function (component, scope) {
@@ -444,11 +448,11 @@ var Evaluator = /** @class */ (function () {
     };
     Evaluator.prototype.evalContainer = function (component, scope) {
         var _this = this;
-        if (this.isArray(component)) {
+        if (this.componentIsArray(component)) {
             var arr = component.fields.map(function (field) { return _this.evalComponent(field.value, scope); });
             return arr;
         }
-        else if (this.isTable(component)) {
+        else if (this.componentIsTable(component)) {
             var tbl = {};
             for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
                 var field = _a[_i];
@@ -464,7 +468,7 @@ var Evaluator = /** @class */ (function () {
             throw errorMsg;
         }
     };
-    Evaluator.prototype.isArray = function (component) {
+    Evaluator.prototype.componentIsArray = function (component) {
         for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
             var field = _a[_i];
             if (field.type === 'TableKeyString') {
@@ -473,7 +477,7 @@ var Evaluator = /** @class */ (function () {
         }
         return true;
     };
-    Evaluator.prototype.isTable = function (component) {
+    Evaluator.prototype.componentIsTable = function (component) {
         for (var _i = 0, _a = component.fields; _i < _a.length; _i++) {
             var field = _a[_i];
             if (field.type === 'TableValue') {

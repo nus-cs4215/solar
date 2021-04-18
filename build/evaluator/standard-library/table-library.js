@@ -5,7 +5,6 @@ var TableLibrary = /** @class */ (function () {
     function TableLibrary() {
     }
     TableLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         var tbl = args[0];
         switch (funcName) {
             case 'tbl_len':

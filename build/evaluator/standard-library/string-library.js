@@ -5,7 +5,6 @@ var StringLibrary = /** @class */ (function () {
     function StringLibrary() {
     }
     StringLibrary.prototype.callLibraryFunction = function (funcName, args) {
-        // TODO: run time type check
         switch (funcName) {
             case 'str_len':
                 return args[0].length;

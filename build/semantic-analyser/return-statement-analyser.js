@@ -17,11 +17,9 @@ var ReturnStatementAnalyser = /** @class */ (function () {
             case 'IfStatement':
                 return this.analyseIfStatement(component);
             case 'WhileStatement':
-                return this.analyseWhileLoop(component);
             case 'ForNumericStatement':
-                return this.analyseNumericForLoop(component);
             case 'ForGenericStatement':
-                return this.analyseGenericForLoop(component);
+                return this.analyseBlock(component);
             case 'ReturnStatement':
                 var errorMsg = 'Syntax Error: return cannot be used outside a function';
                 console.log(errorMsg);
@@ -31,25 +29,10 @@ var ReturnStatementAnalyser = /** @class */ (function () {
     ReturnStatementAnalyser.prototype.analyseIfStatement = function (component) {
         for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
             var clause = _a[_i];
-            for (var _b = 0, _c = clause.body; _b < _c.length; _b++) {
-                var c = _c[_b];
-                this.analyseComponent(c);
-            }
+            this.analyseBlock(clause);
         }
     };
-    ReturnStatementAnalyser.prototype.analyseWhileLoop = function (component) {
-        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
-            var c = _a[_i];
-            this.analyseComponent(c);
-        }
-    };
-    ReturnStatementAnalyser.prototype.analyseNumericForLoop = function (component) {
-        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
-            var c = _a[_i];
-            this.analyseComponent(c);
-        }
-    };
-    ReturnStatementAnalyser.prototype.analyseGenericForLoop = function (component) {
+    ReturnStatementAnalyser.prototype.analyseBlock = function (component) {
         for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
             var c = _a[_i];
             this.analyseComponent(c);

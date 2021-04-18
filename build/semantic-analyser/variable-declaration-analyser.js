@@ -13,8 +13,27 @@ var VariableDeclarationAnalyser = /** @class */ (function () {
     };
     VariableDeclarationAnalyser.prototype.analyseComponent = function (component) {
         switch (component.type) {
+            case 'IfStatement':
+                return this.analyseIfStatement(component);
+            case 'WhileStatement':
+            case 'ForNumericStatement':
+            case 'ForGenericStatement':
+            case 'FunctionDeclaration':
+                return this.analyseBlock(component);
             case 'LetStatement':
                 return this.analyseVariableDeclaration(component);
+        }
+    };
+    VariableDeclarationAnalyser.prototype.analyseIfStatement = function (component) {
+        for (var _i = 0, _a = component.clauses; _i < _a.length; _i++) {
+            var clause = _a[_i];
+            this.analyseBlock(clause);
+        }
+    };
+    VariableDeclarationAnalyser.prototype.analyseBlock = function (component) {
+        for (var _i = 0, _a = component.body; _i < _a.length; _i++) {
+            var c = _a[_i];
+            this.analyseComponent(c);
         }
     };
     VariableDeclarationAnalyser.prototype.analyseVariableDeclaration = function (component) {
