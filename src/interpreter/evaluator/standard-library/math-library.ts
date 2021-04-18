@@ -41,4 +41,12 @@ export class MathLibrary {
         }
         return min;
     }
+
+    // typeCheckArgs(args: number[]): void {
+    //     for (const arg of args) {
+    //         if (typeof arg !== 'number') {
+    //             const errorMsg = 'Type Error: '
+    //         }
+    //     }
+    // }
 }
