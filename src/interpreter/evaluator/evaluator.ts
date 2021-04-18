@@ -282,8 +282,9 @@ export class Evaluator {
         }
     }
 
-    evalGenericForLoop(component: any, scope: Scope): any {        
+    evalGenericForLoop(component: any, scope: Scope): any {
         const container = this.evalComponent(component.iterators[0], scope);
+        // if (typeof container === 'string' || typeof container === 'number' || typeof container === 'boolean')
         
         if (Array.isArray(container)) {
             return this.evalGenericForLoopThroughArray(component, scope);
@@ -294,7 +295,7 @@ export class Evaluator {
 
     evalGenericForLoopThroughArray(component: any, scope: Scope): any {
         if (component.variables.length !== 1) {
-            const errorMsg = 'Syntax Error: There should only be 1 loop variable'
+            const errorMsg = 'Syntax Error: Generic For Loop through array takes 1 loop variable'
             console.log(errorMsg);
             throw errorMsg;
         }
@@ -318,7 +319,7 @@ export class Evaluator {
 
     evalGenericForLoopThroughTable(component: any, scope: Scope): any {
         if (component.variables.length !== 2) {
-            const errorMsg = 'Syntax Error: There should be 2 loop variables, first variable for key and second variable for value';
+            const errorMsg = 'Syntax Error: Generic For Loop through table takes 2 loop variables';
             console.log(errorMsg);
             throw errorMsg;
         }
