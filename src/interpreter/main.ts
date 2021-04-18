@@ -17,9 +17,7 @@ export function interpret(program: string): any {
 
 // user program
 const userProgram = `
-if 1 == 1 then
-    return 5
-end
+math_min(1,math_max(2,3))
 `;
 
 interpret(userProgram);
