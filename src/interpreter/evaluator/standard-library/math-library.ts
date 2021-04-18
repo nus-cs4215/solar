@@ -1,6 +1,7 @@
 export class MathLibrary {
 
     callLibraryFunction(funcName: string, args: number[]): number {
+        this.typeCheckArgs(funcName, args);
         switch (funcName) {
             case 'math_abs':
                 return Math.abs(args[0]);
@@ -40,5 +41,32 @@ export class MathLibrary {
             }
         }
         return min;
+    }
+
+    typeCheckArgs(funcName: string, args: number[]): void {
+        switch (funcName) {
+            case 'math_abs':
+            case 'math_ceil':
+            case 'math_floor':
+            case 'math_sqrt':
+                if (typeof args[0] !== 'number') {
+                    const errorMsg = `Type Error: Args types should be as follows - ${funcName}(number)`;
+                    console.log(errorMsg);
+                    throw errorMsg;
+                } else {
+                    return;
+                }
+
+            case 'math_max':            
+            case 'math_min':
+                for (const arg of args) {
+                    if (typeof arg !== 'number') {
+                        const errorMsg = `Type Error: Args types should be as follows - ${funcName}(number, ... , number)`
+                        console.log(errorMsg);
+                        throw errorMsg;
+                    }
+                }
+                return;
+        }
     }
 }
