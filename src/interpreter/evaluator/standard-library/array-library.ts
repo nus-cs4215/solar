@@ -1,6 +1,7 @@
 export class ArrayLibrary {
 
-    callLibraryFunction(funcName: string, args: any[]): any {       
+    callLibraryFunction(funcName: string, args: any[]): any {      
+        this.typeCheckArgs(funcName, args); 
         const arr = args[0];
         switch (funcName) {
             case 'arr_len':
@@ -50,7 +51,7 @@ export class ArrayLibrary {
                 }
 
             case 'arr_push':
-                if (this.exprIsArray(args[0])) {
+                if (this.exprIsArray(args[0]) && !this.exprIsFunc(args[1])) {
                     return;
                 } else {
                     const errorMsg = `Type Error: Args types should be as follows - ${funcName}([T], T)`;
@@ -68,7 +69,7 @@ export class ArrayLibrary {
                 }
 
             case 'arr_set':
-                if (this.exprIsArray(args[0]) && typeof args[1] === 'number') {
+                if (this.exprIsArray(args[0]) && typeof args[1] === 'number' && !this.exprIsFunc(args[2])) {
                     return;
                 } else {
                     const errorMsg = `Type Error: Args types should be as follows - ${funcName}([T], number, T)`;
@@ -80,5 +81,9 @@ export class ArrayLibrary {
 
     exprIsArray(expr: any): boolean {
         return Array.isArray(expr);
+    }
+
+    exprIsFunc(expr: any): boolean {
+        return expr.isFunc === true;
     }
 }
