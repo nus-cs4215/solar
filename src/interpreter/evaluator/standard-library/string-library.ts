@@ -30,7 +30,8 @@ export class StringLibrary {
                 } else {
                     const errorMsg = `Type Error: Args types should be as follows - ${funcName}(string)`;
                     console.log(errorMsg);
-                    throw errorMsg;                }
+                    throw errorMsg;                
+                }
 
             case 'str_split':
                 if (typeof args[0] === 'string' && typeof args[1] === 'string') {

@@ -27,4 +27,16 @@ export class TableLibrary {
             }
         }
     }
+
+    exprIsArray(expr: any): boolean {
+        return Array.isArray(expr);
+    }
+
+    exprIsTable(expr: any): boolean {
+        return (expr instanceof Object) && !this.exprIsArray(expr) && !this.exprIsFunc(expr)
+    }
+
+    exprIsFunc(expr: any): boolean {
+        return expr.isFunc === true;
+    }
 }
