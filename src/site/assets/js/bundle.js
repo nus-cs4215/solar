@@ -376,7 +376,7 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.printToConsole = function (arg) {
-        if (arg.isFunc === true) {
+        if (this.exprIsFunc(arg)) {
             console.log('<function>');
         }
         else {

@@ -397,7 +397,7 @@ export class Evaluator {
     }
 
     printToConsole(arg: any): void {
-        if (arg.isFunc === true) {
+        if (this.exprIsFunc(arg)) {
             console.log('<function>');
         } else {
             console.log(arg);
