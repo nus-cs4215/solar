@@ -1,7 +1,7 @@
-import { VariableDeclarationAnalyser } from './variable-declaration-analyser';
-import { ReturnStatementAnalyser } from './return-statement-analyser';
-import { ForLoopAnalyser } from './for-loop-analyser';
-import { ArgsLengthAnalyser } from './args-length-analyser';
+import { VariableDeclarationAnalyser } from './semantic-analyser-components/variable-declaration-analyser';
+import { ReturnStatementAnalyser } from './semantic-analyser-components/return-statement-analyser';
+import { ForLoopAnalyser } from './semantic-analyser-components/for-loop-analyser';
+import { ArgsLengthAnalyser } from './semantic-analyser-components/args-length-analyser';
 
 export class SemanticAnalyser {
 

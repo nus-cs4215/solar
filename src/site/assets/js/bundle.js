@@ -909,7 +909,7 @@ exports.TableLibrary = TableLibrary;
 "use strict";
 exports.__esModule = true;
 exports.interpret = void 0;
-var parser_1 = require("./parser");
+var parser_1 = require("./parser/parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator/evaluator");
 // To run this file - npm start
@@ -926,7 +926,7 @@ window.interpret = interpret;
 var userProgram = "\n\nlet f = 1\nfunction a()\n    return 5\nend\nprint(a)\n\n";
 interpret(userProgram);
 
-},{"./evaluator/evaluator":1,"./parser":11,"./semantic-analyser/semantic-analyser":15}],11:[function(require,module,exports){
+},{"./evaluator/evaluator":1,"./parser/parser":11,"./semantic-analyser/semantic-analyser":16}],11:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports.Parser = void 0;
@@ -1185,31 +1185,6 @@ exports.ReturnStatementAnalyser = ReturnStatementAnalyser;
 },{}],15:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
-exports.SemanticAnalyser = void 0;
-var variable_declaration_analyser_1 = require("./variable-declaration-analyser");
-var return_statement_analyser_1 = require("./return-statement-analyser");
-var for_loop_analyser_1 = require("./for-loop-analyser");
-var args_length_analyser_1 = require("./args-length-analyser");
-var SemanticAnalyser = /** @class */ (function () {
-    function SemanticAnalyser() {
-        this.variableDeclarationAnalyser = new variable_declaration_analyser_1.VariableDeclarationAnalyser();
-        this.returnStatementAnalyser = new return_statement_analyser_1.ReturnStatementAnalyser();
-        this.forLoopAnalyser = new for_loop_analyser_1.ForLoopAnalyser();
-        this.argsLengthAnalyser = new args_length_analyser_1.ArgsLengthAnalyser();
-    }
-    SemanticAnalyser.prototype.analyse = function (ast) {
-        this.variableDeclarationAnalyser.analyse(ast);
-        this.returnStatementAnalyser.analyse(ast);
-        this.forLoopAnalyser.analyse(ast);
-        this.argsLengthAnalyser.analyse(ast);
-    };
-    return SemanticAnalyser;
-}());
-exports.SemanticAnalyser = SemanticAnalyser;
-
-},{"./args-length-analyser":12,"./for-loop-analyser":13,"./return-statement-analyser":14,"./variable-declaration-analyser":16}],16:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
 exports.VariableDeclarationAnalyser = void 0;
 var VariableDeclarationAnalyser = /** @class */ (function () {
     function VariableDeclarationAnalyser() {
@@ -1257,7 +1232,32 @@ var VariableDeclarationAnalyser = /** @class */ (function () {
 }());
 exports.VariableDeclarationAnalyser = VariableDeclarationAnalyser;
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.SemanticAnalyser = void 0;
+var variable_declaration_analyser_1 = require("./semantic-analyser-components/variable-declaration-analyser");
+var return_statement_analyser_1 = require("./semantic-analyser-components/return-statement-analyser");
+var for_loop_analyser_1 = require("./semantic-analyser-components/for-loop-analyser");
+var args_length_analyser_1 = require("./semantic-analyser-components/args-length-analyser");
+var SemanticAnalyser = /** @class */ (function () {
+    function SemanticAnalyser() {
+        this.variableDeclarationAnalyser = new variable_declaration_analyser_1.VariableDeclarationAnalyser();
+        this.returnStatementAnalyser = new return_statement_analyser_1.ReturnStatementAnalyser();
+        this.forLoopAnalyser = new for_loop_analyser_1.ForLoopAnalyser();
+        this.argsLengthAnalyser = new args_length_analyser_1.ArgsLengthAnalyser();
+    }
+    SemanticAnalyser.prototype.analyse = function (ast) {
+        this.variableDeclarationAnalyser.analyse(ast);
+        this.returnStatementAnalyser.analyse(ast);
+        this.forLoopAnalyser.analyse(ast);
+        this.argsLengthAnalyser.analyse(ast);
+    };
+    return SemanticAnalyser;
+}());
+exports.SemanticAnalyser = SemanticAnalyser;
+
+},{"./semantic-analyser-components/args-length-analyser":12,"./semantic-analyser-components/for-loop-analyser":13,"./semantic-analyser-components/return-statement-analyser":14,"./semantic-analyser-components/variable-declaration-analyser":15}],17:[function(require,module,exports){
 (function (global){(function (){
 /* global exports:true, module:true, require:true, define:true, global:true */
 

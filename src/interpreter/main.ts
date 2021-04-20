@@ -1,4 +1,4 @@
-import { Parser } from './parser';
+import { Parser } from './parser/parser';
 import { SemanticAnalyser } from './semantic-analyser/semantic-analyser';
 import { Evaluator } from './evaluator/evaluator';
 

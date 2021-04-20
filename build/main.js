@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.interpret = void 0;
-var parser_1 = require("./parser");
+var parser_1 = require("./parser/parser");
 var semantic_analyser_1 = require("./semantic-analyser/semantic-analyser");
 var evaluator_1 = require("./evaluator/evaluator");
 // To run this file - npm start
