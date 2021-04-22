@@ -21,10 +21,11 @@ var Evaluator = /** @class */ (function () {
         }
     };
     Evaluator.prototype.evalComponent = function (component, scope) {
-        if (this.isLiteral(component)) {
-            return this.evalLiteral(component);
-        }
         switch (component.type) {
+            case 'StringLiteral':
+            case 'NumericLiteral':
+            case 'BooleanLiteral':
+                return this.evalLiteral(component);
             case 'Identifier':
                 return this.evalSymbol(component, scope);
             case 'LetStatement':
@@ -61,11 +62,6 @@ var Evaluator = /** @class */ (function () {
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
-    };
-    Evaluator.prototype.isLiteral = function (component) {
-        return component.type === 'StringLiteral'
-            || component.type === 'NumericLiteral'
-            || component.type === 'BooleanLiteral';
     };
     Evaluator.prototype.evalLiteral = function (component) {
         if (component.type === 'StringLiteral') {

@@ -20,11 +20,12 @@ export class Evaluator {
     }
     
     evalComponent(component: any, scope: Scope): any {
-        if (this.isLiteral(component)) {
-            return this.evalLiteral(component);
-        }
-
         switch (component.type) {
+            case 'StringLiteral':
+            case 'NumericLiteral':
+            case 'BooleanLiteral':
+                return this.evalLiteral(component);
+
             case 'Identifier':
                 return this.evalSymbol(component, scope);
 
@@ -77,12 +78,6 @@ export class Evaluator {
                 console.log('Syntax Error');
                 throw 'Syntax Error';
         }
-    }
-
-    isLiteral(component: any): boolean {
-        return component.type === 'StringLiteral' 
-            || component.type === 'NumericLiteral'
-            || component.type === 'BooleanLiteral';
     }
 
     evalLiteral(component: any): string | number | boolean {
