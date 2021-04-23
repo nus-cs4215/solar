@@ -919,7 +919,7 @@ function interpret(program) {
 }
 exports.interpret = interpret;
 window.interpret = interpret;
-var userProgram = "\n\nlet f = 1\nfunction a()\n    return 5\nend\nprint(a)\n\n";
+var userProgram = "\n\nprint('Hello from Solar!')\n\n";
 interpret(userProgram);
 
 },{"./evaluator/evaluator":1,"./parser/parser":11,"./semantic-analyser/semantic-analyser":16}],11:[function(require,module,exports){
