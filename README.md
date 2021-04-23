@@ -6,8 +6,8 @@ Solar borrows heavily from the base syntax of Lua. However, there are divergence
 
 Documentation
 ==============
-[User Documentation](www.google.com)
-[Developer Documentation](www.google.com)
+[User Documentation](www.google.com)\
+[Developer Documentation](https://drive.google.com/file/d/1ZbRSHDQX-ib7DoW6o1wjy5OaEYs9ySMU/view?usp=sharing)
 
 Usage
 ==============
@@ -26,8 +26,8 @@ the user documentation first, followed by the developer documentation.
 
 Contact
 ==============
-For all matters pertaining to the project, feel free to communicate with us through [GitHub issues](www.google.com).
+For all matters pertaining to the project, feel free to communicate with us through [GitHub issues](https://github.com/nus-cs4215/solar/issues).
 
 License
 ==============
-Distributed under MIT License. See [license](www.google.com) for more information.
+Distributed under MIT License. See [license](https://github.com/nus-cs4215/solar/blob/main/LICENSE) for more information.
