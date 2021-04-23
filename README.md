@@ -11,18 +11,17 @@ Documentation
 
 Usage
 ==============
-A browser-based programming environment for Solar, along with a syntax cheatsheet, can be found at https://solar-lang.netlify.app/
-For a more detailed look into the language, you may refer to the user documentation.
+Try out Solar through our [browser-based programming environment](https://solar-lang.netlify.app/interpreter.html)!
+
+Here is a [syntax cheatsheet](https://solar-lang.netlify.app/cheatsheet.html) for quick reference. For a more detailed guide on the language, you may refer to the user documentation.
 
 Have fun writing Solar programs!
 
 Contributing
 ==============
-Solar is an open-source project and we welcome contributions through GitHub pull requests.
+Solar is an open-source project and we welcome contributions through GitHub pull requests. Here is a [guide on open-source contribution](https://github.com/firstcontributions/first-contributions).
 
-[Guide on open-source contribution](https://github.com/firstcontributions/first-contributions)
-
-Developers who are keen to make open-source contributions to Solar are encouraged to read through 
+Developers who are keen to contribute to Solar are encouraged to read through 
 the user documentation first, followed by the developer documentation.
 
 Contact
@@ -31,4 +30,4 @@ For all matters pertaining to the project, feel free to communicate with us thro
 
 License
 ==============
-Distributed under MIT License.
+Distributed under MIT License. See [license](www.google.com) for more information.
