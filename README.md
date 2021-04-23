@@ -8,7 +8,6 @@ Documentation
 ==============
 [User Documentation](www.google.com)
 <br/><br/>
-<br/><br/>
 [Developer Documentation](https://drive.google.com/file/d/1ZbRSHDQX-ib7DoW6o1wjy5OaEYs9ySMU/view?usp=sharing)
 
 Usage
