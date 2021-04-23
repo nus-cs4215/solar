@@ -1,49 +1,34 @@
 About Solar
-===========
+==============
+The Solar programming language is an adaptation of the language [Lua (Ver 5.3)](https://www.lua.org/manual/5.3/).
 
-https://solar-lang.netlify.app/
-
-The Solar programming language is a variant of the Lua programming language.
-
-Just like Lua, Solar is a lightweight and high-level programming language. Solar has been adapted from Lua to accomodate elegant language design decisions in other popular languages, such as C++, Java, JavaScript and Python.
-
-Usage
-===========
-
-A browser-based programming environment for Solar, along with a syntax cheatsheet, can be found at https://solar-lang.netlify.app/ .
-
-Hence, please feel free to write and execute Solar programs there.
-
-If you wish to set up the Solar project on your local machine, for the purposes of open source contribution or personal experimentation, please refer to the sections below.
-
-Local Setup
-===========
-
-After cloning this repository, run the following commands
-
-``` {.}
-$ cd solar
-$ npm install
-```
-
-The Solar project is now working on your local machine. To try it in a console environment, run
-
-``` {.}
-$ npm start
-```
+Solar borrows heavily from the base syntax of Lua. However, there are divergences where we have introduced our own language design decisions, due to our take on programming language design.
 
 Documentation
-=============
+==============
+[User Documentation](www.google.com)
+[Developer Documentation](www.google.com)
 
-User Doc
-Developer Doc
+Usage
+==============
+A browser-based programming environment for Solar, along with a syntax cheatsheet, can be found at https://solar-lang.netlify.app/
+For a more detailed look into the language, you may refer to the user documentation.
 
-Testing
-=======
+Have fun writing Solar programs!
 
-The Solar project utilises the Jest testing framework for its test suite. To run the test suite:
-``` {.}
-$ npm test
-```
+Contributing
+==============
+Solar is an open-source project and we welcome contributions through GitHub pull requests.
 
-Jest is documented here: <https://jestjs.io/docs/en/getting-started.html>
+[Guide on open-source contribution](https://github.com/firstcontributions/first-contributions)
+
+Developers who are keen to make open-source contributions to Solar are encouraged to read through 
+the user documentation first, followed by the developer documentation.
+
+Contact
+==============
+For all matters pertaining to the project, feel free to communicate with us through [GitHub issues](www.google.com).
+
+License
+==============
+Distributed under MIT License.
