@@ -6,7 +6,7 @@ Solar borrows heavily from the base syntax of Lua. However, there are divergence
 
 Documentation
 ==============
-[User Documentation](www.google.com)
+[User Documentation](https://drive.google.com/file/d/1e-ZJlDTY3wepnPrgwn1vvRl-FY7-HUOO/view?usp=sharing)
 <br/><br/>
 [Developer Documentation](https://drive.google.com/file/d/1ZbRSHDQX-ib7DoW6o1wjy5OaEYs9ySMU/view?usp=sharing)
 
